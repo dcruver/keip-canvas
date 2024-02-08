@@ -1,47 +1,90 @@
-import { useCallback } from "react";
-import ReactFlow, {
-  Background,
-  BackgroundVariant,
-  Controls,
-  Edge,
-  MiniMap,
-  Node,
-  addEdge,
-  useEdgesState,
-  useNodesState
-} from "reactflow";
+import {
+  Column,
+  Content,
+  Grid,
+  Header,
+  HeaderName,
+  SideNav,
+  SideNavItems,
+  SideNavMenu,
+} from "@carbon/react"
 
-import "reactflow/dist/style.css";
+import "./styles.scss"
 
-const initialNodes: Node[] = [
-  { id: "1", position: { x: 0, y: 0 }, data: { label: "1" } },
-  { id: "2", position: { x: 0, y: 100 }, data: { label: "2" } },
-];
-const initialEdges: Edge[] = [{ id: "e1-2", source: "1", target: "2" }];
+import FlowCanvas from "./FlowCanvas"
+import componentSchema from "./compnentSchema"
+import eipImgUrls from "./eipImages"
 
-export default function App() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+const toTitleCase = (str: string) =>
+  str
+    .toLowerCase()
+    .split(" ")
+    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+    .join(" ")
 
-  const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
-  );
+interface EIPComponent {
+  name: string
+}
+
+type EIPBlockCollectionProps = {
+  title: string
+  components: EIPComponent[]
+}
+
+const EIPBlockCollection = ({ title, components }: EIPBlockCollectionProps) => {
+  const blocks = components.map((component) => (
+    <Column key={component.name} lg={4} md={2} sm={1}>
+      <img src={eipImgUrls[component.name]} width="100%" height="80%" />
+    </Column>
+  ))
 
   return (
-    <div style={{ width: "100vw", height: "100vh" }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        fitView
-      >
-        <Controls />
-        <MiniMap />
-        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-      </ReactFlow>
-    </div>
-  );
+    <SideNavMenu title={toTitleCase(title)} defaultExpanded>
+      <Grid narrow style={{ paddingTop: "10px" }}>
+        {blocks}
+      </Grid>
+    </SideNavMenu>
+  )
 }
+
+const LeftPanel = () => {
+  const collections = Object.entries(componentSchema).map(
+    ([collectionName, components]) => (
+      <EIPBlockCollection
+        title={collectionName}
+        components={components as EIPComponent[]}
+      />
+    )
+  )
+  return (
+    <SideNav
+      isFixedNav
+      expanded={true}
+      isChildOfHeader={false}
+      aria-label="side-navigation"
+    >
+      <SideNavItems>
+        {collections}
+        <SideNavMenu title="JMS"></SideNavMenu>
+      </SideNavItems>
+    </SideNav>
+  )
+}
+
+const App = () => (
+  <>
+    <Header aria-label="Canvas Title">
+      <HeaderName prefix="">Keip Canvas</HeaderName>
+    </Header>
+    <LeftPanel />
+
+    {/* <HeaderPanel expanded>
+      <RightSideContent />
+    </HeaderPanel> */}
+    <Content style={{ padding: 0 }}>
+      <FlowCanvas />
+    </Content>
+  </>
+)
+
+export default App
