@@ -51,6 +51,7 @@ const LeftPanel = () => {
   const collections = Object.entries(componentSchema).map(
     ([collectionName, components]) => (
       <EIPBlockCollection
+        key={collectionName}
         title={collectionName}
         components={components as EIPComponent[]}
       />
@@ -63,25 +64,24 @@ const LeftPanel = () => {
       isChildOfHeader={false}
       aria-label="side-navigation"
     >
-      <SideNavItems>
-        {collections}
-        <SideNavMenu title="JMS"></SideNavMenu>
-      </SideNavItems>
+      <SideNavItems>{collections}</SideNavItems>
     </SideNav>
   )
 }
 
 const App = () => (
   <>
-    <Header aria-label="Canvas Title">
-      <HeaderName prefix="">Keip Canvas</HeaderName>
+    <Header aria-label="Canvas Title" className="header-main">
+      <HeaderName prefix="" className="header-main-text">
+        Keip Canvas
+      </HeaderName>
     </Header>
     <LeftPanel />
 
     {/* <HeaderPanel expanded>
       <RightSideContent />
     </HeaderPanel> */}
-    <Content style={{ padding: 0 }}>
+    <Content className="canvas">
       <FlowCanvas />
     </Content>
   </>
