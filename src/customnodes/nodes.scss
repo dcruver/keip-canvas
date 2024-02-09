@@ -1,0 +1,33 @@
+@use "@carbon/themes";
+@use "@carbon/layout";
+
+.eip-node {
+  background-color: themes.$layer-02;
+  padding: layout.$spacing-04;
+  border: 0.05rem solid themes.$border-inverse;
+  text-align: center;
+  min-inline-size: 6rem;
+  min-block-size: 6rem;
+  max-width: 14rem;
+  max-height: 14rem;
+}
+
+.eip-node-image {
+  padding: layout.$spacing-02;
+  width: 8rem;
+  height: 8rem;
+}
+
+.react-flow .react-flow__handle {
+  background-color: themes.$icon-interactive;
+  height: 30px;
+  width: 6px;
+}
+
+.react-flow .react-flow__handle-right {
+  right: -5px
+}
+
+.react-flow .react-flow__handle-left {
+  left: -5px
+}

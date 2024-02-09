@@ -13,6 +13,7 @@ import {
   applyEdgeChanges,
   applyNodeChanges,
 } from "reactflow"
+import { EipNodeData, FlowType } from "./customnodes/EIPNode"
 
 export interface FlowState {
   nodes: Node[]
@@ -22,20 +23,29 @@ export interface FlowState {
   onConnect: OnConnect
 }
 
-const initialNodes: Node[] = [
-  { id: "1", type: "example", position: { x: 0, y: 0 }, data: { label: "1" } },
+const initialNodes: Node<EipNodeData>[] = [
   {
-    id: "2",
-    type: "example",
-    position: { x: 0, y: 100 },
-    data: { label: "2" },
+    id: "1",
+    type: "eipNode",
+    position: { x: 0, y: 0 },
+    data: {
+      eipName: "inbound-channel-adapter",
+      label: "Adapter1",
+      flowType: FlowType.Source,
+    },
   },
+  // {
+  //   id: "2",
+  //   type: "eipNode",
+  //   position: { x: 300, y: 300 },
+  //   data: { label: "2" },
+  // },
 ]
-const initialEdges: Edge[] = [{ id: "e1-2", source: "1", target: "2" }]
+// const initialEdges: Edge[] = [{ id: "e1-2", source: "1", target: "2" }]
 
 const useStore = create<FlowState>()((set, get) => ({
-  nodes: initialNodes,
-  edges: initialEdges,
+  nodes: [],
+  edges: [],
 
   onNodesChange: (changes: NodeChange[]) => {
     set({

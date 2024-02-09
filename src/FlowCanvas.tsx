@@ -1,13 +1,14 @@
 import ReactFlow, { Background, BackgroundVariant, Controls } from "reactflow"
 
 import { useShallow } from "zustand/react/shallow"
-import ExampleNode from "./customnodes/example"
 import useStore, { FlowState } from "./store"
 
-import "reactflow/dist/style.css"
+import "reactflow/dist/base.css"
+
+import EIPNode from "./customnodes/EIPNode"
 
 const nodeTypes = {
-  example: ExampleNode,
+  eipNode: EIPNode,
 }
 
 const selector = (state: FlowState) => ({

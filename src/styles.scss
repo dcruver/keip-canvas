@@ -1,20 +1,20 @@
 // TODO: Prune imports
-@use '@carbon/react' with (
-    // Fetch IBM Plex fonts from remote CDN
-    $use-akamai-cdn: true
+@use "@carbon/react" with (
+  // Fetch IBM Plex fonts from remote CDN
+  $use-akamai-cdn: true
 );
 
-@use '@carbon/themes';
+@use "@carbon/themes";
 
 .header-main {
-    background-color: themes.$background-inverse;
+  background-color: themes.$background-inverse;
 }
 
 .header-main-text {
-    color: themes.$text-inverse !important;
+  color: themes.$text-inverse !important;
 }
 
 .canvas {
-    background-color: themes.$layer-01;
-    padding: 0
+  background-color: themes.$layer-01;
+  padding: 0;
 }
