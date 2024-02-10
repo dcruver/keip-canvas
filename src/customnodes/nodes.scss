@@ -3,31 +3,32 @@
 
 .eip-node {
   background-color: themes.$layer-02;
-  padding: layout.$spacing-04;
-  border: 0.05rem solid themes.$border-inverse;
+  padding: layout.$spacing-02;
+  // border: 0.05rem solid themes.$border-inverse;
   text-align: center;
-  min-inline-size: 6rem;
-  min-block-size: 6rem;
-  max-width: 14rem;
-  max-height: 14rem;
+  min-inline-size: 2rem;
+  min-block-size: 2rem;
+  max-width: 8rem;
+  max-height: 8rem;
+  font-size: 0.5rem;
 }
 
 .eip-node-image {
   padding: layout.$spacing-02;
-  width: 8rem;
-  height: 8rem;
+  width: 4rem;
+  height: 4rem;
 }
 
 .react-flow .react-flow__handle {
   background-color: themes.$icon-interactive;
-  height: 30px;
+  height: 25px;
   width: 6px;
 }
 
 .react-flow .react-flow__handle-right {
-  right: -5px
+  right: -5px;
 }
 
 .react-flow .react-flow__handle-left {
-  left: -5px
+  left: -5px;
 }

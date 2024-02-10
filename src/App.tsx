@@ -11,7 +11,9 @@ import {
 
 import "./styles.scss"
 
+import { useDrag } from "react-dnd"
 import FlowCanvas from "./FlowCanvas"
+import { DragTypes } from "./FlowCanvas.exports"
 import componentSchema from "./compnentSchema"
 import eipImgUrls from "./eipImages"
 import { toTitleCase } from "./titleTransform"
@@ -20,15 +22,49 @@ interface EIPComponent {
   name: string
 }
 
+type EIPBlockProps = {
+  name: string
+}
+
 type EIPBlockCollectionProps = {
   title: string
   components: EIPComponent[]
 }
 
+const getIconStyles = (isDragging: boolean) => {
+  return {
+    width: isDragging ? "80%" : "100%",
+    height: isDragging ? "70%" : "80%",
+    opacity: isDragging ? 0.7 : 1,
+  }
+}
+
+const EIPBlock = ({ name }: EIPBlockProps) => {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: DragTypes.FLOWNODE,
+    item: { name },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }))
+
+  const { width, height, ...restStyle } = getIconStyles(isDragging)
+
+  return (
+    <img
+      src={eipImgUrls[name]}
+      width={width}
+      height={height}
+      ref={drag}
+      style={restStyle}
+    />
+  )
+}
+
 const EIPBlockCollection = ({ title, components }: EIPBlockCollectionProps) => {
   const blocks = components.map((component) => (
     <Column key={component.name} lg={4} md={2} sm={1}>
-      <img src={eipImgUrls[component.name]} width="100%" height="80%" />
+      <EIPBlock name={component.name} />
     </Column>
   ))
 
@@ -70,11 +106,9 @@ const App = () => (
         Keip Canvas
       </HeaderName>
     </Header>
+
     <LeftPanel />
 
-    {/* <HeaderPanel expanded>
-      <RightSideContent />
-    </HeaderPanel> */}
     <Content className="canvas">
       <FlowCanvas />
     </Content>

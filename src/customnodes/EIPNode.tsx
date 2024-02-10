@@ -2,15 +2,11 @@ import { ClickableTile } from "@carbon/react"
 import { Handle, NodeProps, Position } from "reactflow"
 
 import eipImgUrls from "../eipImages"
-
 import { toTitleCase } from "../titleTransform"
+import { FlowType } from "./EIPNode.exports"
 import "./nodes.scss"
 
-export enum FlowType {
-  Source,
-  Sink,
-  Passthru,
-}
+export const eipNodeKey = "eipNode"
 
 export type EipNodeData = {
   eipName: string
@@ -18,6 +14,7 @@ export type EipNodeData = {
   flowType: FlowType
 }
 
+// TODO: Limit handles to a single connection
 const renderHandles = (flowType: FlowType) => {
   switch (flowType) {
     case FlowType.Source:
@@ -49,12 +46,6 @@ const EIPNode = ({ data }: NodeProps<EipNodeData>) => {
       {handles}
     </ClickableTile>
   )
-}
-
-{
-  /* <IconButton label="Add connection" size="sm" enterDelayMs={5000}>
-          <CaretRight />
-        </IconButton> */
 }
 
 export default EIPNode
