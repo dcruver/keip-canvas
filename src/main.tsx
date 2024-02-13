@@ -1,3 +1,4 @@
+import { Theme } from "@carbon/react"
 import React from "react"
 import { DndProvider } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
@@ -9,7 +10,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <DndProvider backend={HTML5Backend}>
       <ReactFlowProvider>
-        <App />
+        <Theme theme="white">
+          <App />
+        </Theme>
       </ReactFlowProvider>
     </DndProvider>
   </React.StrictMode>

@@ -4,6 +4,7 @@ import {
   Grid,
   Header,
   HeaderName,
+  HeaderPanel,
   SideNav,
   SideNavItems,
   SideNavMenu,
@@ -14,7 +15,8 @@ import "./styles.scss"
 import { useDrag } from "react-dnd"
 import FlowCanvas from "./FlowCanvas"
 import { DragTypes } from "./FlowCanvas.exports"
-import componentSchema from "./compnentSchema"
+import NodeConfigPanel from "./NodeConfigForm"
+import eipComponentSchema from "./compnentSchema"
 import eipImgUrls from "./eipImages"
 import { toTitleCase } from "./titleTransform"
 
@@ -78,7 +80,7 @@ const EIPBlockCollection = ({ title, components }: EIPBlockCollectionProps) => {
 }
 
 const LeftPanel = () => {
-  const collections = Object.entries(componentSchema).map(
+  const collections = Object.entries(eipComponentSchema).map(
     ([collectionName, components]) => (
       <EIPBlockCollection
         key={collectionName}
@@ -112,6 +114,13 @@ const App = () => (
     <Content className="canvas">
       <FlowCanvas />
     </Content>
+
+    <HeaderPanel className="right-panel" expanded>
+      <NodeConfigPanel
+        nodeId={"123"}
+        eipComponent={eipComponentSchema["integration"][0]}
+      />
+    </HeaderPanel>
   </>
 )
 

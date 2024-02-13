@@ -3,8 +3,8 @@ import { Handle, NodeProps, Position } from "reactflow"
 
 import eipImgUrls from "../eipImages"
 import { toTitleCase } from "../titleTransform"
-import { FlowType } from "./EIPNode.exports"
 import "./nodes.scss"
+import { FlowType } from "../compnentSchema"
 
 export const eipNodeKey = "eipNode"
 

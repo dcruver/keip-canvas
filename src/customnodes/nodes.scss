@@ -4,7 +4,7 @@
 .eip-node {
   background-color: themes.$layer-02;
   padding: layout.$spacing-02;
-  // border: 0.05rem solid themes.$border-inverse;
+  border: 1px solid themes.$border-inverse;
   text-align: center;
   min-inline-size: 2rem;
   min-block-size: 2rem;
