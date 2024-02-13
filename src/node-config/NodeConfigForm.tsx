@@ -1,25 +1,29 @@
 import { Information } from "@carbon/icons-react"
 import {
-    ContentSwitcher,
-    Form,
-    FormLabel,
-    Select,
-    SelectItem,
-    Stack,
-    Switch,
-    TextArea,
-    TextInput,
-    Tooltip,
+  ContentSwitcher,
+  Form,
+  FormLabel,
+  Select,
+  SelectItem,
+  Stack,
+  Switch,
+  TextArea,
+  TextInput,
+  Toggle,
+  Tooltip,
 } from "@carbon/react"
 import { useState } from "react"
-import { AttributeSchema, EIPComponentSchema } from "./compnentSchema"
+import { AttributeSchema, EIPComponentSchema } from "../schema/compnentSchema"
+
+// TODO:
+// - split attribute form into required/optional sections
 
 interface Attribute {
   name: string
   type: "string" | "boolean"
   required: boolean
   description?: string
-  default?: string | number
+  default?: string | number | boolean
   allowedValues?: string[]
 }
 
@@ -60,6 +64,16 @@ const AttributeSelectInput = (props: Attribute) => (
   </Select>
 )
 
+const AttributeBoolInput = (props: Attribute) => (
+  <Toggle
+    id={props.name}
+    labelText={props.name}
+    labelA="False"
+    labelB="True"
+    defaultToggled={Boolean(props.default)}
+  />
+)
+
 const AttributeTextInput = (props: Attribute & TextInputSubsetProps) => (
   <TextInput
     id={props.name}
@@ -72,6 +86,11 @@ const AttributeTextInput = (props: Attribute & TextInputSubsetProps) => (
 const TextInputWithDescription = (props: Attribute) => {
   const tooltipDivId = `tooltip-hack-${props.name}`
 
+  // Workaround for tooltip popover not 'escaping' the side panel boundary.
+  // The side panel requires vertical scrolling and so this does not allow overflow-x to be set to visible.
+  // This workaround detachesuses JS to position the popover dynamically.
+  // Long-term we would be better served by implementing our own Tooltip based on the Popover component,
+  // to have greater control over the underlying DOM elements.
   const tooltipWorkaroundHandler: React.MouseEventHandler = (e) => {
     const icon: Element = e.target
     const tooltipParent = document.getElementById(tooltipDivId)
@@ -108,10 +127,13 @@ const AttributeInput = (props: Attribute) => {
       ) : (
         <AttributeTextInput {...props} />
       )
+
+    case "boolean":
+      return <AttributeBoolInput {...props} />
   }
 }
 
-const AttributeConfigs = (props: { attrs: Attribute[] }) => {
+const AttributeConfigForm = (props: { attrs: Attribute[] }) => {
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
       <Stack gap={6}>
@@ -146,11 +168,7 @@ const NodeConfigPanel = ({ nodeId, eipComponent }: NodeConfigPanelProps) => {
           disabled
           defaultValue={nodeId}
         ></TextInput>
-        <TextInput
-          id={"channelId"}
-          labelText="channelId"
-          disabled
-        ></TextInput>
+        <TextInput id={"channelId"} labelText="channelId" disabled></TextInput>
         <TextArea
           labelText="Description"
           helperText="Optional description of the selected node's behavior"
@@ -167,7 +185,7 @@ const NodeConfigPanel = ({ nodeId, eipComponent }: NodeConfigPanelProps) => {
           <Switch name="children" text="Children" />
         </ContentSwitcher>
         {showAttributes ? (
-          <AttributeConfigs
+          <AttributeConfigForm
             attrs={attributesFromSchema(eipComponent.attributes)}
           />
         ) : (

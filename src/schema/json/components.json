@@ -26,7 +26,8 @@
         },
         "auto-startup": {
           "type": "boolean",
-          "description": "Boolean value indicating whether this endpoint should start automatically."
+          "description": "Boolean value indicating whether this endpoint should start automatically.",
+          "default": true
         },
         "phase": {
           "type": "string",

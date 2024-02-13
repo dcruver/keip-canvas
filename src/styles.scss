@@ -6,6 +6,7 @@
 
 @use "@carbon/themes";
 @use "@carbon/layout";
+@use "@carbon/type";
 
 .header-main {
   background-color: themes.$background-inverse;
@@ -13,6 +14,7 @@
 
 .header-main-text {
   color: themes.$text-inverse !important;
+  font-size: type.type-scale(3) !important;
 }
 
 .canvas {
@@ -28,13 +30,4 @@
 
 .right-panel .form-input-label {
   margin-bottom: layout.$spacing-03;
-}
-
-.cds--tooltip-content {
-  // display: block !important;
-  // position: fixed !important;
-  // top: 423px !important;
-  // left: 948px !important;
-  // transform: translate(75px, 330px) !important;
-  // z-index: 99999 !important;
 }

@@ -6,13 +6,13 @@ import ReactFlow, {
 } from "reactflow"
 
 import { useShallow } from "zustand/react/shallow"
-import useStore, { FlowState } from "./store"
+import useStore, { FlowState } from "../store"
 
 import "reactflow/dist/base.css"
 
 import { useDrop } from "react-dnd"
-import { DragTypes } from "./FlowCanvas.exports"
-import EIPNode from "./customnodes/EIPNode"
+import EIPNode from "../custom-nodes/EIPNode"
+import { DragTypes } from "../node-chooser/dragTypes"
 
 export type FlowNodeData = {
   name: string

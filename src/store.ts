@@ -15,8 +15,8 @@ import {
   applyEdgeChanges,
   applyNodeChanges,
 } from "reactflow"
-import { FlowType } from "./compnentSchema"
-import { EipNodeData, eipNodeKey } from "./customnodes/EIPNode"
+import { FlowType } from "./schema/compnentSchema"
+import { EipNodeData, eipNodeKey } from "./custom-nodes/EIPNode"
 
 export interface FlowState {
   nodes: Node[]
