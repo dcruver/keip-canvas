@@ -29,7 +29,7 @@ const renderHandles = (flowType: FlowType) => {
         </>
       )
     default:
-      console.log(`WARNING: flow type not handled: ${flowType}`)
+      console.warn(`flow type not handled: ${flowType}`)
   }
 }
 

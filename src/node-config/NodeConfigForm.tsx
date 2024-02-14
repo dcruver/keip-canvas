@@ -1,39 +1,21 @@
-import { Information } from "@carbon/icons-react"
 import {
   ContentSwitcher,
   Form,
-  FormLabel,
-  Select,
-  SelectItem,
   Stack,
   Switch,
   TextArea,
   TextInput,
-  Toggle,
-  Tooltip,
 } from "@carbon/react"
 import { useState } from "react"
 import { AttributeSchema, EIPComponentSchema } from "../schema/compnentSchema"
+import AttributeConfigForm, { Attribute } from "./AttributeConfig"
 
 // TODO:
 // - split attribute form into required/optional sections
 
-interface Attribute {
-  name: string
-  type: "string" | "boolean"
-  required: boolean
-  description?: string
-  default?: string | number | boolean
-  allowedValues?: string[]
-}
-
 type NodeConfigPanelProps = {
   nodeId: string
   eipComponent: EIPComponentSchema
-}
-
-type TextInputSubsetProps = {
-  hideLabel?: boolean
 }
 
 const attributesFromSchema = (attrs: AttributeSchema[]) => {
@@ -56,95 +38,6 @@ const attributesFromSchema = (attrs: AttributeSchema[]) => {
   return transformed
 }
 
-const AttributeSelectInput = (props: Attribute) => (
-  <Select id={props.name} labelText={props.name} defaultValue={props.default}>
-    {props.allowedValues?.map((item) => (
-      <SelectItem key={item} value={item} text={item} />
-    ))}
-  </Select>
-)
-
-const AttributeBoolInput = (props: Attribute) => (
-  <Toggle
-    id={props.name}
-    labelText={props.name}
-    labelA="False"
-    labelB="True"
-    defaultToggled={Boolean(props.default)}
-  />
-)
-
-const AttributeTextInput = (props: Attribute & TextInputSubsetProps) => (
-  <TextInput
-    id={props.name}
-    labelText={props.name}
-    defaultValue={props.default}
-    hideLabel={props.hideLabel}
-  />
-)
-
-const TextInputWithDescription = (props: Attribute) => {
-  const tooltipDivId = `tooltip-hack-${props.name}`
-
-  // Workaround for tooltip popover not 'escaping' the side panel boundary.
-  // The side panel requires vertical scrolling and so this does not allow overflow-x to be set to visible.
-  // This workaround detachesuses JS to position the popover dynamically.
-  // Long-term we would be better served by implementing our own Tooltip based on the Popover component,
-  // to have greater control over the underlying DOM elements.
-  const tooltipWorkaroundHandler: React.MouseEventHandler = (e) => {
-    const icon: Element = e.target
-    const tooltipParent = document.getElementById(tooltipDivId)
-
-    const tooltip = tooltipParent?.getElementsByClassName(
-      "cds--tooltip-content"
-    )[0]
-
-    const rect = icon.getBoundingClientRect()
-    tooltip.style.left = `${rect.left}px`
-    tooltip.style.top = `${rect.top}px`
-    tooltip.style.position = "fixed"
-  }
-
-  return (
-    <div id={tooltipDivId}>
-      <FormLabel className="form-input-label">{props.name}</FormLabel>
-      <Tooltip align="top" label={props.description}>
-        <Information onMouseEnter={tooltipWorkaroundHandler} />
-      </Tooltip>
-      <AttributeTextInput {...props} hideLabel />
-    </div>
-  )
-}
-
-const AttributeInput = (props: Attribute) => {
-  switch (props.type) {
-    case "string":
-      if (props.allowedValues) {
-        return <AttributeSelectInput {...props} />
-      }
-      return props.description ? (
-        <TextInputWithDescription {...props} />
-      ) : (
-        <AttributeTextInput {...props} />
-      )
-
-    case "boolean":
-      return <AttributeBoolInput {...props} />
-  }
-}
-
-const AttributeConfigForm = (props: { attrs: Attribute[] }) => {
-  return (
-    <Form onSubmit={(e) => e.preventDefault()}>
-      <Stack gap={6}>
-        {props.attrs.map((attr) => (
-          <AttributeInput key={attr.name} {...attr} />
-        ))}
-      </Stack>
-    </Form>
-  )
-}
-
 const ChildrenConfigs = () => {
   return (
     <Form title="Node configuration" onSubmit={(e) => e.preventDefault()}>
@@ -157,7 +50,7 @@ const ChildrenConfigs = () => {
 }
 
 const NodeConfigPanel = ({ nodeId, eipComponent }: NodeConfigPanelProps) => {
-  // TODO: Handle case where no attributes are required.
+  // TODO: Handle case where no attributes are listed or required.
   const [showAttributes, setShowAttributes] = useState(true)
   return (
     <Stack gap={8}>
