@@ -10,34 +10,20 @@ import {
 import { useState } from "react"
 import { useOnSelectionChange } from "reactflow"
 import eipComponentSchema, {
-  AttributeSchema,
+  Attribute,
   EIPComponentSchema,
 } from "../schema/compnentSchema"
-import AttributeConfigForm, { Attribute } from "./AttributeConfig"
+import AttributeConfigForm from "./AttributeConfig"
 
 type PanelContentProps = {
   nodeId: string
   eipComponent: EIPComponentSchema
 }
 
-const attributesFromSchema = (attrs: AttributeSchema[]) => {
-  const transformed: Attribute[] = Object.entries(attrs).reduce(
-    (accum, [name, fields]) => {
-      if (name !== "id" && name !== "channel") {
-        accum.push({
-          name: name,
-          type: fields.type,
-          required: Boolean(fields.required),
-          description: fields.description,
-          default: fields.default,
-          allowedValues: fields.restriction?.enum,
-        })
-      }
-      return accum
-    },
-    [] as Attribute[]
-  )
-  return transformed
+const flowControlledAttributes = new Set(["id", "channel"])
+
+const getConfigurableAttributes = (attrs: Attribute[]) => {
+  return attrs.filter((attr) => !flowControlledAttributes.has(attr.name))
 }
 
 const ChildrenConfigs = () => {
@@ -81,7 +67,11 @@ const PanelContent = ({ nodeId, eipComponent }: PanelContentProps) => {
         </ContentSwitcher>
         {showAttributes ? (
           <AttributeConfigForm
-            attrs={attributesFromSchema(eipComponent.attributes)}
+            attrs={
+              eipComponent.attributes
+                ? getConfigurableAttributes(eipComponent.attributes)
+                : []
+            }
           />
         ) : (
           <ChildrenConfigs />

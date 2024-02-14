@@ -3,45 +3,55 @@
     {
       "name": "inbound-channel-adapter",
       "description": "Defines a Polling Channel Adapter",
+      "role": "endpoint",
       "flowType": "source",
-      "attributes": {
-        "ref": {
+      "attributes": [
+        {
+          "name": "ref",
           "type": "string",
           "description": "A reference to a bean defined in the application context."
         },
-        "method": {
+        {
+          "name": "method",
           "type": "string",
           "description": "A method defined on the bean referenced by 'ref' attribute"
         },
-        "expression": {
+        {
+          "name": "expression",
           "type": "string",
           "description": "SpEL expression to be evaluated for each triggered execution. The result of the evaluation will be passed as the payload of the Message that is sent to the MessageChannel."
         },
-        "id": {
+        {
+          "name": "id",
           "type": "string"
         },
-        "channel": {
+        {
+          "name": "channel",
           "type": "string",
           "description": "Identifies channel attached to this adapter. Depending on the type of the adapter this channel could be the receiving channel (e.g., outbound-channel-adapter) or channel where messages will be sent to by this adapter (e.g., inbound-channel-adapter)."
         },
-        "auto-startup": {
+        {
+          "name": "auto-startup",
           "type": "boolean",
           "description": "Boolean value indicating whether this endpoint should start automatically.",
           "default": true
         },
-        "phase": {
+        {
+          "name": "phase",
           "type": "string",
           "description": "The lifecycle phase within which this endpoint should start and stop. The lower the value the earlier this endpoint will start and the later it will stop. The default is 0. Values can be negative. See SmartLifeCycle."
         },
-        "role": {
+        {
+          "name": "role",
           "type": "string",
           "description": "Assigns this endpoint to a role. Endpoints in a role can be started/stopped as a group. See 'SmartLifecycleRoleController'."
         },
-        "send-timeout": {
+        {
+          "name": "send-timeout",
           "type": "string",
           "description": "Maximum amount of time in milliseconds to wait when sending a message to the channel if such channel may block. For example, a Queue Channel can block until space is available if its maximum capacity has been reached. Defaults to '-1' - blocking indefinitely."
         }
-      },
+      ],
       "children": {
         "indicator": "sequence",
         "elements": [
@@ -49,64 +59,76 @@
             "name": "poller",
             "description": "Defines the configuration metadata for a poller.",
             "occurrence": { "min": 0 },
-            "attributes": {
-              "fixed-delay": {
+            "attributes": [
+              {
+                "name": "fixed-delay",
                 "type": "string",
                 "description": "Fixed delay trigger (in milliseconds)."
               },
-              "ref": {
+              {
+                "name": "ref",
                 "type": "string",
                 "description": "Allows this poller to reference another instance of a top-level poller.Defining this attribute on a top-level poller definition will result in a configuration exception."
               },
-              "fixed-rate": {
+              {
+                "name": "fixed-rate",
                 "type": "string",
                 "description": "Fixed rate trigger (in milliseconds)."
               },
-              "time-unit": {
+              {
+                "name": "time-unit",
                 "type": "string",
                 "description": "The java.util.concurrent.TimeUnit enum value. This can ONLY be used in combinationwith the 'fixed-delay' or 'fixed-rate' attributes. If combined with either 'cron'or a 'trigger' reference attribute, it will cause a failure. The minimal supportedgranularity for a PeriodicTrigger is MILLISECONDS. Therefore, the only available optionsare MILLISECONDS and SECONDS. If this value is not provided, then any 'fixed-delay' or'fixed-rate' value will be interpreted as MILLISECONDS by default. Basically this enumprovides a convenience for SECONDS-based interval trigger values. For hourly, daily,and monthly settings, consider using a 'cron' trigger instead.",
                 "restriction": {
                   "enum": ["MILLISECONDS", "SECONDS"]
                 }
               },
-              "cron": {
+              {
+                "name": "cron",
                 "type": "string",
                 "description": "Cron trigger."
               },
-              "trigger": {
+              {
+                "name": "trigger",
                 "type": "string",
                 "description": "Expected Type: org.springframework.scheduling.Trigger"
               },
-              "receive-timeout": {
+              {
+                "name": "receive-timeout",
                 "type": "string",
                 "description": "Only applies to polling consumers - the time the poll thread will wait after the trigger for a new message to arrive. Defaults to 1000 (1 second). For polled inbound channel adapters, whether or not the polling thread blocks is dependent on the message source implementation."
               },
-              "max-messages-per-poll": {
+              {
+                "name": "max-messages-per-poll",
                 "type": "string",
                 "description": "The maximum number of messages that will be produced for each poll. Defaults to infinity (indicated by -1) for polling consumers, and 1 for polled inbound channel adapters."
               },
-              "task-executor": {
+              {
+                "name": "task-executor",
                 "type": "string",
                 "description": "Expected Type: org.springframework.core.task.TaskExecutor"
               },
-              "error-channel": {
+              {
+                "name": "error-channel",
                 "type": "string",
                 "description": "Identifies channel that error messages will be sent to if a failure occurs in this poller's invocation. To completely suppress Exceptions, provide a reference to the 'nullChannel' here."
               }
-            },
+            ],
             "children": {
               "indicator": "choice",
               "elements": [
                 {
                   "name": "transactional",
                   "occurrence": { "min": 0 },
-                  "attributes": {
-                    "transaction-manager": {
+                  "attributes": [
+                    {
+                      "name": "transaction-manager",
                       "type": "string",
                       "default": "transactionManager",
                       "description": "The bean name of the PlatformTransactionManager to use."
                     },
-                    "propagation": {
+                    {
+                      "name": "propagation",
                       "type": "string",
                       "default": "REQUIRED",
                       "description": "The transaction propagation behavior.",
@@ -122,7 +144,8 @@
                         ]
                       }
                     },
-                    "isolation": {
+                    {
+                      "name": "isolation",
                       "type": "string",
                       "default": "DEFAULT",
                       "description": "The transaction isolation level.",
@@ -136,44 +159,45 @@
                         ]
                       }
                     },
-                    "timeout": {
+                    {
+                      "name": "timeout",
                       "type": "string",
                       "default": "-1",
                       "description": "The transaction timeout value (in seconds)."
                     },
-                    "read-only": {
+                    {
+                      "name": "read-only",
                       "type": "boolean",
                       "default": "false",
                       "description": "Is this transaction read-only?"
                     },
-                    "synchronization-factory": {
+                    {
+                      "name": "synchronization-factory",
                       "type": "string",
                       "description": "Reference to an instance of org.springframework.integration.transaction.TransactionSynchronizationFactory which will return an instance of org.springframework.transaction.support.TransactionSynchronization via its create(..) method."
                     }
-                  }
+                  ]
                 },
                 {
                   "name": "advice-chain",
                   "description": "A chain of nested AOP 'Advice' objects applied to the poller task. Mutually exclusive with 'transactional'.",
                   "occurrence": { "min": 0 },
-                  "attributes": {
-                    "synchronization-factory": {
+                  "attributes": [
+                    {
+                      "name": "synchronization-factory",
                       "type": "string",
                       "description": "Reference to an instance of org.springframework.integration.transaction.TransactionSynchronizationFactory which will return an instance of org.springframework.transaction.support.TransactionSynchronization via its create(..) method."
                     }
-                  },
+                  ],
                   "children": {
                     "indicator": "sequence",
                     "elements": [
                       {
                         "name": "ref",
                         "occurrence": { "min": 0, "max": "unbounded" },
-                        "attributes": {
-                          "bean": {
-                            "type": "string",
-                            "required": true
-                          }
-                        }
+                        "attributes": [
+                          { "name": "bean", "type": "string", "required": true }
+                        ]
                       }
                     ]
                   }
@@ -184,38 +208,43 @@
           {
             "name": "expression",
             "occurrence": { "min": 0 },
-            "attributes": {
-              "key": {
+            "attributes": [
+              {
+                "name": "key",
                 "type": "string",
                 "description": "The key for retrieving the expression from an ExpressionSource.",
                 "required": true
               },
-              "source": {
+              {
+                "name": "source",
                 "type": "string",
                 "default": "expressionSource",
                 "description": "The reference to an ExpressionSource."
               }
-            }
+            ]
           },
           {
             "name": "header",
             "description": "Provides mechanism to enrich content of the message with custom message headers. When this method is going to be invoked the generated message will be enriched with these headers.",
             "occurrence": { "min": 0, "max": "unboubded" },
-            "attributes": {
-              "name": {
+            "attributes": [
+              {
+                "name": "name",
                 "type": "string",
                 "description": "The name of the header",
                 "required": true
               },
-              "value": {
+              {
+                "name": "value",
                 "type": "string",
                 "description": "The value of the header. Either this or 'expression' must be provided."
               },
-              "expression": {
+              {
+                "name": "expression",
                 "type": "string",
                 "description": "Expression to be evaluated to produce a value for the header. Either this or 'value' must be provided."
               }
-            }
+            ]
           }
         ]
       }

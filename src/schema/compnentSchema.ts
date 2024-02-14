@@ -4,10 +4,11 @@ interface Restriction {
   enum?: string[]
 }
 
-export interface AttributeSchema {
+export interface Attribute {
+  name: string
   type: "string" | "boolean"
-  description: string
-  default?: string | number
+  description?: string
+  default?: string | number | boolean
   required?: boolean
   restriction?: Restriction
 }
@@ -22,7 +23,7 @@ export interface EIPComponentSchema {
   name: string
   flowType: FlowType
   description?: string
-  attributes?: Record<string, AttributeSchema>
+  attributes?: Attribute[]
 }
 
 const eipComponentSchema: Record<string, EIPComponentSchema[]> =

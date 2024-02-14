@@ -1,27 +1,18 @@
 import { Information } from "@carbon/icons-react"
 import {
-    Accordion,
-    AccordionItem,
-    Form,
-    FormLabel,
-    Select,
-    SelectItem,
-    Stack,
-    TextInput,
-    Toggle,
-    Tooltip,
+  Accordion,
+  AccordionItem,
+  Form,
+  FormLabel,
+  Select,
+  SelectItem,
+  Stack,
+  TextInput,
+  Toggle,
+  Tooltip,
 } from "@carbon/react"
 import { ReactNode } from "react"
-
-// TODO: Consider unifying with AttributeSchema type
-export interface Attribute {
-  name: string
-  type: "string" | "boolean"
-  required: boolean
-  description?: string
-  default?: string | number | boolean
-  allowedValues?: string[]
-}
+import { Attribute } from "../schema/compnentSchema"
 
 type DescriptionWrapperProps = {
   id: string
