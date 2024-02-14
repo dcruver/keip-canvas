@@ -1,6 +1,11 @@
-import { Column, Grid, SideNav, SideNavItems, SideNavMenu } from "@carbon/react"
+import {
+  SideNav,
+  SideNavItems,
+  SideNavMenu,
+  SideNavMenuItem,
+} from "@carbon/react"
 
-import { useDrag } from "react-dnd"
+import { DragPreviewImage, useDrag } from "react-dnd"
 import eipIconUrls from "../eipIconCatalog"
 import eipComponentSchema from "../schema/compnentSchema"
 import { toTitleCase } from "../utils/titleTransform"
@@ -19,16 +24,8 @@ type EIPBlockCollectionProps = {
   components: EIPComponent[]
 }
 
-const getIconStyles = (isDragging: boolean) => {
-  return {
-    width: isDragging ? "80%" : "100%",
-    height: isDragging ? "70%" : "80%",
-    opacity: isDragging ? 0.7 : 1,
-  }
-}
-
-const EIPBlock = ({ name }: EIPBlockProps) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
+const EIPItem = ({ name }: EIPBlockProps) => {
+  const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: DragTypes.FLOWNODE,
     item: { name },
     collect: (monitor) => ({
@@ -36,31 +33,28 @@ const EIPBlock = ({ name }: EIPBlockProps) => {
     }),
   }))
 
-  const { width, height, ...restStyle } = getIconStyles(isDragging)
+  const iconUrl = eipIconUrls[name]
+  const opacity = isDragging ? 0.5 : 1
 
   return (
-    <img
-      src={eipIconUrls[name]}
-      width={width}
-      height={height}
-      ref={drag}
-      style={restStyle}
-    />
+    <div className="eip-item-container" ref={drag} style={{ opacity }}>
+      <img className="eip-item-image" src={iconUrl} />
+      <span className="eip-item-text">{toTitleCase(name)}</span>
+      <DragPreviewImage connect={preview} src={iconUrl} />
+    </div>
   )
 }
 
 const EIPBlockCollection = ({ title, components }: EIPBlockCollectionProps) => {
-  const blocks = components.map((component) => (
-    <Column key={component.name} lg={4} md={2} sm={1}>
-      <EIPBlock name={component.name} />
-    </Column>
+  const eipItems = components.map((component) => (
+    <SideNavMenuItem key={component.name}>
+      <EIPItem name={component.name} />
+    </SideNavMenuItem>
   ))
 
   return (
-    <SideNavMenu title={toTitleCase(title)} defaultExpanded>
-      <Grid narrow style={{ paddingTop: "10px" }}>
-        {blocks}
-      </Grid>
+    <SideNavMenu title={toTitleCase(title)} large defaultExpanded>
+      {eipItems}
     </SideNavMenu>
   )
 }
@@ -79,6 +73,7 @@ const NodeChooserPanel = () => {
   )
   return (
     <SideNav
+      className="node-chooser-panel"
       isFixedNav
       expanded={true}
       isChildOfHeader={false}

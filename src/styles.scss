@@ -28,12 +28,32 @@
   overflow-y: auto;
   width: 25vw;
   max-width: 25rem;
+
+  .form-input-label {
+    margin-bottom: layout.$spacing-03;
+  }
+
+  .cds--accordion__content {
+    padding: 0;
+  }
 }
 
-.right-panel .form-input-label {
-  margin-bottom: layout.$spacing-03;
-}
+.node-chooser-panel {
+  a.cds--side-nav__link {
+    padding-left: 1rem;
+  }
 
-.right-panel .cds--accordion__content {
-  padding: 0;
+  .eip-item-container {
+    cursor: grab;
+  }
+
+  .eip-item-image {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .eip-item-text {
+    margin-left: 1rem;
+    vertical-align: 0.5rem;
+  }
 }
