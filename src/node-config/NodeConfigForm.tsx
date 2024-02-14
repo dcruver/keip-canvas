@@ -1,19 +1,21 @@
 import {
   ContentSwitcher,
   Form,
+  HeaderPanel,
   Stack,
   Switch,
   TextArea,
   TextInput,
 } from "@carbon/react"
 import { useState } from "react"
-import { AttributeSchema, EIPComponentSchema } from "../schema/compnentSchema"
+import { useOnSelectionChange } from "reactflow"
+import eipComponentSchema, {
+  AttributeSchema,
+  EIPComponentSchema,
+} from "../schema/compnentSchema"
 import AttributeConfigForm, { Attribute } from "./AttributeConfig"
 
-// TODO:
-// - split attribute form into required/optional sections
-
-type NodeConfigPanelProps = {
+type PanelContentProps = {
   nodeId: string
   eipComponent: EIPComponentSchema
 }
@@ -49,9 +51,9 @@ const ChildrenConfigs = () => {
   )
 }
 
-const NodeConfigPanel = ({ nodeId, eipComponent }: NodeConfigPanelProps) => {
-  // TODO: Handle case where no attributes are listed or required.
+const PanelContent = ({ nodeId, eipComponent }: PanelContentProps) => {
   const [showAttributes, setShowAttributes] = useState(true)
+
   return (
     <Stack gap={8}>
       <Stack gap={6}>
@@ -86,6 +88,32 @@ const NodeConfigPanel = ({ nodeId, eipComponent }: NodeConfigPanelProps) => {
         )}
       </Stack>
     </Stack>
+  )
+}
+
+const NodeConfigPanel = () => {
+  // TODO: Handle case where no attributes are listed or required.
+  const [selectedNodes, setSelectedNodes] = useState<string[]>([])
+
+  useOnSelectionChange({
+    onChange: ({ nodes }) => {
+      setSelectedNodes(nodes.map((node) => node.id))
+    },
+  })
+
+  const isDisplayed = selectedNodes.length === 1
+
+  return (
+    <HeaderPanel
+      className={isDisplayed ? "right-panel" : ""}
+      expanded={isDisplayed}
+    >
+      <PanelContent
+        // key={selectedNodes[0]}
+        nodeId={selectedNodes[0]}
+        eipComponent={eipComponentSchema["integration"][0]}
+      />
+    </HeaderPanel>
   )
 }
 

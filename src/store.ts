@@ -37,19 +37,6 @@ interface AppStore {
   appActions: AppActions
 }
 
-// const initialNodes: Node<EipNodeData>[] = [
-//   {
-//     id: "1",
-//     type: eipNodeKey,
-//     position: { x: 0, y: 0 },
-//     data: {
-//       eipName: "inbound-channel-adapter",
-//       label: "Adapter1",
-//       flowType: FlowType.Source,
-//     },
-//   },
-// ]
-
 const useStore = create<AppStore>()((set) => ({
   nodes: [],
   edges: [],
