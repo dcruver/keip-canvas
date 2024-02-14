@@ -21,6 +21,7 @@ export enum FlowType {
 
 export interface EIPComponentSchema {
   name: string
+  role: "endpoint" | "channel"
   flowType: FlowType
   description?: string
   attributes?: Attribute[]

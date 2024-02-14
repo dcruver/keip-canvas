@@ -24,6 +24,7 @@ type EIPBlockCollectionProps = {
   components: EIPComponent[]
 }
 
+// TODO: Show description docs on hover
 const EIPItem = ({ name }: EIPBlockProps) => {
   const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: DragTypes.FLOWNODE,
