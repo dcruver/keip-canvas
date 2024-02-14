@@ -1,5 +1,7 @@
 import { Information } from "@carbon/icons-react"
 import {
+    Accordion,
+    AccordionItem,
     Form,
     FormLabel,
     Select,
@@ -162,13 +164,31 @@ const AttributeInput = (props: Attribute) => {
 }
 
 const AttributeConfigForm = (props: { attrs: Attribute[] }) => {
+  const required = props.attrs.filter((attr) => attr.required)
+  const optional = props.attrs.filter((attr) => !attr.required)
+
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
-      <Stack gap={6}>
-        {props.attrs.map((attr) => (
-          <AttributeInput key={attr.name} {...attr} />
-        ))}
-      </Stack>
+      <Accordion isFlush size="lg">
+        {required.length ? (
+          <AccordionItem title="Required" open>
+            <Stack gap={6}>
+              {required.map((attr) => (
+                <AttributeInput key={attr.name} {...attr} />
+              ))}
+            </Stack>
+          </AccordionItem>
+        ) : null}
+        {optional.length ? (
+          <AccordionItem title="Optional">
+            <Stack gap={6}>
+              {optional.map((attr) => (
+                <AttributeInput key={attr.name} {...attr} />
+              ))}
+            </Stack>
+          </AccordionItem>
+        ) : null}
+      </Accordion>
     </Form>
   )
 }

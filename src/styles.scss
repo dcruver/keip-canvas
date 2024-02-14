@@ -26,8 +26,14 @@
   background-color: themes.$background;
   padding: 1rem;
   overflow-y: auto;
+  width: 25vw;
+  max-width: 25rem;
 }
 
 .right-panel .form-input-label {
   margin-bottom: layout.$spacing-03;
+}
+
+.right-panel .cds--accordion__content {
+  padding: 0;
 }
