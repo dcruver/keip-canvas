@@ -5,8 +5,7 @@ import ReactFlow, {
   useReactFlow,
 } from "reactflow"
 
-import { useShallow } from "zustand/react/shallow"
-import useStore, { FlowState } from "../store"
+import { useAppActions, useFlowStore } from "../store"
 
 import "reactflow/dist/base.css"
 
@@ -22,19 +21,10 @@ const nodeTypes = {
   eipNode: EIPNode,
 }
 
-const selector = (state: FlowState) => ({
-  nodes: state.nodes,
-  edges: state.edges,
-  onNodesChange: state.onNodesChange,
-  onEdgesChange: state.onEdgesChange,
-  onConnect: state.onConnect,
-
-  createDroppedNode: state.createDroppedNode,
-})
-
 const FlowCanvas = () => {
   const reactFlowInstance = useReactFlow()
-  const state = useStore(useShallow(selector))
+  const flowStore = useFlowStore()
+  const { createDroppedNode } = useAppActions()
 
   const [_, drop] = useDrop<FlowNodeData, unknown, unknown>(
     () => ({
@@ -43,7 +33,7 @@ const FlowCanvas = () => {
         let offset = monitor.getClientOffset()
         offset = offset === null ? { x: 0, y: 0 } : offset
         const pos = reactFlowInstance.screenToFlowPosition(offset)
-        state.createDroppedNode(item.name, pos)
+        createDroppedNode(item.name, pos)
       },
     }),
     [reactFlowInstance]
@@ -52,11 +42,11 @@ const FlowCanvas = () => {
   return (
     <div style={{ width: "100%", height: "calc(100vh - 3rem)" }} ref={drop}>
       <ReactFlow
-        nodes={state.nodes}
-        edges={state.edges}
-        onNodesChange={state.onNodesChange}
-        onEdgesChange={state.onEdgesChange}
-        onConnect={state.onConnect}
+        nodes={flowStore.nodes}
+        edges={flowStore.edges}
+        onNodesChange={flowStore.onNodesChange}
+        onEdgesChange={flowStore.onEdgesChange}
+        onConnect={flowStore.onConnect}
         nodeTypes={nodeTypes}
         fitView
       >
