@@ -38,14 +38,12 @@ const EIPItem = ({ eipId }: EIPItemProps) => {
   const opacity = isDragging ? 0.5 : 1
 
   return (
-    <SideNavMenuItem
-      className="eip-item-container"
-      ref={drag}
-      style={{ opacity }}
-    >
-      <img className="eip-item-image" src={iconUrl} />
-      <span className="eip-item-text">{toTitleCase(eipId.name)}</span>
-      <DragPreviewImage connect={preview} src={iconUrl} />
+    <SideNavMenuItem className="eip-menu-item" ref={drag} style={{ opacity }}>
+      <div className="eip-item-wrapper">
+        <img className="eip-item-image" src={iconUrl} />
+        <span>{toTitleCase(eipId.name)}</span>
+        <DragPreviewImage connect={preview} src={iconUrl} />
+      </div>
     </SideNavMenuItem>
   )
 }

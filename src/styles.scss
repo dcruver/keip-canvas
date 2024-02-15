@@ -44,18 +44,20 @@
     padding-left: 1rem;
   }
 
-  .eip-item-container {
+  .eip-menu-item {
     cursor: grab;
+  }
+
+  .eip-item-wrapper {
+    display: flex;
+    align-items: center;
+    column-gap: 1rem;
+    text-wrap: wrap;
   }
 
   .eip-item-image {
     width: 2rem;
     height: 2rem;
-  }
-
-  .eip-item-text {
-    margin-left: 1rem;
-    vertical-align: 0.5rem;
   }
 
   .search-bar-container {
