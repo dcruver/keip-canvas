@@ -1,10 +1,12 @@
 import {
+  Search,
   SideNav,
   SideNavItems,
   SideNavMenu,
   SideNavMenuItem,
 } from "@carbon/react"
 
+import { useState } from "react"
 import { DragPreviewImage, useDrag } from "react-dnd"
 import eipIconUrls from "../eipIconCatalog"
 import eipComponentSchema from "../schema/compnentSchema"
@@ -22,6 +24,7 @@ type EIPBlockProps = {
 type EIPBlockCollectionProps = {
   title: string
   components: EIPComponent[]
+  searchFilter?: string
 }
 
 // TODO: Show description docs on hover
@@ -38,20 +41,28 @@ const EIPItem = ({ name }: EIPBlockProps) => {
   const opacity = isDragging ? 0.5 : 1
 
   return (
-    <div className="eip-item-container" ref={drag} style={{ opacity }}>
+    <SideNavMenuItem
+      className="eip-item-container"
+      ref={drag}
+      style={{ opacity }}
+    >
       <img className="eip-item-image" src={iconUrl} />
       <span className="eip-item-text">{toTitleCase(name)}</span>
       <DragPreviewImage connect={preview} src={iconUrl} />
-    </div>
+    </SideNavMenuItem>
   )
 }
 
-const EIPBlockCollection = ({ title, components }: EIPBlockCollectionProps) => {
-  const eipItems = components.map((component) => (
-    <SideNavMenuItem key={component.name}>
-      <EIPItem name={component.name} />
-    </SideNavMenuItem>
-  ))
+const EIPBlockCollection = ({
+  title,
+  components,
+  searchFilter,
+}: EIPBlockCollectionProps) => {
+  const filtered = searchFilter
+    ? components.filter((c) => c.name.toLowerCase().includes(searchFilter))
+    : components
+
+  const eipItems = filtered.map((c) => <EIPItem key={c.name} name={c.name} />)
 
   return (
     <SideNavMenu title={toTitleCase(title)} large defaultExpanded>
@@ -63,12 +74,15 @@ const EIPBlockCollection = ({ title, components }: EIPBlockCollectionProps) => {
 // TODO: Add node search bar
 
 const NodeChooserPanel = () => {
+  const [searchTerm, setSearchTerm] = useState("")
+
   const collections = Object.entries(eipComponentSchema).map(
     ([collectionName, components]) => (
       <EIPBlockCollection
         key={collectionName}
         title={collectionName}
         components={components as EIPComponent[]}
+        searchFilter={searchTerm}
       />
     )
   )
@@ -80,6 +94,12 @@ const NodeChooserPanel = () => {
       isChildOfHeader={false}
       aria-label="side-navigation"
     >
+      <div className="search-bar-container">
+        <Search
+          labelText="Narrow component selections"
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       <SideNavItems>{collections}</SideNavItems>
     </SideNav>
   )
