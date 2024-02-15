@@ -16,8 +16,9 @@ import {
   applyNodeChanges,
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
+import { EipId } from "./api/eip"
 import { EipNodeData, eipNodeKey } from "./custom-nodes/EIPNode"
-import eipComponentSchema, { FlowType } from "./schema/compnentSchema"
+import { FlowType, lookupEipComponent } from "./schema/compnentSchema"
 
 interface FlowActions {
   onNodesChange: OnNodesChange
@@ -26,7 +27,7 @@ interface FlowActions {
 }
 
 interface AppActions {
-  createDroppedNode: (eipName: string, position: XYPosition) => void
+  createDroppedNode: (eipId: EipId, position: XYPosition) => void
 }
 
 interface AppStore {
@@ -59,33 +60,28 @@ const useStore = create<AppStore>()((set) => ({
   },
 
   appActions: {
-    createDroppedNode: (eipName, position) =>
+    createDroppedNode: (eipId, position) =>
       set((state) => ({
-        nodes: [...state.nodes, newNode(eipName, position)],
+        nodes: [...state.nodes, newNode(eipId, position)],
       })),
   },
 }))
 
-// TODO: Update this not to rely on 'integration' package and use a map.
-const getFlowType = (name: string) => {
-  for (const c of eipComponentSchema["integration"]) {
-    if (c.name === name) {
-      return c.flowType
-    }
-  }
-  return FlowType.Passthru
+const getFlowType = (eipId: EipId) => {
+  const flowType = lookupEipComponent(eipId)?.flowType
+  return flowType ? flowType : FlowType.Passthru
 }
 
-const newNode = (eipName: string, position: XYPosition) => {
+const newNode = (eipId: EipId, position: XYPosition) => {
   const id = nanoid(10)
   const node: Node<EipNodeData> = {
     id: id,
     type: eipNodeKey,
     position: position,
     data: {
-      eipName: eipName,
+      eipId: eipId,
       label: "New Node",
-      flowType: getFlowType(eipName),
+      flowType: getFlowType(eipId),
     },
   }
   return node

@@ -1,3 +1,4 @@
+import { EipId } from "../api/eip"
 import schema from "./json/components.json?raw"
 
 interface Restriction {
@@ -19,7 +20,7 @@ export enum FlowType {
   Passthru = "passthru",
 }
 
-export interface EIPComponentSchema {
+export interface EIPComponent {
   name: string
   role: "endpoint" | "channel"
   flowType: FlowType
@@ -27,7 +28,20 @@ export interface EIPComponentSchema {
   attributes?: Attribute[]
 }
 
-const eipComponentSchema: Record<string, EIPComponentSchema[]> =
-  JSON.parse(schema)
+type EIPSchema = Record<string, EIPComponent[]>
 
-export default eipComponentSchema
+export const eipComponentSchema: EIPSchema = JSON.parse(schema)
+
+const getFlatMap = (schema: EIPSchema) => {
+  const map = new Map<string, EIPComponent>()
+  for (const [namespace, componentList] of Object.entries(schema)) {
+    componentList.forEach((c) => map.set(`${namespace}.${c.name}`, c))
+  }
+  return map
+}
+
+const componentFlatMap = getFlatMap(eipComponentSchema)
+
+export const lookupEipComponent = (eipId: EipId) => {
+  return componentFlatMap.get(`${eipId.namespace}.${eipId.name}`)
+}

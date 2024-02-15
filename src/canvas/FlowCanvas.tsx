@@ -10,12 +10,9 @@ import { useAppActions, useFlowStore } from "../store"
 import "reactflow/dist/base.css"
 
 import { useDrop } from "react-dnd"
+import { EipId } from "../api/eip"
 import EIPNode from "../custom-nodes/EIPNode"
 import { DragTypes } from "../node-chooser/dragTypes"
-
-export type FlowNodeData = {
-  name: string
-}
 
 const nodeTypes = {
   eipNode: EIPNode,
@@ -26,14 +23,14 @@ const FlowCanvas = () => {
   const flowStore = useFlowStore()
   const { createDroppedNode } = useAppActions()
 
-  const [_, drop] = useDrop<FlowNodeData, unknown, unknown>(
+  const [_, drop] = useDrop<EipId, unknown, unknown>(
     () => ({
       accept: DragTypes.FLOWNODE,
-      drop: (item, monitor) => {
+      drop: (eipId, monitor) => {
         let offset = monitor.getClientOffset()
         offset = offset === null ? { x: 0, y: 0 } : offset
         const pos = reactFlowInstance.screenToFlowPosition(offset)
-        createDroppedNode(item.name, pos)
+        createDroppedNode(eipId, pos)
       },
     }),
     [reactFlowInstance]

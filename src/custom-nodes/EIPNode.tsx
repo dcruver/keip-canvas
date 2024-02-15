@@ -1,15 +1,16 @@
 import { ClickableTile } from "@carbon/react"
 import { Handle, NodeProps, Position } from "reactflow"
 
-import eipIconUrls from "../eipIconCatalog"
+import { EipId } from "../api/eip"
+import getIconUrl from "../eipIconCatalog"
+import { FlowType } from "../schema/compnentSchema"
 import { toTitleCase } from "../utils/titleTransform"
 import "./nodes.scss"
-import { FlowType } from "../schema/compnentSchema"
 
 export const eipNodeKey = "eipNode"
 
 export type EipNodeData = {
-  eipName: string
+  eipId: EipId
   label: string
   flowType: FlowType
 }
@@ -38,8 +39,8 @@ const EIPNode = ({ data }: NodeProps<EipNodeData>) => {
 
   return (
     <ClickableTile className="eip-node">
-      <div>{toTitleCase(data.eipName)}</div>
-      <img className="eip-node-image" src={eipIconUrls[data.eipName]} />
+      <div>{toTitleCase(data.eipId.name)}</div>
+      <img className="eip-node-image" src={getIconUrl(data.eipId)} />
       <div>
         <strong>{data.label}</strong>
       </div>

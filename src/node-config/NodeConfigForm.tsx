@@ -9,21 +9,23 @@ import {
 } from "@carbon/react"
 import { useState } from "react"
 import { Node, useOnSelectionChange } from "reactflow"
+import { EipId } from "../api/eip"
 import { EipNodeData } from "../custom-nodes/EIPNode"
-import eipComponentSchema, {
+import {
   Attribute,
-  EIPComponentSchema,
+  EIPComponent,
+  lookupEipComponent,
 } from "../schema/compnentSchema"
 import AttributeConfigForm from "./AttributeConfig"
 
 type PanelContentProps = {
   nodeId: string
-  eipComponent: EIPComponentSchema
+  eipComponent: EIPComponent
 }
 
 type SelectedNode = {
   id: string
-  eipName: string
+  eipId: EipId
 }
 
 const flowControlledAttributes = new Set(["id", "channel"])
@@ -45,7 +47,6 @@ const ChildrenConfigs = () => {
 
 const PanelContent = ({ nodeId, eipComponent }: PanelContentProps) => {
   const [showAttributes, setShowAttributes] = useState(true)
-
 
   // TODO: Allow setting node label from panel
   return (
@@ -89,15 +90,6 @@ const PanelContent = ({ nodeId, eipComponent }: PanelContentProps) => {
   )
 }
 
-// TODO: Use a map
-const findComponent = (eipName: string) => {
-  for (const c of eipComponentSchema["integration"]) {
-    if (c.name === eipName) {
-      return c
-    }
-  }
-}
-
 const NodeConfigPanel = () => {
   // TODO: Handle case where no attributes are listed or required.
   const [selectedNodes, setSelectedNodes] = useState<SelectedNode[]>([])
@@ -107,7 +99,7 @@ const NodeConfigPanel = () => {
       setSelectedNodes(
         nodes.map((node: Node<EipNodeData>) => ({
           id: node.id,
-          eipName: node.data.eipName,
+          eipId: node.data.eipId,
         }))
       )
     },
@@ -126,7 +118,7 @@ const NodeConfigPanel = () => {
         <PanelContent
           key={node!.id}
           nodeId={node!.id}
-          eipComponent={findComponent(node!.eipName)}
+          eipComponent={lookupEipComponent(node!.eipId)}
         />
       )}
     </HeaderPanel>

@@ -8,36 +8,33 @@ import {
 
 import { useState } from "react"
 import { DragPreviewImage, useDrag } from "react-dnd"
-import eipIconUrls from "../eipIconCatalog"
-import eipComponentSchema from "../schema/compnentSchema"
+import { EipId } from "../api/eip"
+import getIconUrl from "../eipIconCatalog"
+import { EIPComponent, eipComponentSchema } from "../schema/compnentSchema"
 import { toTitleCase } from "../utils/titleTransform"
 import { DragTypes } from "./dragTypes"
 
-interface EIPComponent {
-  name: string
-}
-
-type EIPBlockProps = {
-  name: string
+type EIPItemProps = {
+  eipId: EipId
 }
 
 type EIPBlockCollectionProps = {
-  title: string
+  namespace: string
   components: EIPComponent[]
   searchFilter?: string
 }
 
 // TODO: Show description docs on hover
-const EIPItem = ({ name }: EIPBlockProps) => {
+const EIPItem = ({ eipId }: EIPItemProps) => {
   const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: DragTypes.FLOWNODE,
-    item: { name },
+    item: eipId,
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   }))
 
-  const iconUrl = eipIconUrls[name]
+  const iconUrl = getIconUrl(eipId)
   const opacity = isDragging ? 0.5 : 1
 
   return (
@@ -47,14 +44,14 @@ const EIPItem = ({ name }: EIPBlockProps) => {
       style={{ opacity }}
     >
       <img className="eip-item-image" src={iconUrl} />
-      <span className="eip-item-text">{toTitleCase(name)}</span>
+      <span className="eip-item-text">{toTitleCase(eipId.name)}</span>
       <DragPreviewImage connect={preview} src={iconUrl} />
     </SideNavMenuItem>
   )
 }
 
 const EIPBlockCollection = ({
-  title,
+  namespace,
   components,
   searchFilter,
 }: EIPBlockCollectionProps) => {
@@ -62,25 +59,25 @@ const EIPBlockCollection = ({
     ? components.filter((c) => c.name.toLowerCase().includes(searchFilter))
     : components
 
-  const eipItems = filtered.map((c) => <EIPItem key={c.name} name={c.name} />)
+  const eipItems = filtered.map((c) => (
+    <EIPItem key={c.name} eipId={{ namespace, name: c.name }} />
+  ))
 
   return (
-    <SideNavMenu title={toTitleCase(title)} large defaultExpanded>
+    <SideNavMenu title={toTitleCase(namespace)} large defaultExpanded>
       {eipItems}
     </SideNavMenu>
   )
 }
 
-// TODO: Add node search bar
-
 const NodeChooserPanel = () => {
   const [searchTerm, setSearchTerm] = useState("")
 
   const collections = Object.entries(eipComponentSchema).map(
-    ([collectionName, components]) => (
+    ([namespace, components]) => (
       <EIPBlockCollection
-        key={collectionName}
-        title={collectionName}
+        key={namespace}
+        namespace={namespace}
         components={components as EIPComponent[]}
         searchFilter={searchTerm}
       />
