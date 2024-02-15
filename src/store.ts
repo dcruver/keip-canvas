@@ -17,7 +17,7 @@ import {
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
 import { EipNodeData, eipNodeKey } from "./custom-nodes/EIPNode"
-import { FlowType } from "./schema/compnentSchema"
+import eipComponentSchema, { FlowType } from "./schema/compnentSchema"
 
 interface FlowActions {
   onNodesChange: OnNodesChange
@@ -66,6 +66,16 @@ const useStore = create<AppStore>()((set) => ({
   },
 }))
 
+// TODO: Update this not to rely on 'integration' package and use a map.
+const getFlowType = (name: string) => {
+  for (const c of eipComponentSchema["integration"]) {
+    if (c.name === name) {
+      return c.flowType
+    }
+  }
+  return FlowType.Passthru
+}
+
 const newNode = (eipName: string, position: XYPosition) => {
   const id = nanoid(10)
   const node: Node<EipNodeData> = {
@@ -75,7 +85,7 @@ const newNode = (eipName: string, position: XYPosition) => {
     data: {
       eipName: eipName,
       label: "New Node",
-      flowType: FlowType.Passthru,
+      flowType: getFlowType(eipName),
     },
   }
   return node

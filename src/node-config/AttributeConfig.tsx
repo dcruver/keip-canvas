@@ -23,8 +23,8 @@ type DescriptionWrapperProps = {
 const AttributeSelectInput = (props: Attribute) => {
   const emptySelect = ""
   const options = props.default
-    ? props.allowedValues!
-    : [emptySelect, ...props.allowedValues!]
+    ? props.restriction!.enum!
+    : [emptySelect, ...props.restriction!.enum!]
 
   return (
     <DescriptionTooltipWrapper id={props.name} description={props.description}>
@@ -141,7 +141,7 @@ const DescriptionTooltipWrapper = (props: DescriptionWrapperProps) => {
 const AttributeInput = (props: Attribute) => {
   switch (props.type) {
     case "string":
-      if (props.allowedValues) {
+      if (props.restriction?.enum) {
         return <AttributeSelectInput {...props} />
       }
       return <AttributeTextInput {...props} />

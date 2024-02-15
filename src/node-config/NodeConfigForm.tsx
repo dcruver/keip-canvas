@@ -8,7 +8,8 @@ import {
   TextInput,
 } from "@carbon/react"
 import { useState } from "react"
-import { useOnSelectionChange } from "reactflow"
+import { Node, useOnSelectionChange } from "reactflow"
+import { EipNodeData } from "../custom-nodes/EIPNode"
 import eipComponentSchema, {
   Attribute,
   EIPComponentSchema,
@@ -18,6 +19,11 @@ import AttributeConfigForm from "./AttributeConfig"
 type PanelContentProps = {
   nodeId: string
   eipComponent: EIPComponentSchema
+}
+
+type SelectedNode = {
+  id: string
+  eipName: string
 }
 
 const flowControlledAttributes = new Set(["id", "channel"])
@@ -40,6 +46,8 @@ const ChildrenConfigs = () => {
 const PanelContent = ({ nodeId, eipComponent }: PanelContentProps) => {
   const [showAttributes, setShowAttributes] = useState(true)
 
+
+  // TODO: Allow setting node label from panel
   return (
     <Stack gap={8}>
       <Stack gap={6}>
@@ -81,28 +89,46 @@ const PanelContent = ({ nodeId, eipComponent }: PanelContentProps) => {
   )
 }
 
+// TODO: Use a map
+const findComponent = (eipName: string) => {
+  for (const c of eipComponentSchema["integration"]) {
+    if (c.name === eipName) {
+      return c
+    }
+  }
+}
+
 const NodeConfigPanel = () => {
   // TODO: Handle case where no attributes are listed or required.
-  const [selectedNodes, setSelectedNodes] = useState<string[]>([])
+  const [selectedNodes, setSelectedNodes] = useState<SelectedNode[]>([])
 
   useOnSelectionChange({
     onChange: ({ nodes }) => {
-      setSelectedNodes(nodes.map((node) => node.id))
+      setSelectedNodes(
+        nodes.map((node: Node<EipNodeData>) => ({
+          id: node.id,
+          eipName: node.data.eipName,
+        }))
+      )
     },
   })
 
   const isDisplayed = selectedNodes.length === 1
+  const node = isDisplayed ? selectedNodes[0] : null
 
+  // TODO: Pass in channelId to PanelContent
   return (
     <HeaderPanel
       className={isDisplayed ? "right-panel" : ""}
       expanded={isDisplayed}
     >
-      <PanelContent
-        // key={selectedNodes[0]}
-        nodeId={selectedNodes[0]}
-        eipComponent={eipComponentSchema["integration"][0]}
-      />
+      {isDisplayed && (
+        <PanelContent
+          key={node!.id}
+          nodeId={node!.id}
+          eipComponent={findComponent(node!.eipName)}
+        />
+      )}
     </HeaderPanel>
   )
 }

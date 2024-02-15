@@ -398,7 +398,7 @@
           "description": "Specifies the minimum subscribers required to be subscribed to this channel; if the minimum number of subscribers receive the message, the send is deemed to be successful (returns true). Defaults to 0."
         },
         {
-          "name": ",ax-subscribers",
+          "name": "max-subscribers",
           "type": "string",
           "description": "Specifies the maximum subscribers allowed on this channel; defaults to Integer.MAX_VALUE, unless a 'channelInitializer' bean has previously been declared, with a different default."
         }
