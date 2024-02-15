@@ -28,6 +28,7 @@ interface FlowActions {
 
 interface AppActions {
   createDroppedNode: (eipId: EipId, position: XYPosition) => void
+  updateNodeLabel: (nodeId: string, label: string) => void
 }
 
 interface AppStore {
@@ -64,6 +65,12 @@ const useStore = create<AppStore>()((set) => ({
       set((state) => ({
         nodes: [...state.nodes, newNode(eipId, position)],
       })),
+    updateNodeLabel: (id, label) =>
+      set((state) => ({
+        nodes: state.nodes.map((node) =>
+          node.id === id ? { ...node, data: { ...node.data, label } } : node
+        ),
+      })),
   },
 }))
 
@@ -83,6 +90,9 @@ const newNode = (eipId: EipId, position: XYPosition) => {
   }
   return node
 }
+
+export const useGetNode = (id: string) =>
+  useStore(useShallow((state) => state.nodes.find((node) => node.id === id)))
 
 export const useFlowStore = () =>
   useStore(

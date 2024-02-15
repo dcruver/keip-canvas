@@ -16,6 +16,7 @@ import {
   EIPComponent,
   lookupEipComponent,
 } from "../schema/componentSchema"
+import { useAppActions, useGetNode } from "../store"
 import AttributeConfigForm from "./AttributeConfig"
 
 type PanelContentProps = {
@@ -47,6 +48,8 @@ const ChildrenConfigs = () => {
 
 const PanelContent = ({ nodeId, eipComponent }: PanelContentProps) => {
   const [showAttributes, setShowAttributes] = useState(true)
+  const node = useGetNode(nodeId)
+  const { updateNodeLabel } = useAppActions()
 
   // TODO: Allow setting node label from panel
   return (
@@ -54,11 +57,17 @@ const PanelContent = ({ nodeId, eipComponent }: PanelContentProps) => {
       <Stack gap={6}>
         <TextInput
           id={"nodeId"}
-          labelText="nodeId"
+          labelText="NodeId"
           disabled
           defaultValue={nodeId}
-        ></TextInput>
-        <TextInput id={"channelId"} labelText="channelId" disabled></TextInput>
+        />
+        <TextInput id={"channelId"} labelText="ChannelId" disabled />
+        <TextInput
+          id={"nodeLabel"}
+          labelText="Label"
+          value={node?.data.label}
+          onChange={(e) => updateNodeLabel(nodeId, e.target.value)}
+        />
         <TextArea
           labelText="Description"
           helperText="Optional description of the selected node's behavior"

@@ -9,6 +9,8 @@ import "./nodes.scss"
 
 export const eipNodeKey = "eipNode"
 
+const defaultNamespace = "integration"
+
 export type EipNodeData = {
   eipId: EipId
   label: string
@@ -35,6 +37,13 @@ const renderHandles = (flowType: FlowType) => {
   }
 }
 
+const getNamespacedTitle = (eipId: EipId) => {
+  if (eipId.namespace === defaultNamespace) {
+    return toTitleCase(eipId.name)
+  }
+  return toTitleCase(eipId.namespace) + " " + toTitleCase(eipId.name)
+}
+
 // TODO: Consider separating into Endpoint and Channel custom node types
 const EIPNode = ({ data }: NodeProps<EipNodeData>) => {
   const handles = renderHandles(data.flowType)
@@ -45,7 +54,7 @@ const EIPNode = ({ data }: NodeProps<EipNodeData>) => {
 
   return (
     <ClickableTile className={clsNames}>
-      <div>{toTitleCase(data.eipId.name)}</div>
+      <div>{getNamespacedTitle(data.eipId)}</div>
       <img className="eip-node-image" src={getIconUrl(data.eipId)} />
       <div>
         <strong>{data.label}</strong>
