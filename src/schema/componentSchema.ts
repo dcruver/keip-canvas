@@ -14,15 +14,13 @@ export interface Attribute {
   restriction?: Restriction
 }
 
-export enum FlowType {
-  Source = "source",
-  Sink = "sink",
-  Passthru = "passthru",
-}
+export type FlowType = "source" | "sink" | "passthru"
+
+export type Role = "endpoint" | "channel"
 
 export interface EIPComponent {
   name: string
-  role: "endpoint" | "channel"
+  role: Role
   flowType: FlowType
   description?: string
   attributes?: Attribute[]
@@ -30,7 +28,7 @@ export interface EIPComponent {
 
 type EIPSchema = Record<string, EIPComponent[]>
 
-export const eipComponentSchema: EIPSchema = JSON.parse(schema)
+export const eipComponentSchema: Readonly<EIPSchema> = JSON.parse(schema)
 
 const getFlatMap = (schema: EIPSchema) => {
   const map = new Map<string, EIPComponent>()

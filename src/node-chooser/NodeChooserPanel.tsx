@@ -10,7 +10,7 @@ import { useState } from "react"
 import { DragPreviewImage, useDrag } from "react-dnd"
 import { EipId } from "../api/eip"
 import getIconUrl from "../eipIconCatalog"
-import { EIPComponent, eipComponentSchema } from "../schema/compnentSchema"
+import { EIPComponent, eipComponentSchema } from "../schema/componentSchema"
 import { toTitleCase } from "../utils/titleTransform"
 import { DragTypes } from "./dragTypes"
 

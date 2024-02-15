@@ -15,8 +15,16 @@
 
 .eip-node-image {
   padding: layout.$spacing-02;
+}
+
+.eip-endpoint-node .eip-node-image {
   width: 4rem;
   height: 4rem;
+}
+
+.eip-channel-node .eip-node-image {
+  width: 6rem;
+  height: 3rem;
 }
 
 .react-flow .react-flow__handle {

@@ -18,7 +18,7 @@ import {
 import { useShallow } from "zustand/react/shallow"
 import { EipId } from "./api/eip"
 import { EipNodeData, eipNodeKey } from "./custom-nodes/EIPNode"
-import { FlowType, lookupEipComponent } from "./schema/compnentSchema"
+import { lookupEipComponent } from "./schema/componentSchema"
 
 interface FlowActions {
   onNodesChange: OnNodesChange
@@ -67,13 +67,9 @@ const useStore = create<AppStore>()((set) => ({
   },
 }))
 
-const getFlowType = (eipId: EipId) => {
-  const flowType = lookupEipComponent(eipId)?.flowType
-  return flowType ? flowType : FlowType.Passthru
-}
-
 const newNode = (eipId: EipId, position: XYPosition) => {
   const id = nanoid(10)
+  const nodeSchema = lookupEipComponent(eipId)!
   const node: Node<EipNodeData> = {
     id: id,
     type: eipNodeKey,
@@ -81,7 +77,8 @@ const newNode = (eipId: EipId, position: XYPosition) => {
     data: {
       eipId: eipId,
       label: "New Node",
-      flowType: getFlowType(eipId),
+      flowType: nodeSchema.flowType,
+      role: nodeSchema.role,
     },
   }
   return node

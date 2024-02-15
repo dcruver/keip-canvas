@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from "@carbon/react"
 import { ReactNode } from "react"
-import { Attribute } from "../schema/compnentSchema"
+import { Attribute } from "../schema/componentSchema"
 
 type DescriptionWrapperProps = {
   id: string

@@ -15,7 +15,7 @@ import {
   Attribute,
   EIPComponent,
   lookupEipComponent,
-} from "../schema/compnentSchema"
+} from "../schema/componentSchema"
 import AttributeConfigForm from "./AttributeConfig"
 
 type PanelContentProps = {
