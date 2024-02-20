@@ -41,5 +41,9 @@ const getFlatMap = (schema: EIPSchema) => {
 const componentFlatMap = getFlatMap(eipComponentSchema)
 
 export const lookupEipComponent = (eipId: EipId) => {
-  return componentFlatMap.get(`${eipId.namespace}.${eipId.name}`)
+  const component = componentFlatMap.get(`${eipId.namespace}.${eipId.name}`)
+  if (component === undefined) {
+    console.error(`Did not find component with id: ${eipId}`)
+  }
+  return component
 }

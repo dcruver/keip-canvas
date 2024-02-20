@@ -1,5 +1,5 @@
 import { ClickableTile } from "@carbon/react"
-import { Handle, NodeProps, Position } from "reactflow"
+import { Handle, Node, NodeProps, Position } from "reactflow"
 
 import { EipId } from "../api/eip"
 import getIconUrl from "../eipIconCatalog"
@@ -17,6 +17,8 @@ export type EipNodeData = {
   flowType: FlowType
   role: Role
 }
+
+export type EipFlowNode = Node<EipNodeData>
 
 // TODO: Limit handles to the appropriate number of connections
 const renderHandles = (flowType: FlowType) => {

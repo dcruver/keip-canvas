@@ -17,7 +17,7 @@ import {
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
 import { EipId } from "./api/eip"
-import { EipNodeData, eipNodeKey } from "./custom-nodes/EIPNode"
+import { EipFlowNode, eipNodeKey } from "./custom-nodes/EIPNode"
 import { lookupEipComponent } from "./schema/componentSchema"
 
 interface FlowActions {
@@ -77,7 +77,7 @@ const useStore = create<AppStore>()((set) => ({
 const newNode = (eipId: EipId, position: XYPosition) => {
   const id = nanoid(10)
   const nodeSchema = lookupEipComponent(eipId)!
-  const node: Node<EipNodeData> = {
+  const node: EipFlowNode = {
     id: id,
     type: eipNodeKey,
     position: position,
@@ -93,6 +93,8 @@ const newNode = (eipId: EipId, position: XYPosition) => {
 
 export const useGetNode = (id: string) =>
   useStore(useShallow((state) => state.nodes.find((node) => node.id === id)))
+
+export const useNodeCount = () => useStore((state) => state.nodes.length)
 
 export const useFlowStore = () =>
   useStore(

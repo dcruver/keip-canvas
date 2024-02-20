@@ -6,11 +6,12 @@ import {
   SideNavMenuItem,
 } from "@carbon/react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { DragPreviewImage, useDrag } from "react-dnd"
 import { EipId } from "../api/eip"
 import getIconUrl from "../eipIconCatalog"
 import { EIPComponent, eipComponentSchema } from "../schema/componentSchema"
+import { useNodeCount } from "../store"
 import { toTitleCase } from "../utils/titleTransform"
 import { DragTypes } from "./dragTypes"
 
@@ -70,6 +71,9 @@ const EIPBlockCollection = ({
 
 const NodeChooserPanel = () => {
   const [searchTerm, setSearchTerm] = useState("")
+  const nodeCount = useNodeCount()
+
+  useEffect(() => setSearchTerm(""), [nodeCount])
 
   const collections = Object.entries(eipComponentSchema).map(
     ([namespace, components]) => (
@@ -92,6 +96,7 @@ const NodeChooserPanel = () => {
       <div className="search-bar-container">
         <Search
           labelText="Narrow component selections"
+          value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
