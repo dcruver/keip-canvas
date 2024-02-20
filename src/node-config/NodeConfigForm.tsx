@@ -1,9 +1,12 @@
 import {
-  ContentSwitcher,
   Form,
   HeaderPanel,
   Stack,
-  Switch,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   TextArea,
   TextInput,
 } from "@carbon/react"
@@ -36,17 +39,17 @@ const ChildrenConfigs = () => {
 }
 
 const PanelContent = ({ nodeId }: PanelContentProps) => {
-  const [showAttributes, setShowAttributes] = useState(true)
   const node = useGetNode(nodeId)
   const { updateNodeLabel } = useAppActions()
 
   const eipComponent = node ? lookupEipComponent(node.data.eipId) : null
 
   // TODO: Node should remain highlighted in diagram when panel is open.
+  // TODO: Refactor: extract into smaller components
   return (
     eipComponent && (
       <Stack gap={8}>
-        <Stack gap={6}>
+        <Stack gap={6} className="side-panel-padded-container">
           <TextInput
             id="nodeId"
             labelText="NodeId"
@@ -68,24 +71,30 @@ const PanelContent = ({ nodeId }: PanelContentProps) => {
           ></TextArea>
         </Stack>
         <Stack gap={6}>
-          <ContentSwitcher
-            onChange={({ index }) => setShowAttributes(index === 0)}
-            size="md"
-          >
-            <Switch name="attrs" text="Attributes" />
-            <Switch name="children" text="Children" />
-          </ContentSwitcher>
-          {showAttributes ? (
-            <AttributeConfigForm
-              attrs={
-                eipComponent.attributes
-                  ? getConfigurableAttributes(eipComponent.attributes)
-                  : []
-              }
-            />
-          ) : (
-            <ChildrenConfigs />
-          )}
+          <Tabs>
+            <TabList
+              aria-label="Attributes/children toggle"
+              contained
+              fullWidth
+            >
+              <Tab>Attributes</Tab>
+              <Tab>Children</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel className="side-panel-unpadded-container">
+                <AttributeConfigForm
+                  attrs={
+                    eipComponent.attributes
+                      ? getConfigurableAttributes(eipComponent.attributes)
+                      : []
+                  }
+                />
+              </TabPanel>
+              <TabPanel>
+                <ChildrenConfigs />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
         </Stack>
       </Stack>
     )
@@ -106,7 +115,7 @@ const NodeConfigPanel = () => {
   // TODO: Pass in channelId to PanelContent
   return (
     <HeaderPanel
-      className={selectedNodeId ? "right-panel" : ""}
+      className={selectedNodeId ? "node-config-panel" : ""}
       expanded={Boolean(selectedNodeId)}
     >
       {selectedNodeId ? (

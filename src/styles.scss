@@ -22,9 +22,8 @@
   padding: 0;
 }
 
-.right-panel {
+.node-config-panel {
   background-color: themes.$background;
-  padding: 1rem;
   overflow-y: auto;
   // TODO: fine-tune the width
   width: 25vw;
@@ -35,6 +34,14 @@
   }
 
   .cds--accordion__content {
+    padding: 0;
+  }
+
+  .side-panel-padded-container {
+    padding: 1rem;
+  }
+
+  .side-panel-unpadded-container {
     padding: 0;
   }
 }

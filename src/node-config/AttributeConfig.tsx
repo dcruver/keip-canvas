@@ -125,12 +125,14 @@ const AttributeConfigForm = (props: { attrs: Attribute[] }) => {
   const required = props.attrs.filter((attr) => attr.required)
   const optional = props.attrs.filter((attr) => !attr.required)
 
+  const addPadding = "side-panel-padded-container"
+
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
       <Accordion isFlush size="lg">
         {required.length ? (
           <AccordionItem title="Required" open>
-            <Stack gap={6}>
+            <Stack gap={6} className={addPadding}>
               {required.map((attr) => (
                 <AttributeInput key={attr.name} {...attr} />
               ))}
@@ -139,7 +141,7 @@ const AttributeConfigForm = (props: { attrs: Attribute[] }) => {
         ) : null}
         {optional.length ? (
           <AccordionItem title="Optional">
-            <Stack gap={6}>
+            <Stack gap={6} className={addPadding}>
               {optional.map((attr) => (
                 <AttributeInput key={attr.name} {...attr} />
               ))}
