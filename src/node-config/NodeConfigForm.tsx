@@ -9,7 +9,7 @@ import {
 } from "@carbon/react"
 import { useState } from "react"
 import { useOnSelectionChange } from "reactflow"
-import { EipFlowNode } from "../custom-nodes/EIPNode"
+import { EipFlowNode } from "../custom-nodes/EipNode"
 import { Attribute, lookupEipComponent } from "../schema/componentSchema"
 import { useAppActions, useGetNode } from "../store"
 import AttributeConfigForm from "./AttributeConfig"

@@ -10,23 +10,23 @@ import { useEffect, useState } from "react"
 import { DragPreviewImage, useDrag } from "react-dnd"
 import { EipId } from "../api/eip"
 import getIconUrl from "../eipIconCatalog"
-import { EIPComponent, eipComponentSchema } from "../schema/componentSchema"
+import { EipComponent, eipComponentSchema } from "../schema/componentSchema"
 import { useNodeCount } from "../store"
 import { toTitleCase } from "../utils/titleTransform"
 import { DragTypes } from "./dragTypes"
 
-type EIPItemProps = {
+type EipItemProps = {
   eipId: EipId
 }
 
-type EIPBlockCollectionProps = {
+type EipBlockCollectionProps = {
   namespace: string
-  components: EIPComponent[]
+  components: EipComponent[]
   searchFilter?: string
 }
 
 // TODO: Show description docs on hover
-const EIPItem = ({ eipId }: EIPItemProps) => {
+const EipItem = ({ eipId }: EipItemProps) => {
   const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: DragTypes.FLOWNODE,
     item: eipId,
@@ -49,17 +49,17 @@ const EIPItem = ({ eipId }: EIPItemProps) => {
   )
 }
 
-const EIPBlockCollection = ({
+const EipBlockCollection = ({
   namespace,
   components,
   searchFilter,
-}: EIPBlockCollectionProps) => {
+}: EipBlockCollectionProps) => {
   const filtered = searchFilter
     ? components.filter((c) => c.name.toLowerCase().includes(searchFilter))
     : components
 
   const eipItems = filtered.map((c) => (
-    <EIPItem key={c.name} eipId={{ namespace, name: c.name }} />
+    <EipItem key={c.name} eipId={{ namespace, name: c.name }} />
   ))
 
   return (
@@ -77,10 +77,10 @@ const NodeChooserPanel = () => {
 
   const collections = Object.entries(eipComponentSchema).map(
     ([namespace, components]) => (
-      <EIPBlockCollection
+      <EipBlockCollection
         key={namespace}
         namespace={namespace}
-        components={components as EIPComponent[]}
+        components={components as EipComponent[]}
         searchFilter={searchTerm}
       />
     )

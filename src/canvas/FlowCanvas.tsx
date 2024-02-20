@@ -11,11 +11,11 @@ import "reactflow/dist/base.css"
 
 import { useDrop } from "react-dnd"
 import { EipId } from "../api/eip"
-import EIPNode from "../custom-nodes/EIPNode"
+import EipNode from "../custom-nodes/EipNode"
 import { DragTypes } from "../node-chooser/dragTypes"
 
 const nodeTypes = {
-  eipNode: EIPNode,
+  eipNode: EipNode,
 }
 
 const FlowCanvas = () => {

@@ -17,7 +17,7 @@ import {
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
 import { EipId } from "./api/eip"
-import { EipFlowNode, eipNodeKey } from "./custom-nodes/EIPNode"
+import { EipFlowNode, eipNodeKey } from "./custom-nodes/EipNode"
 import { lookupEipComponent } from "./schema/componentSchema"
 
 interface FlowActions {

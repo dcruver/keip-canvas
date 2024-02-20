@@ -47,7 +47,7 @@ const getNamespacedTitle = (eipId: EipId) => {
 }
 
 // TODO: Consider separating into Endpoint and Channel custom node types
-const EIPNode = ({ data }: NodeProps<EipNodeData>) => {
+const EipNode = ({ data }: NodeProps<EipNodeData>) => {
   const handles = renderHandles(data.flowType)
 
   const roleClassName =
@@ -66,4 +66,4 @@ const EIPNode = ({ data }: NodeProps<EipNodeData>) => {
   )
 }
 
-export default EIPNode
+export default EipNode

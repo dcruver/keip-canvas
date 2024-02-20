@@ -18,7 +18,7 @@ export type FlowType = "source" | "sink" | "passthru"
 
 export type Role = "endpoint" | "channel"
 
-export interface EIPComponent {
+export interface EipComponent {
   name: string
   role: Role
   flowType: FlowType
@@ -26,12 +26,12 @@ export interface EIPComponent {
   attributes?: Attribute[]
 }
 
-type EIPSchema = Record<string, EIPComponent[]>
+type EipSchema = Record<string, EipComponent[]>
 
-export const eipComponentSchema: Readonly<EIPSchema> = JSON.parse(schema)
+export const eipComponentSchema: Readonly<EipSchema> = JSON.parse(schema)
 
-const getFlatMap = (schema: EIPSchema) => {
-  const map = new Map<string, EIPComponent>()
+const getFlatMap = (schema: EipSchema) => {
+  const map = new Map<string, EipComponent>()
   for (const [namespace, componentList] of Object.entries(schema)) {
     componentList.forEach((c) => map.set(`${namespace}.${c.name}`, c))
   }
