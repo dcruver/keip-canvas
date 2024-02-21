@@ -44,7 +44,6 @@ const PanelContent = ({ nodeId }: PanelContentProps) => {
 
   const eipComponent = node ? lookupEipComponent(node.data.eipId) : null
 
-  // TODO: Node should remain highlighted in diagram when panel is open.
   // TODO: Refactor: extract into smaller components
   return (
     eipComponent && (

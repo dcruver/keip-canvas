@@ -5,12 +5,21 @@
   background-color: themes.$layer-02;
   padding: layout.$spacing-02;
   border: 1px solid themes.$border-inverse;
+  // border: 2.5px solid themes.$icon-interactive;
   text-align: center;
   min-inline-size: 2rem;
   min-block-size: 2rem;
   max-width: 8rem;
   max-height: 8rem;
   font-size: 0.5rem;
+
+  &:hover {
+    background-color: themes.$layer-hover-02;
+  }
+}
+
+.eip-node-selected {
+  outline: themes.$icon-interactive solid 2px;
 }
 
 .eip-node-image {

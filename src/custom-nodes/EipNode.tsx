@@ -1,4 +1,4 @@
-import { ClickableTile } from "@carbon/react"
+import { Tile } from "@carbon/react"
 import { Handle, Node, NodeProps, Position } from "reactflow"
 
 import { EipId } from "../api/eip"
@@ -46,23 +46,27 @@ const getNamespacedTitle = (eipId: EipId) => {
   return toTitleCase(eipId.namespace) + " " + toTitleCase(eipId.name)
 }
 
+const getClassNames = (props: NodeProps<EipNodeData>) => {
+  const roleClsName =
+    props.data.role === "channel" ? "eip-channel-node" : "eip-endpoint-node"
+  const selectedClsName = props.selected ? "eip-node-selected" : ""
+  return ["eip-node", roleClsName, selectedClsName].join(" ")
+}
+
 // TODO: Consider separating into Endpoint and Channel custom node types
-const EipNode = ({ data }: NodeProps<EipNodeData>) => {
+const EipNode = (props: NodeProps<EipNodeData>) => {
+  const { data } = props
   const handles = renderHandles(data.flowType)
 
-  const roleClassName =
-    data.role === "channel" ? "eip-channel-node" : "eip-endpoint-node"
-  const clsNames = "eip-node " + roleClassName
-
   return (
-    <ClickableTile className={clsNames}>
+    <Tile className={getClassNames(props)}>
       <div>{getNamespacedTitle(data.eipId)}</div>
       <img className="eip-node-image" src={getIconUrl(data.eipId)} />
       <div>
         <strong>{data.label}</strong>
       </div>
       {handles}
-    </ClickableTile>
+    </Tile>
   )
 }
 
