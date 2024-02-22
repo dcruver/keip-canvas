@@ -1,7 +1,7 @@
-import { EipId } from "./api/eipId"
-import channelImg from "./assets/eip/channel.png"
-import inboundAdapterImg from "./assets/eip/inbound_channel_adapter.png"
-import outboundAdapterImg from "./assets/eip/outbound_channel_adapter.png"
+import { EipId } from "../api/eipId"
+import channelImg from "../assets/eip/channel.png"
+import inboundAdapterImg from "../assets/eip/inbound_channel_adapter.png"
+import outboundAdapterImg from "../assets/eip/outbound_channel_adapter.png"
 
 type UrlCatalog = Record<string, Record<string, string>>
 

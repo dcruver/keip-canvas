@@ -1,5 +1,5 @@
 import { Form, Stack, TextInput } from "@carbon/react"
-import { EipChildren } from "../api/eipSchema"
+import { EipChildren } from "../../api/eipSchema"
 
 const ChildrenConfigs = ({ eipChildren }: { eipChildren: EipChildren }) => {
   return (

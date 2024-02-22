@@ -1,8 +1,8 @@
-import { EipId } from "./api/eipId"
-import { EipComponent, EipSchema } from "./api/eipSchema"
-import schema from "./json/sampleComponents.json?raw"
+import { EipId } from "../api/eipId"
+import { EipComponent, EipSchema } from "../api/eipSchema"
+import schema from "../json/sampleComponents.json?raw"
 
-export const eipComponents: Readonly<EipSchema> = JSON.parse(
+export const EIP_COMPONENTS: Readonly<EipSchema> = JSON.parse(
   schema
 ) as EipSchema
 
@@ -14,7 +14,7 @@ const getFlatMap = (schema: EipSchema) => {
   return map
 }
 
-const componentFlatMap = getFlatMap(eipComponents)
+const componentFlatMap = getFlatMap(EIP_COMPONENTS)
 
 export const lookupEipComponent = (eipId: EipId) => {
   const component = componentFlatMap.get(`${eipId.namespace}.${eipId.name}`)

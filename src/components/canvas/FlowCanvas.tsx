@@ -5,14 +5,14 @@ import ReactFlow, {
   useReactFlow,
 } from "reactflow"
 
-import { useAppActions, useFlowStore } from "../store"
+import { useAppActions, useFlowStore } from "../../singletons/store"
 
 import "reactflow/dist/base.css"
 
 import { useDrop } from "react-dnd"
-import { EipId } from "../api/eipId"
+import { EipId } from "../../api/eipId"
 import EipNode from "../custom-nodes/EipNode"
-import { DragTypes } from "../node-chooser/dragTypes"
+import { DragTypes } from "../draggable-panel/dragTypes"
 
 const nodeTypes = {
   eipNode: EipNode,

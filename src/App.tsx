@@ -2,9 +2,9 @@ import { Content, Header, HeaderName } from "@carbon/react"
 
 import "./styles.scss"
 
-import FlowCanvas from "./canvas/FlowCanvas"
-import NodeChooserPanel from "./node-chooser/NodeChooserPanel"
-import NodeConfigPanel from "./node-config/NodeConfigForm"
+import FlowCanvas from "./components/canvas/FlowCanvas"
+import NodeConfigPanel from "./components/config-panel/NodeConfigForm"
+import NodeChooserPanel from "./components/draggable-panel/NodeChooserPanel"
 
 const App = () => (
   <>

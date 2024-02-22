@@ -1,24 +1,14 @@
 import { Tile } from "@carbon/react"
-import { Handle, Node, NodeProps, Position } from "reactflow"
+import { Handle, NodeProps, Position } from "reactflow"
 
-import { EipId } from "../api/eipId"
-import getIconUrl from "../eipIconCatalog"
-import { FlowType, Role } from "../eipDefinitions"
-import { toTitleCase } from "../utils/titleTransform"
+import { EipId } from "../../api/eipId"
+import { FlowType } from "../../api/eipSchema"
+import { EipNodeData } from "../../api/flow"
+import getIconUrl from "../../singletons/eipIconCatalog"
+import { toTitleCase } from "../../utils/titleTransform"
 import "./nodes.scss"
 
-export const eipNodeKey = "eipNode"
-
 const defaultNamespace = "integration"
-
-export interface EipNodeData {
-  eipId: EipId
-  label: string
-  flowType: FlowType
-  role: Role
-}
-
-export type EipFlowNode = Node<EipNodeData>
 
 // TODO: Limit handles to the appropriate number of connections
 const renderHandles = (flowType: FlowType) => {

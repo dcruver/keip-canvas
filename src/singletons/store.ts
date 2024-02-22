@@ -12,11 +12,11 @@ import {
   XYPosition,
   addEdge,
   applyEdgeChanges,
-  applyNodeChanges
+  applyNodeChanges,
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
-import { EipId } from "./api/eipId"
-import { EipFlowNode, eipNodeKey } from "./custom-nodes/EipNode"
+import { EipId } from "../api/eipId"
+import { EIP_NODE_KEY, EipFlowNode } from "../api/flow"
 import { lookupEipComponent } from "./eipDefinitions"
 
 interface FlowActions {
@@ -78,7 +78,7 @@ const newNode = (eipId: EipId, position: XYPosition) => {
   const nodeSchema = lookupEipComponent(eipId)!
   const node: EipFlowNode = {
     id: id,
-    type: eipNodeKey,
+    type: EIP_NODE_KEY,
     position: position,
     data: {
       eipId: eipId,

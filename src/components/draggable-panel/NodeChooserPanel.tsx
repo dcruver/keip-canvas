@@ -8,12 +8,12 @@ import {
 
 import { useEffect, useState } from "react"
 import { DragPreviewImage, useDrag } from "react-dnd"
-import { EipId } from "../api/eipId"
-import { EipComponent } from "../api/eipSchema"
-import { eipComponents } from "../eipDefinitions"
-import getIconUrl from "../eipIconCatalog"
-import { useNodeCount } from "../store"
-import { toTitleCase } from "../utils/titleTransform"
+import { EipId } from "../../api/eipId"
+import { EipComponent } from "../../api/eipSchema"
+import { EIP_COMPONENTS } from "../../singletons/eipDefinitions"
+import getIconUrl from "../../singletons/eipIconCatalog"
+import { useNodeCount } from "../../singletons/store"
+import { toTitleCase } from "../../utils/titleTransform"
 import { DragTypes } from "./dragTypes"
 
 interface EipItemProps {
@@ -76,7 +76,7 @@ const NodeChooserPanel = () => {
 
   useEffect(() => setSearchTerm(""), [nodeCount])
 
-  const collections = Object.entries(eipComponents).map(
+  const collections = Object.entries(EIP_COMPONENTS).map(
     ([namespace, components]) => (
       <EipBlockCollection
         key={namespace}
