@@ -11,7 +11,7 @@ export const eipNodeKey = "eipNode"
 
 const defaultNamespace = "integration"
 
-export type EipNodeData = {
+export interface EipNodeData {
   eipId: EipId
   label: string
   flowType: FlowType
@@ -35,7 +35,7 @@ const renderHandles = (flowType: FlowType) => {
         </>
       )
     default:
-      console.warn(`flow type not handled: ${flowType}`)
+      console.error("unhandled FlowType")
   }
 }
 

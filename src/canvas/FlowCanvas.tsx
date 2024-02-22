@@ -23,12 +23,12 @@ const FlowCanvas = () => {
   const flowStore = useFlowStore()
   const { createDroppedNode } = useAppActions()
 
-  const [_, drop] = useDrop<EipId, unknown, unknown>(
+  const [, drop] = useDrop<EipId, unknown, unknown>(
     () => ({
       accept: DragTypes.FLOWNODE,
       drop: (eipId, monitor) => {
         let offset = monitor.getClientOffset()
-        offset = offset === null ? { x: 0, y: 0 } : offset
+        offset = offset ?? { x: 0, y: 0 }
         const pos = reactFlowInstance.screenToFlowPosition(offset)
         createDroppedNode(eipId, pos)
       },

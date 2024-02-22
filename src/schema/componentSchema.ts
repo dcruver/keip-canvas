@@ -28,7 +28,9 @@ export interface EipComponent {
 
 type EipSchema = Record<string, EipComponent[]>
 
-export const eipComponentSchema: Readonly<EipSchema> = JSON.parse(schema)
+export const eipComponentSchema: Readonly<EipSchema> = JSON.parse(
+  schema
+) as EipSchema
 
 const getFlatMap = (schema: EipSchema) => {
   const map = new Map<string, EipComponent>()
@@ -43,7 +45,7 @@ const componentFlatMap = getFlatMap(eipComponentSchema)
 export const lookupEipComponent = (eipId: EipId) => {
   const component = componentFlatMap.get(`${eipId.namespace}.${eipId.name}`)
   if (component === undefined) {
-    console.error(`Did not find component with id: ${eipId}`)
+    console.error(`Did not find component with id: ${JSON.stringify(eipId)}`)
   }
   return component
 }

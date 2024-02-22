@@ -15,11 +15,11 @@ import { useNodeCount } from "../store"
 import { toTitleCase } from "../utils/titleTransform"
 import { DragTypes } from "./dragTypes"
 
-type EipItemProps = {
+interface EipItemProps {
   eipId: EipId
 }
 
-type EipBlockCollectionProps = {
+interface EipBlockCollectionProps {
   namespace: string
   components: EipComponent[]
   searchFilter?: string
@@ -80,7 +80,7 @@ const NodeChooserPanel = () => {
       <EipBlockCollection
         key={namespace}
         namespace={namespace}
-        components={components as EipComponent[]}
+        components={components}
         searchFilter={searchTerm}
       />
     )

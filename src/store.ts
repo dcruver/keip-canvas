@@ -5,7 +5,6 @@ import {
   Connection,
   Edge,
   EdgeChange,
-  Node,
   NodeChange,
   OnConnect,
   OnEdgesChange,
@@ -13,7 +12,7 @@ import {
   XYPosition,
   addEdge,
   applyEdgeChanges,
-  applyNodeChanges,
+  applyNodeChanges
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
 import { EipId } from "./api/eip"
@@ -32,7 +31,7 @@ interface AppActions {
 }
 
 interface AppStore {
-  nodes: Node[]
+  nodes: EipFlowNode[]
   edges: Edge[]
 
   flowActions: FlowActions
@@ -91,7 +90,7 @@ const newNode = (eipId: EipId, position: XYPosition) => {
   return node
 }
 
-export const useGetNode = (id: string) =>
+export const useGetNode = (id: string): EipFlowNode | undefined =>
   useStore(useShallow((state) => state.nodes.find((node) => node.id === id)))
 
 export const useNodeCount = () => useStore((state) => state.nodes.length)

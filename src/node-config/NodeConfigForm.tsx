@@ -17,7 +17,7 @@ import { Attribute, lookupEipComponent } from "../schema/componentSchema"
 import { useAppActions, useGetNode } from "../store"
 import AttributeConfigForm from "./AttributeConfig"
 
-type PanelContentProps = {
+interface PanelContentProps {
   nodeId: string
 }
 

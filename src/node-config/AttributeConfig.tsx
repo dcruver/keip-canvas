@@ -11,10 +11,10 @@ import {
   Toggle,
   Tooltip,
 } from "@carbon/react"
-import { ReactNode } from "react"
+import { MouseEventHandler, ReactNode, ReactSVGElement } from "react"
 import { Attribute } from "../schema/componentSchema"
 
-type DescriptionWrapperProps = {
+interface DescriptionWrapperProps {
   id: string
   description: string | undefined
   children: ReactNode
@@ -80,13 +80,13 @@ const DescriptionTooltipWrapper = (props: DescriptionWrapperProps) => {
   // This workaround detachesuses JS to position the popover dynamically.
   // Long-term we would be better served by implementing our own Tooltip based on the Popover component,
   // to have greater control over the underlying DOM elements.
-  const tooltipWorkaroundHandler: React.MouseEventHandler = (e) => {
-    const icon: Element = e.target
+  const tooltipWorkaroundHandler: MouseEventHandler<ReactSVGElement> = (e) => {
+    const icon = e.target as Element
     const tooltipParent = document.getElementById(tooltipDivId)
 
     const tooltip = tooltipParent?.getElementsByClassName(
       "cds--tooltip-content"
-    )[0]
+    )[0] as HTMLElement
 
     const rect = icon.getBoundingClientRect()
     tooltip.style.left = `${rect.left}px`
@@ -117,7 +117,7 @@ const AttributeInput = (props: Attribute) => {
       return <AttributeBoolInput {...props} />
 
     default:
-      console.warn(`unknown type: ${props.type}`)
+      console.error("unhandled attribute input type")
   }
 }
 
