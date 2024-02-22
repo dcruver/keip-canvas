@@ -15,7 +15,7 @@ export type FlowType = "source" | "sink" | "passthru"
 
 export type Role = "endpoint" | "channel"
 
-interface Children {
+export interface EipChildren {
   indicator: "all" | "choice" | "sequence"
   elements: EipElement[]
 }
@@ -24,7 +24,7 @@ interface EipElement {
   name: string
   description?: string
   attributes?: Attribute[]
-  children?: Children
+  children?: EipChildren
 }
 
 export interface EipComponent extends EipElement {
