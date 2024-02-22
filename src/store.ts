@@ -15,9 +15,9 @@ import {
   applyNodeChanges
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
-import { EipId } from "./api/eip"
+import { EipId } from "./api/eipId"
 import { EipFlowNode, eipNodeKey } from "./custom-nodes/EipNode"
-import { lookupEipComponent } from "./schema/componentSchema"
+import { lookupEipComponent } from "./eipDefinitions"
 
 interface FlowActions {
   onNodesChange: OnNodesChange

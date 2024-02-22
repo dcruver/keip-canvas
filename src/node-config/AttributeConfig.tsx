@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from "@carbon/react"
 import { MouseEventHandler, ReactNode, ReactSVGElement } from "react"
-import { Attribute } from "../schema/componentSchema"
+import { Attribute } from "../api/eipSchema"
 
 interface DescriptionWrapperProps {
   id: string

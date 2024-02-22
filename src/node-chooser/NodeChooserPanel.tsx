@@ -8,9 +8,10 @@ import {
 
 import { useEffect, useState } from "react"
 import { DragPreviewImage, useDrag } from "react-dnd"
-import { EipId } from "../api/eip"
+import { EipId } from "../api/eipId"
+import { EipComponent } from "../api/eipSchema"
+import { eipComponents } from "../eipDefinitions"
 import getIconUrl from "../eipIconCatalog"
-import { EipComponent, eipComponentSchema } from "../schema/componentSchema"
 import { useNodeCount } from "../store"
 import { toTitleCase } from "../utils/titleTransform"
 import { DragTypes } from "./dragTypes"
@@ -75,7 +76,7 @@ const NodeChooserPanel = () => {
 
   useEffect(() => setSearchTerm(""), [nodeCount])
 
-  const collections = Object.entries(eipComponentSchema).map(
+  const collections = Object.entries(eipComponents).map(
     ([namespace, components]) => (
       <EipBlockCollection
         key={namespace}

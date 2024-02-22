@@ -10,7 +10,7 @@ import { useAppActions, useFlowStore } from "../store"
 import "reactflow/dist/base.css"
 
 import { useDrop } from "react-dnd"
-import { EipId } from "../api/eip"
+import { EipId } from "../api/eipId"
 import EipNode from "../custom-nodes/EipNode"
 import { DragTypes } from "../node-chooser/dragTypes"
 

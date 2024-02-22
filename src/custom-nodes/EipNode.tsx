@@ -1,9 +1,9 @@
 import { Tile } from "@carbon/react"
 import { Handle, Node, NodeProps, Position } from "reactflow"
 
-import { EipId } from "../api/eip"
+import { EipId } from "../api/eipId"
 import getIconUrl from "../eipIconCatalog"
-import { FlowType, Role } from "../schema/componentSchema"
+import { FlowType, Role } from "../eipDefinitions"
 import { toTitleCase } from "../utils/titleTransform"
 import "./nodes.scss"
 
