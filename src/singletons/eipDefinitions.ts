@@ -1,10 +1,9 @@
 import { EipId } from "../api/eipId"
 import { EipComponent, EipSchema } from "../api/eipSchema"
-import schema from "../json/sampleComponents.json?raw"
+import eipDefintion from "../json/sampleComponents.json"
 
-export const EIP_COMPONENTS: Readonly<EipSchema> = JSON.parse(
-  schema
-) as EipSchema
+// TODO: Validate that the parsed JSON matches the schema type
+export const EIP_COMPONENTS: Readonly<EipSchema> = eipDefintion as EipSchema
 
 const getFlatMap = (schema: EipSchema) => {
   const map = new Map<string, EipComponent>()
