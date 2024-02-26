@@ -1,6 +1,7 @@
-import { Tile } from "@carbon/react"
+import { Stack, Tile } from "@carbon/react"
 import { Handle, NodeProps, Position } from "reactflow"
 
+import { ServiceId } from "@carbon/react/icons"
 import { EipId } from "../../api/eipId"
 import { FlowType } from "../../api/eipSchema"
 import { EipNodeData } from "../../api/flow"
@@ -43,18 +44,35 @@ const getClassNames = (props: NodeProps<EipNodeData>) => {
   return ["eip-node", roleClsName, selectedClsName].join(" ")
 }
 
+const ChildIcons = () => (
+  <Stack className="eip-node-child" orientation="horizontal" gap={2}>
+    <div>
+      <ServiceId size={16} />
+    </div>
+    <div>
+      <ServiceId size={16} />
+    </div>
+    <div>
+      <ServiceId size={16} />
+    </div>
+  </Stack>
+)
+
 // TODO: Consider separating into Endpoint and Channel custom node types
 const EipNode = (props: NodeProps<EipNodeData>) => {
   const { data } = props
   const handles = renderHandles(data.flowType)
 
+  const hasChildren = false
+
   return (
     <Tile className={getClassNames(props)}>
       <div>{getNamespacedTitle(data.eipId)}</div>
       <img className="eip-node-image" src={getIconUrl(data.eipId)} />
-      <div>
+      <div style={hasChildren ? { paddingBottom: "0.5rem" } : {}}>
         <strong>{data.label}</strong>
       </div>
+      {hasChildren && <ChildIcons />}
       {handles}
     </Tile>
   )

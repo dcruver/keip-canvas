@@ -18,6 +18,11 @@ import { useAppActions, useGetNode } from "../../singletons/store"
 import AttributeConfigForm from "./AttributeConfig"
 import ChildrenConfigs from "./ChildrenConfig"
 
+interface ConfigurationTabProps {
+  nodeId: string
+  eipComponent: EipComponent
+}
+
 const flowControlledAttributes = new Set(["id", "channel"])
 
 const getConfigurableAttributes = (attrs: Attribute[]) => {
@@ -52,10 +57,9 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
 }
 
 const ConfigurationInputTabs = ({
+  nodeId,
   eipComponent,
-}: {
-  eipComponent: EipComponent
-}) => {
+}: ConfigurationTabProps) => {
   const configurableAttrs = eipComponent.attributes
     ? getConfigurableAttributes(eipComponent.attributes)
     : []
@@ -72,7 +76,7 @@ const ConfigurationInputTabs = ({
         <TabPanels>
           {hasAttributes && (
             <TabPanel className="side-panel-unpadded-container">
-              <AttributeConfigForm attrs={configurableAttrs} />
+              <AttributeConfigForm nodeId={nodeId} attrs={configurableAttrs} />
             </TabPanel>
           )}
           {eipComponent.children && (
@@ -95,7 +99,7 @@ const PanelContent = ({ nodeId }: { nodeId: string }) => {
     eipComponent && (
       <Stack gap={8}>
         <NodeIdentifierInputs node={node!} />
-        <ConfigurationInputTabs eipComponent={eipComponent} />
+        <ConfigurationInputTabs nodeId={nodeId} eipComponent={eipComponent} />
       </Stack>
     )
   )

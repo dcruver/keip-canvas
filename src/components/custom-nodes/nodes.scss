@@ -1,11 +1,12 @@
 @use "@carbon/themes";
 @use "@carbon/layout";
+@use "@carbon/colors";
 
 .eip-node {
   background-color: themes.$layer-02;
-  padding: layout.$spacing-02;
+  padding: layout.$spacing-03;
   border: 1px solid themes.$border-inverse;
-  // border: 2.5px solid themes.$icon-interactive;
+  border-radius: 8px;
   text-align: center;
   min-inline-size: 2rem;
   min-block-size: 2rem;
@@ -15,6 +16,19 @@
 
   &:hover {
     background-color: themes.$layer-hover-02;
+  }
+
+  .eip-node-child {
+    position: absolute;
+    left: layout.$spacing-02;
+  }
+
+  .eip-node-child > div {
+    padding: 4px;
+    border-radius: 100%;
+    line-height: 0;
+    color: themes.$text-inverse;
+    background-color: colors.$blue-50;
   }
 }
 

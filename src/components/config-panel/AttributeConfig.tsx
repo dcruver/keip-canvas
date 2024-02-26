@@ -11,8 +11,16 @@ import {
   Toggle,
   Tooltip,
 } from "@carbon/react"
-import { MouseEventHandler, ReactNode, ReactSVGElement } from "react"
+import {
+  ChangeEvent,
+  MouseEventHandler,
+  ReactNode,
+  ReactSVGElement,
+  useMemo,
+} from "react"
 import { Attribute } from "../../api/eipSchema"
+import { useAppActions, useGetAttributeValue } from "../../singletons/store"
+import debounce from "../../utils/debounce"
 
 interface DescriptionWrapperProps {
   id: string
@@ -20,19 +28,48 @@ interface DescriptionWrapperProps {
   children: ReactNode
 }
 
-const AttributeSelectInput = (props: Attribute) => {
+interface AttributeInputFactoryProps {
+  attr: Attribute
+  nodeId: string
+}
+
+interface AttributeInputProps<T> {
+  attr: Attribute
+  nodeId: string
+  attrValue: T
+}
+
+interface AttributeFormProps {
+  attrs: Attribute[]
+  nodeId: string
+}
+
+const AttributeSelectInput = ({
+  nodeId,
+  attr,
+  attrValue,
+}: AttributeInputProps<string>) => {
+  const { updateAttributeConfig } = useAppActions()
   const emptySelect = ""
-  const options = props.default
-    ? props.restriction!.enum!
-    : [emptySelect, ...props.restriction!.enum!]
+  const options = useMemo(
+    () =>
+      attr.default
+        ? attr.restriction!.enum!
+        : [emptySelect, ...attr.restriction!.enum!],
+    [attr.restriction, attr.default]
+  )
+
+  const handleSelect = (ev: ChangeEvent<HTMLSelectElement>) =>
+    updateAttributeConfig(nodeId, attr.name, ev.target.value)
 
   return (
-    <DescriptionTooltipWrapper id={props.name} description={props.description}>
+    <DescriptionTooltipWrapper id={attr.name} description={attr.description}>
       <Select
-        id={props.name}
-        labelText={props.name}
-        defaultValue={props.default}
-        hideLabel={Boolean(props.description)}
+        id={attr.name}
+        labelText={attr.name}
+        defaultValue={attrValue ?? attr.default}
+        hideLabel={Boolean(attr.description)}
+        onChange={handleSelect}
       >
         {options.map((item) => (
           <SelectItem key={item} value={item} text={item} />
@@ -42,31 +79,65 @@ const AttributeSelectInput = (props: Attribute) => {
   )
 }
 
-const AttributeBoolInput = (props: Attribute) => (
-  <DescriptionTooltipWrapper id={props.name} description={props.description}>
-    <div style={{ display: "block" }}>
-      <Toggle
-        id={props.name}
-        labelText={props.description ? "" : props.name}
-        labelA=""
-        labelB=""
-        defaultToggled={Boolean(props.default)}
-        hideLabel={Boolean(props.description)}
-      />
-    </div>
-  </DescriptionTooltipWrapper>
-)
+const AttributeBoolInput = ({
+  nodeId,
+  attr,
+  attrValue,
+}: AttributeInputProps<boolean>) => {
+  const { updateAttributeConfig } = useAppActions()
 
-const AttributeTextInput = (props: Attribute) => (
-  <DescriptionTooltipWrapper id={props.name} description={props.description}>
-    <TextInput
-      id={props.name}
-      labelText={props.name}
-      defaultValue={props.default ? String(props.default) : ""}
-      hideLabel={Boolean(props.description)}
-    />
-  </DescriptionTooltipWrapper>
-)
+  const handleToggle = (checked: boolean) =>
+    updateAttributeConfig(nodeId, attr.name, checked)
+
+  return (
+    <DescriptionTooltipWrapper id={attr.name} description={attr.description}>
+      <div style={{ display: "block" }}>
+        <Toggle
+          id={attr.name}
+          labelText={attr.description ? "" : attr.name}
+          labelA=""
+          labelB=""
+          defaultToggled={attrValue ?? Boolean(attr.default)}
+          hideLabel={Boolean(attr.description)}
+          onToggle={handleToggle}
+        />
+      </div>
+    </DescriptionTooltipWrapper>
+  )
+}
+
+const getDefaultStr = (attr: Attribute) =>
+  attr.default ? String(attr.default) : ""
+
+const AttributeTextInput = ({
+  attr,
+  nodeId,
+  attrValue,
+}: AttributeInputProps<string>) => {
+  const { updateAttributeConfig } = useAppActions()
+
+  const handleTextUpdates = useMemo(
+    () =>
+      debounce(
+        (ev: ChangeEvent<HTMLInputElement>) =>
+          updateAttributeConfig(nodeId, attr.name, ev.target.value),
+        1000
+      ),
+    [nodeId, attr, updateAttributeConfig]
+  )
+
+  return (
+    <DescriptionTooltipWrapper id={attr.name} description={attr.description}>
+      <TextInput
+        id={attr.name}
+        labelText={attr.name}
+        defaultValue={attrValue ?? getDefaultStr(attr)}
+        hideLabel={Boolean(attr.description)}
+        onChange={handleTextUpdates}
+      />
+    </DescriptionTooltipWrapper>
+  )
+}
 
 const DescriptionTooltipWrapper = (props: DescriptionWrapperProps) => {
   if (!props.description) {
@@ -105,23 +176,26 @@ const DescriptionTooltipWrapper = (props: DescriptionWrapperProps) => {
   )
 }
 
-const AttributeInput = (props: Attribute) => {
-  switch (props.type) {
+const AttributeInput = (props: AttributeInputFactoryProps) => {
+  const attrValue = useGetAttributeValue(props.nodeId, props.attr.name)
+  switch (props.attr.type) {
     case "string":
-      if (props.restriction?.enum) {
-        return <AttributeSelectInput {...props} />
+      if (props.attr.restriction?.enum) {
+        return (
+          <AttributeSelectInput {...props} attrValue={attrValue as string} />
+        )
       }
-      return <AttributeTextInput {...props} />
+      return <AttributeTextInput {...props} attrValue={attrValue as string} />
 
     case "boolean":
-      return <AttributeBoolInput {...props} />
+      return <AttributeBoolInput {...props} attrValue={attrValue as boolean} />
 
     default:
       console.error("unhandled attribute input type")
   }
 }
 
-const AttributeConfigForm = (props: { attrs: Attribute[] }) => {
+const AttributeConfigForm = (props: AttributeFormProps) => {
   const required = props.attrs.filter((attr) => attr.required)
   const optional = props.attrs.filter((attr) => !attr.required)
 
@@ -134,7 +208,11 @@ const AttributeConfigForm = (props: { attrs: Attribute[] }) => {
           <AccordionItem title="Required" open>
             <Stack gap={6} className={addPadding}>
               {required.map((attr) => (
-                <AttributeInput key={attr.name} {...attr} />
+                <AttributeInput
+                  key={attr.name}
+                  attr={attr}
+                  nodeId={props.nodeId}
+                />
               ))}
             </Stack>
           </AccordionItem>
@@ -143,7 +221,11 @@ const AttributeConfigForm = (props: { attrs: Attribute[] }) => {
           <AccordionItem title="Optional">
             <Stack gap={6} className={addPadding}>
               {optional.map((attr) => (
-                <AttributeInput key={attr.name} {...attr} />
+                <AttributeInput
+                  key={attr.name}
+                  attr={attr}
+                  nodeId={props.nodeId}
+                />
               ))}
             </Stack>
           </AccordionItem>

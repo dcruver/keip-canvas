@@ -20,7 +20,7 @@ export interface EipChildren {
   elements: EipElement[]
 }
 
-interface EipElement {
+export interface EipElement {
   name: string
   description?: string
   attributes?: Attribute[]
