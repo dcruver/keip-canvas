@@ -11,8 +11,8 @@ import "reactflow/dist/base.css"
 
 import { useDrop } from "react-dnd"
 import { EipId } from "../../api/eipId"
-import EipNode from "../custom-nodes/EipNode"
 import { DragTypes } from "../draggable-panel/dragTypes"
+import EipNode from "./EipNode"
 
 const nodeTypes = {
   eipNode: EipNode,

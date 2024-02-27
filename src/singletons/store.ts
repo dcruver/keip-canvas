@@ -17,7 +17,6 @@ import {
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
 import { EipId } from "../api/eipId"
-import { EipElement } from "../api/eipSchema"
 import { EIP_NODE_KEY, EipFlowNode } from "../api/flow"
 import { lookupEipComponent } from "./eipDefinitions"
 
@@ -31,17 +30,21 @@ type AttributeTypes = string | boolean
 
 interface EipNodeConfig {
   attributes: Record<string, AttributeTypes>
-  children: Record<string, EipElement>
+  children: Record<string, string>
 }
 
 interface AppActions {
   createDroppedNode: (eipId: EipId, position: XYPosition) => void
+
   updateNodeLabel: (nodeId: string, label: string) => void
+
   updateAttributeConfig: (
     nodeId: string,
     attrName: string,
     value: AttributeTypes
   ) => void
+
+  updateChildConfig: (nodeId: string, children: string[]) => void
 }
 
 interface AppStore {
@@ -110,6 +113,18 @@ const useStore = create<AppStore>()((set) => ({
         return { eipConfigs: configs }
       })
     },
+
+    updateChildConfig(nodeId, children) {
+      set((state) => {
+        const configs = { ...state.eipConfigs }
+        configs[nodeId].children = children.reduce((accum, child) => {
+          accum[child] = ""
+          return accum
+        }, {} as Record<string, string>)
+
+        return { eipConfigs: configs }
+      })
+    },
   },
 }))
 
@@ -148,7 +163,13 @@ export const useGetNode = (id: string): EipFlowNode | undefined =>
 export const useNodeCount = () => useStore((state) => state.nodes.length)
 
 export const useGetAttributeValue = (id: string, attrName: string) =>
-  useStore((state) => state.eipConfigs[id].attributes[attrName])
+  useStore((state) => state.eipConfigs[id]?.attributes[attrName])
+
+export const useGetChildren = (id: string) =>
+  useStore(
+    (state) =>
+      state.eipConfigs[id] && Object.keys(state.eipConfigs[id].children)
+  )
 
 export const useFlowStore = () =>
   useStore(

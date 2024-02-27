@@ -23,12 +23,10 @@
     left: layout.$spacing-02;
   }
 
-  .eip-node-child > div {
-    padding: 4px;
+  .eip-node-child .child-icon-button {
     border-radius: 100%;
-    line-height: 0;
-    color: themes.$text-inverse;
-    background-color: colors.$blue-50;
+    padding: 0;
+    align-items: center;
   }
 }
 

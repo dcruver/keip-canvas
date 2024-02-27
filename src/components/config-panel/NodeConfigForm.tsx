@@ -81,7 +81,7 @@ const ConfigurationInputTabs = ({
           )}
           {eipComponent.children && (
             <TabPanel>
-              <ChildrenConfigs eipChildren={eipComponent.children} />
+              <ChildrenConfigs nodeId={nodeId} eipChildren={eipComponent.children} />
             </TabPanel>
           )}
         </TabPanels>
