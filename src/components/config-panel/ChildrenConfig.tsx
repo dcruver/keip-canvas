@@ -1,5 +1,5 @@
 import { Checkbox, Form, RadioButton, RadioButtonGroup } from "@carbon/react"
-import { EipChildren, EipElement } from "../../api/eipSchema"
+import { EipChildren } from "../../api/eipSchema"
 import { useAppActions, useGetChildren } from "../../singletons/store"
 
 interface ChildrenConfigProps {
@@ -8,42 +8,41 @@ interface ChildrenConfigProps {
 }
 
 interface ChildrenInputProps {
-  childElements: EipElement[]
+  childrenOptions: string[]
   childrenState: string[]
   updateChildrenState: (updates: string[]) => void
 }
 
 const idPrefix = "child-"
 const getUniqueId = (id: string) => `${idPrefix}-${id}`
-const getOriginalId = (prefixed: string) =>
-  prefixed.substring(idPrefix.length + 1)
+const getName = (id: string) => id.substring(idPrefix.length + 1)
 
 const ChildrenMultiSelection = ({
-  childElements,
+  childrenOptions,
   childrenState,
   updateChildrenState,
 }: ChildrenInputProps) => {
   const handleChange = (checked: boolean, id: string) => {
-    const originalId = getOriginalId(id)
+    const name = getName(id)
     const updatedChildren = checked
-      ? [...childrenState, originalId]
-      : childrenState.filter((c) => c !== originalId)
+      ? [...childrenState, name].sort()
+      : childrenState.filter((c) => c !== name)
     updateChildrenState(updatedChildren)
   }
 
-  return childElements.map((child) => (
+  return childrenOptions.map((name) => (
     <Checkbox
-      key={child.name}
-      id={getUniqueId(child.name)}
-      labelText={child.name}
-      defaultChecked={childrenState.includes(child.name)}
+      key={name}
+      id={getUniqueId(name)}
+      labelText={name}
+      defaultChecked={childrenState.includes(name)}
       onChange={(_, { checked, id }) => handleChange(checked, id)}
     />
   ))
 }
 
 const ChildrenSingleSelection = ({
-  childElements,
+  childrenOptions,
   childrenState,
   updateChildrenState,
 }: ChildrenInputProps) => {
@@ -54,7 +53,7 @@ const ChildrenSingleSelection = ({
     )
   }
 
-  const elements = [{ name: "none" }, ...childElements]
+  const elements = ["none", ...childrenOptions]
   const handleClick = (name: string) => {
     name === "none" ? updateChildrenState([]) : updateChildrenState([name])
   }
@@ -65,12 +64,12 @@ const ChildrenSingleSelection = ({
       orientation="vertical"
       defaultSelected={childrenState?.[0] || "none"}
     >
-      {elements.map((child) => (
+      {elements.map((name) => (
         <RadioButton
-          key={child.name}
-          id={getUniqueId(child.name)}
-          value={child.name}
-          labelText={child.name}
+          key={name}
+          id={getUniqueId(name)}
+          value={name}
+          labelText={name}
           onClick={(ev) => handleClick(ev.currentTarget.value)}
         />
       ))}
@@ -86,17 +85,19 @@ const ChildrenConfigs = ({ nodeId, eipChildren }: ChildrenConfigProps) => {
   const updateChildrenState = (updates: string[]) =>
     updateChildConfig(nodeId, updates)
 
+  const sortedNames = eipChildren.elements.map((c) => c.name).sort()
+
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
       {eipChildren.indicator === "choice" ? (
         <ChildrenSingleSelection
-          childElements={eipChildren.elements}
+          childrenOptions={sortedNames}
           childrenState={childrenState}
           updateChildrenState={updateChildrenState}
         />
       ) : (
         <ChildrenMultiSelection
-          childElements={eipChildren.elements}
+          childrenOptions={sortedNames}
           childrenState={childrenState}
           updateChildrenState={updateChildrenState}
         />
