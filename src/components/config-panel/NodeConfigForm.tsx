@@ -14,12 +14,18 @@ import { useOnSelectionChange } from "reactflow"
 import { Attribute, EipComponent } from "../../api/eipSchema"
 import { EipFlowNode } from "../../api/flow"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
-import { useAppActions, useGetNode } from "../../singletons/store"
+import { useAppActions, useGetSelectedChildNode } from "../../singletons/store"
 import AttributeConfigForm from "./AttributeConfig"
+import ChildAttributeSubPanel from "./ChildAttributeSubPanel"
 import ChildrenConfigs from "./ChildrenConfig"
 
 interface ConfigurationTabProps {
   nodeId: string
+  eipComponent: EipComponent
+}
+
+interface PanelContentProps {
+  node: EipFlowNode
   eipComponent: EipComponent
 }
 
@@ -81,7 +87,10 @@ const ConfigurationInputTabs = ({
           )}
           {eipComponent.children && (
             <TabPanel>
-              <ChildrenConfigs nodeId={nodeId} eipChildren={eipComponent.children} />
+              <ChildrenConfigs
+                nodeId={nodeId}
+                eipChildren={eipComponent.children}
+              />
             </TabPanel>
           )}
         </TabPanels>
@@ -90,43 +99,63 @@ const ConfigurationInputTabs = ({
   )
 }
 
-const PanelContent = ({ nodeId }: { nodeId: string }) => {
-  const node = useGetNode(nodeId)
-
-  const eipComponent = node ? lookupEipComponent(node.data.eipId) : null
-
+const PanelContent = ({ node, eipComponent }: PanelContentProps) => {
   return (
     eipComponent && (
       <Stack gap={8}>
-        <NodeIdentifierInputs node={node!} />
-        <ConfigurationInputTabs nodeId={nodeId} eipComponent={eipComponent} />
+        <NodeIdentifierInputs node={node} />
+        <ConfigurationInputTabs nodeId={node.id} eipComponent={eipComponent} />
       </Stack>
     )
   )
 }
 
 const NodeConfigPanel = () => {
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const { clearSelectedChildNode } = useAppActions()
+  const [selectedNode, setSelectedNode] = useState<EipFlowNode | null>(null)
+  const childNodeId = useGetSelectedChildNode()
 
   useOnSelectionChange({
     onChange: ({ nodes }) => {
-      const selected = nodes.map((node: EipFlowNode) => node.id)
-      setSelectedNodeId(selected.length === 1 ? selected[0] : null)
+      childNodeId && clearSelectedChildNode()
+      setSelectedNode(nodes.length === 1 ? nodes[0] : null)
     },
   })
 
-  // TODO: Pass in channelId to PanelContent
+  const eipComponent = selectedNode
+    ? lookupEipComponent(selectedNode.data.eipId)
+    : null
+
+  let sidePanelContent
+  if (childNodeId) {
+    sidePanelContent = (
+      <ChildAttributeSubPanel
+        parentEipId={childNodeId.parentEipId}
+        childName={childNodeId.name}
+      />
+    )
+  } else if (selectedNode) {
+    // TODO: Pass in channelId to PanelContent
+    sidePanelContent = (
+      <PanelContent
+        key={selectedNode.id}
+        node={selectedNode}
+        eipComponent={eipComponent!}
+      />
+    )
+  } else {
+    // Returning an empty fragment because the HeaderPanel component spams the logs with error messages if it doesn't have any children.
+    sidePanelContent = <></>
+  }
+
+  const showPanel = Boolean(selectedNode ?? childNodeId)
+
   return (
     <HeaderPanel
-      className={selectedNodeId ? "node-config-panel" : ""}
-      expanded={Boolean(selectedNodeId)}
+      className={showPanel ? "node-config-panel" : ""}
+      expanded={showPanel}
     >
-      {selectedNodeId ? (
-        <PanelContent key={selectedNodeId} nodeId={selectedNodeId} />
-      ) : (
-        // Returning an empty fragment because the HeaderPanel component spams the logs with error messages if it doesn't have any children.
-        <></>
-      )}
+      {sidePanelContent}
     </HeaderPanel>
   )
 }

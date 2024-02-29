@@ -10,7 +10,7 @@ import { useAppActions, useFlowStore } from "../../singletons/store"
 import "reactflow/dist/base.css"
 
 import { useDrop } from "react-dnd"
-import { EipId } from "../../api/eipId"
+import { EipId } from "../../api/id"
 import { DragTypes } from "../draggable-panel/dragTypes"
 import EipNode from "./EipNode"
 
@@ -21,7 +21,7 @@ const nodeTypes = {
 const FlowCanvas = () => {
   const reactFlowInstance = useReactFlow()
   const flowStore = useFlowStore()
-  const { createDroppedNode } = useAppActions()
+  const { createDroppedNode, clearSelectedChildNode } = useAppActions()
 
   const [, drop] = useDrop<EipId, unknown, unknown>(
     () => ({
@@ -36,6 +36,9 @@ const FlowCanvas = () => {
     [reactFlowInstance]
   )
 
+  // TODO: See if there is a better way to select and clear child nodes,
+  // to avoid having to clear the selection in multiple components.
+
   return (
     <div style={{ width: "100%", height: "calc(100vh - 3rem)" }} ref={drop}>
       <ReactFlow
@@ -45,6 +48,7 @@ const FlowCanvas = () => {
         onEdgesChange={flowStore.onEdgesChange}
         onConnect={flowStore.onConnect}
         nodeTypes={nodeTypes}
+        onPaneClick={() => clearSelectedChildNode()}
         fitView
       >
         <Controls />

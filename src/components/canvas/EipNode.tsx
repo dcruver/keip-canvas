@@ -2,16 +2,22 @@ import { Button, Stack, Tile } from "@carbon/react"
 import { Handle, NodeProps, Position } from "reactflow"
 
 import { ServiceId } from "@carbon/react/icons"
-import { EipId } from "../../api/eipId"
 import { FlowType } from "../../api/eipSchema"
 import { EipNodeData } from "../../api/flow"
+import { ChildNodeId, EipId } from "../../api/id"
 import getIconUrl from "../../singletons/eipIconCatalog"
-import { useGetChildren } from "../../singletons/store"
+import {
+  useAppActions,
+  useGetChildren,
+  useIsChildSelected,
+} from "../../singletons/store"
 import { toTitleCase } from "../../utils/titleTransform"
 import "./nodes.scss"
 
-interface ChildIconsProps {
-  childNames: string[]
+interface ChildrenIconsProps {
+  childrenNames: string[]
+  parentNodeId: string
+  parentEipId: EipId
 }
 
 const defaultNamespace = "integration"
@@ -49,40 +55,78 @@ const getClassNames = (props: NodeProps<EipNodeData>) => {
   return ["eip-node", roleClsName, selectedClsName].join(" ")
 }
 
-// TODO: Account for a large number of children
+const ChildIconButton = (props: ChildNodeId) => {
+  const { updateSelectedChildNode } = useAppActions()
+  const selected = useIsChildSelected(props)
+
+  const clsNames = ["child-icon-button"]
+  selected && clsNames.push("child-icon-button-focused")
+
+  return (
+    <Button
+      className={clsNames.join(" ")}
+      hasIconOnly
+      renderIcon={ServiceId}
+      iconDescription={props.name}
+      size="sm"
+      tooltipPosition="bottom"
+      kind="primary"
+      onClick={(ev) => {
+        ev.stopPropagation()
+        updateSelectedChildNode(props)
+      }}
+    />
+  )
+}
+
+// TODO: Account for a large number of children to be displayed
 // TODO: Create a mapping of children to icons (with a fallback option)
-const ChildIcons = ({ childNames }: ChildIconsProps) => (
-  <Stack className="eip-node-child" orientation="horizontal" gap={2}>
-    {childNames.map((name) => (
-      <Button
-        key={name}
-        className="nodrag child-icon-button"
-        hasIconOnly
-        renderIcon={ServiceId}
-        iconDescription={name}
-        size="sm"
-        tooltipPosition="bottom"
-        kind="primary"
-      />
-    ))}
-  </Stack>
-)
+const ChildrenIcons = ({
+  childrenNames,
+  parentNodeId,
+  parentEipId,
+}: ChildrenIconsProps) => {
+  return (
+    <Stack className="eip-node-children" orientation="horizontal" gap={2}>
+      {childrenNames.map((name) => (
+        <ChildIconButton
+          key={name}
+          name={name}
+          parentNodeId={parentNodeId}
+          parentEipId={parentEipId}
+        />
+      ))}
+    </Stack>
+  )
+}
 
 // TODO: Consider separating into Endpoint and Channel custom node types
 const EipNode = (props: NodeProps<EipNodeData>) => {
-  const children = useGetChildren(props.id)
+  // TODO: clearSelectedChildNode is used in too many different components. See if that can be reduced (or elimnated).
+  const { clearSelectedChildNode } = useAppActions()
+  const childrenState = useGetChildren(props.id)
+  const hasChildren = childrenState.length > 0
 
   const { data } = props
   const handles = renderHandles(data.flowType)
 
   return (
-    <Tile className={getClassNames(props)}>
+    <Tile
+      className={getClassNames(props)}
+      onClick={hasChildren ? () => clearSelectedChildNode() : undefined}
+    >
       <div>{getNamespacedTitle(data.eipId)}</div>
       <img className="eip-node-image" src={getIconUrl(data.eipId)} />
-      <div style={children ? { paddingBottom: "0.5rem" } : {}}>
+      <div style={hasChildren ? { paddingBottom: "0.5rem" } : {}}>
         <strong>{data.label}</strong>
       </div>
-      {children && <ChildIcons childNames={children} />}
+      {hasChildren && (
+        <ChildrenIcons
+          childrenNames={childrenState}
+          parentNodeId={props.id}
+          parentEipId={props.data.eipId}
+        />
+      )}
       {handles}
     </Tile>
   )

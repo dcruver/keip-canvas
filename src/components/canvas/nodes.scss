@@ -2,6 +2,9 @@
 @use "@carbon/layout";
 @use "@carbon/colors";
 
+$icon-button-focus-shadow: inset 0 0 0 1px themes.$focus,
+  inset 0 0 0 2px themes.$focus-inset;
+
 .eip-node {
   background-color: themes.$layer-02;
   padding: layout.$spacing-03;
@@ -18,15 +21,24 @@
     background-color: themes.$layer-hover-02;
   }
 
-  .eip-node-child {
+  .eip-node-children {
     position: absolute;
     left: layout.$spacing-02;
   }
 
-  .eip-node-child .child-icon-button {
+  .eip-node-children .child-icon-button {
     border-radius: 100%;
     padding: 0;
     align-items: center;
+  }
+
+  .eip-node-children .child-icon-button:focus {
+    box-shadow: $icon-button-focus-shadow;
+  }
+
+  // Used from React to control appearance of a focused button
+  .eip-node-children .child-icon-button-focused {
+    box-shadow: $icon-button-focus-shadow;
   }
 }
 

@@ -16,8 +16,8 @@ import {
   applyNodeChanges,
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
-import { EipId } from "../api/eipId"
 import { EIP_NODE_KEY, EipFlowNode } from "../api/flow"
+import { ChildNodeId, EipId, areChildIdsEqual } from "../api/id"
 import { lookupEipComponent } from "./eipDefinitions"
 
 interface FlowActions {
@@ -45,12 +45,17 @@ interface AppActions {
   ) => void
 
   updateChildConfig: (nodeId: string, children: string[]) => void
+
+  updateSelectedChildNode: (childId: ChildNodeId) => void
+
+  clearSelectedChildNode: () => void
 }
 
 interface AppStore {
   nodes: EipFlowNode[]
   edges: Edge[]
   eipConfigs: Record<string, EipNodeConfig>
+  selectedChildNode: ChildNodeId | null
 
   flowActions: FlowActions
   appActions: AppActions
@@ -60,6 +65,7 @@ const useStore = create<AppStore>()((set) => ({
   nodes: [],
   edges: [],
   eipConfigs: {},
+  selectedChildNode: null,
 
   flowActions: {
     onNodesChange: (changes: NodeChange[]) =>
@@ -106,15 +112,14 @@ const useStore = create<AppStore>()((set) => ({
         ),
       })),
 
-    updateAttributeConfig(nodeId, attrName, value) {
+    updateAttributeConfig: (nodeId, attrName, value) =>
       set((state) => {
         const configs = { ...state.eipConfigs }
         configs[nodeId].attributes[attrName] = value
         return { eipConfigs: configs }
-      })
-    },
+      }),
 
-    updateChildConfig(nodeId, children) {
+    updateChildConfig: (nodeId, children) =>
       set((state) => {
         const configs = { ...state.eipConfigs }
         configs[nodeId].children = children.reduce((accum, child) => {
@@ -123,8 +128,12 @@ const useStore = create<AppStore>()((set) => ({
         }, {} as Record<string, string>)
 
         return { eipConfigs: configs }
-      })
-    },
+      }),
+
+    updateSelectedChildNode: (childId) =>
+      set(() => ({ selectedChildNode: childId })),
+
+    clearSelectedChildNode: () => set(() => ({ selectedChildNode: null })),
   },
 }))
 
@@ -157,9 +166,6 @@ const removeDeletedNodeConfigs = (state: AppStore, changes: NodeChange[]) => {
   return updatedConfigs
 }
 
-export const useGetNode = (id: string): EipFlowNode | undefined =>
-  useStore(useShallow((state) => state.nodes.find((node) => node.id === id)))
-
 export const useNodeCount = () => useStore((state) => state.nodes.length)
 
 export const useGetAttributeValue = (id: string, attrName: string) =>
@@ -167,9 +173,22 @@ export const useGetAttributeValue = (id: string, attrName: string) =>
 
 export const useGetChildren = (id: string) =>
   useStore(
-    (state) =>
-      state.eipConfigs[id] && Object.keys(state.eipConfigs[id].children)
+    useShallow(
+      (state) =>
+        state.eipConfigs[id] && Object.keys(state.eipConfigs[id].children)
+    )
   )
+
+export const useGetSelectedChildNode = () =>
+  useStore(useShallow((state) => state.selectedChildNode))
+
+export const useIsChildSelected = (childId: ChildNodeId) =>
+  useStore((state) => {
+    if (state.selectedChildNode === null) {
+      return false
+    }
+    return areChildIdsEqual(state.selectedChildNode, childId)
+  })
 
 export const useFlowStore = () =>
   useStore(

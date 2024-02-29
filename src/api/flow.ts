@@ -1,5 +1,5 @@
 import { Node } from "reactflow"
-import { EipId } from "./eipId"
+import { EipId } from "./id"
 import { FlowType, Role } from "./eipSchema"
 
 export interface EipNodeData {

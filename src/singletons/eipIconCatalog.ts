@@ -1,4 +1,4 @@
-import { EipId } from "../api/eipId"
+import { EipId } from "../api/id"
 import channelImg from "../assets/eip/channel.png"
 import inboundAdapterImg from "../assets/eip/inbound_channel_adapter.png"
 import outboundAdapterImg from "../assets/eip/outbound_channel_adapter.png"

@@ -1,4 +1,4 @@
-import { EipId } from "../api/eipId"
+import { EipId } from "../api/id"
 import { EipComponent, EipSchema } from "../api/eipSchema"
 import eipDefintion from "../json/sampleComponents.json"
 
