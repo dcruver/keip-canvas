@@ -16,9 +16,12 @@ import {
   applyNodeChanges,
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
+import { AttributeTypes } from "../api/eipSchema"
 import { EIP_NODE_KEY, EipFlowNode } from "../api/flow"
 import { ChildNodeId, EipId, areChildIdsEqual } from "../api/id"
 import { lookupEipComponent } from "./eipDefinitions"
+
+export const ROOT_PARENT = "root"
 
 interface FlowActions {
   onNodesChange: OnNodesChange
@@ -26,11 +29,11 @@ interface FlowActions {
   onConnect: OnConnect
 }
 
-type AttributeTypes = string | boolean
+type AttributeMapping = Record<string, AttributeTypes>
 
 interface EipNodeConfig {
-  attributes: Record<string, AttributeTypes>
-  children: Record<string, string>
+  attributes: AttributeMapping
+  children: Record<string, AttributeMapping>
 }
 
 interface AppActions {
@@ -38,13 +41,14 @@ interface AppActions {
 
   updateNodeLabel: (nodeId: string, label: string) => void
 
-  updateAttributeConfig: (
-    nodeId: string,
+  updateEipAttribute: (
+    id: string,
+    parentId: string,
     attrName: string,
     value: AttributeTypes
   ) => void
 
-  updateChildConfig: (nodeId: string, children: string[]) => void
+  updateEnabledChildren: (nodeId: string, children: string[]) => void
 
   updateSelectedChildNode: (childId: ChildNodeId) => void
 
@@ -54,7 +58,7 @@ interface AppActions {
 interface AppStore {
   nodes: EipFlowNode[]
   edges: Edge[]
-  eipConfigs: Record<string, EipNodeConfig>
+  eipNodeConfigs: Record<string, EipNodeConfig>
   selectedChildNode: ChildNodeId | null
 
   flowActions: FlowActions
@@ -64,7 +68,7 @@ interface AppStore {
 const useStore = create<AppStore>()((set) => ({
   nodes: [],
   edges: [],
-  eipConfigs: {},
+  eipNodeConfigs: {},
   selectedChildNode: null,
 
   flowActions: {
@@ -76,7 +80,7 @@ const useStore = create<AppStore>()((set) => ({
 
         const updatedEipConfigs = removeDeletedNodeConfigs(state, changes)
         if (updatedEipConfigs) {
-          updates.eipConfigs = updatedEipConfigs
+          updates.eipNodeConfigs = updatedEipConfigs
         }
 
         return updates
@@ -99,8 +103,8 @@ const useStore = create<AppStore>()((set) => ({
         const node = newNode(eipId, position)
         return {
           nodes: [...state.nodes, node],
-          eipConfigs: {
-            ...state.eipConfigs,
+          eipNodeConfigs: {
+            ...state.eipNodeConfigs,
             [node.id]: { attributes: {}, children: {} },
           },
         }
@@ -112,22 +116,26 @@ const useStore = create<AppStore>()((set) => ({
         ),
       })),
 
-    updateAttributeConfig: (nodeId, attrName, value) =>
+    updateEipAttribute: (id, parentId, attrName, value) =>
       set((state) => {
-        const configs = { ...state.eipConfigs }
-        configs[nodeId].attributes[attrName] = value
-        return { eipConfigs: configs }
+        const configs = { ...state.eipNodeConfigs }
+        if (parentId === ROOT_PARENT) {
+          configs[id].attributes[attrName] = value
+        } else {
+          configs[parentId].children[id][attrName] = value
+        }
+        return { eipNodeConfigs: configs }
       }),
 
-    updateChildConfig: (nodeId, children) =>
+    updateEnabledChildren: (nodeId, children) =>
       set((state) => {
-        const configs = { ...state.eipConfigs }
+        const configs = { ...state.eipNodeConfigs }
         configs[nodeId].children = children.reduce((accum, child) => {
-          accum[child] = ""
+          accum[child] = {}
           return accum
-        }, {} as Record<string, string>)
+        }, {} as Record<string, AttributeMapping>)
 
-        return { eipConfigs: configs }
+        return { eipNodeConfigs: configs }
       }),
 
     updateSelectedChildNode: (childId) =>
@@ -158,24 +166,36 @@ const removeDeletedNodeConfigs = (state: AppStore, changes: NodeChange[]) => {
   const deletes: NodeRemoveChange[] = changes.filter(
     (c) => c.type === "remove"
   ) as NodeRemoveChange[]
+
   if (deletes.length === 0) {
     return null
   }
-  const updatedConfigs = { ...state.eipConfigs }
+
+  const updatedConfigs = { ...state.eipNodeConfigs }
   deletes.forEach((c) => delete updatedConfigs[c.id])
   return updatedConfigs
 }
 
 export const useNodeCount = () => useStore((state) => state.nodes.length)
 
-export const useGetAttributeValue = (id: string, attrName: string) =>
-  useStore((state) => state.eipConfigs[id]?.attributes[attrName])
+export const useGetEipAttribute = (
+  id: string,
+  parentId: string,
+  attrName: string
+) =>
+  useStore((state) => {
+    if (parentId === ROOT_PARENT) {
+      return state.eipNodeConfigs[id]?.attributes[attrName]
+    }
+    return state.eipNodeConfigs[parentId]?.children[id][attrName]
+  })
 
 export const useGetChildren = (id: string) =>
   useStore(
-    useShallow(
-      (state) =>
-        state.eipConfigs[id] && Object.keys(state.eipConfigs[id].children)
+    useShallow((state) =>
+      state.eipNodeConfigs[id]
+        ? Object.keys(state.eipNodeConfigs[id].children)
+        : []
     )
   )
 

@@ -81,20 +81,11 @@ const ChildIconButton = (props: ChildNodeId) => {
 
 // TODO: Account for a large number of children to be displayed
 // TODO: Create a mapping of children to icons (with a fallback option)
-const ChildrenIcons = ({
-  childrenNames,
-  parentNodeId,
-  parentEipId,
-}: ChildrenIconsProps) => {
+const ChildrenIcons = ({ childrenNames, parentNodeId }: ChildrenIconsProps) => {
   return (
     <Stack className="eip-node-children" orientation="horizontal" gap={2}>
       {childrenNames.map((name) => (
-        <ChildIconButton
-          key={name}
-          name={name}
-          parentNodeId={parentNodeId}
-          parentEipId={parentEipId}
-        />
+        <ChildIconButton key={name} name={name} parentNodeId={parentNodeId} />
       ))}
     </Stack>
   )

@@ -19,7 +19,7 @@ import {
   useMemo,
 } from "react"
 import { Attribute } from "../../api/eipSchema"
-import { useAppActions, useGetAttributeValue } from "../../singletons/store"
+import { useAppActions, useGetEipAttribute } from "../../singletons/store"
 import debounce from "../../utils/debounce"
 
 interface DescriptionWrapperProps {
@@ -30,26 +30,30 @@ interface DescriptionWrapperProps {
 
 interface AttributeInputFactoryProps {
   attr: Attribute
-  nodeId: string
+  id: string
+  parentId: string
 }
 
 interface AttributeInputProps<T> {
+  id: string
+  parentId: string
   attr: Attribute
-  nodeId: string
   attrValue: T
 }
 
 interface AttributeFormProps {
   attrs: Attribute[]
-  nodeId: string
+  id: string
+  parentId: string
 }
 
 const AttributeSelectInput = ({
-  nodeId,
   attr,
   attrValue,
+  id,
+  parentId,
 }: AttributeInputProps<string>) => {
-  const { updateAttributeConfig } = useAppActions()
+  const { updateEipAttribute } = useAppActions()
   const emptySelect = ""
   const options = useMemo(
     () =>
@@ -60,7 +64,7 @@ const AttributeSelectInput = ({
   )
 
   const handleSelect = (ev: ChangeEvent<HTMLSelectElement>) =>
-    updateAttributeConfig(nodeId, attr.name, ev.target.value)
+    updateEipAttribute(id, parentId, attr.name, ev.target.value)
 
   return (
     <DescriptionTooltipWrapper id={attr.name} description={attr.description}>
@@ -80,14 +84,15 @@ const AttributeSelectInput = ({
 }
 
 const AttributeBoolInput = ({
-  nodeId,
   attr,
   attrValue,
+  id,
+  parentId,
 }: AttributeInputProps<boolean>) => {
-  const { updateAttributeConfig } = useAppActions()
+  const { updateEipAttribute } = useAppActions()
 
   const handleToggle = (checked: boolean) =>
-    updateAttributeConfig(nodeId, attr.name, checked)
+    updateEipAttribute(id, parentId, attr.name, checked)
 
   return (
     <DescriptionTooltipWrapper id={attr.name} description={attr.description}>
@@ -111,19 +116,20 @@ const getDefaultStr = (attr: Attribute) =>
 
 const AttributeTextInput = ({
   attr,
-  nodeId,
   attrValue,
+  id,
+  parentId,
 }: AttributeInputProps<string>) => {
-  const { updateAttributeConfig } = useAppActions()
+  const { updateEipAttribute } = useAppActions()
 
   const handleTextUpdates = useMemo(
     () =>
       debounce(
         (ev: ChangeEvent<HTMLInputElement>) =>
-          updateAttributeConfig(nodeId, attr.name, ev.target.value),
+          updateEipAttribute(id, parentId, attr.name, ev.target.value),
         1000
       ),
-    [nodeId, attr, updateAttributeConfig]
+    [id, parentId, attr.name, updateEipAttribute]
   )
 
   return (
@@ -177,7 +183,12 @@ const DescriptionTooltipWrapper = (props: DescriptionWrapperProps) => {
 }
 
 const AttributeInput = (props: AttributeInputFactoryProps) => {
-  const attrValue = useGetAttributeValue(props.nodeId, props.attr.name)
+  const attrValue = useGetEipAttribute(
+    props.id,
+    props.parentId,
+    props.attr.name
+  )
+
   switch (props.attr.type) {
     case "string":
       if (props.attr.restriction?.enum) {
@@ -208,11 +219,7 @@ const AttributeConfigForm = (props: AttributeFormProps) => {
           <AccordionItem title="Required" open>
             <Stack gap={6} className={addPadding}>
               {required.map((attr) => (
-                <AttributeInput
-                  key={attr.name}
-                  attr={attr}
-                  nodeId={props.nodeId}
-                />
+                <AttributeInput {...props} key={attr.name} attr={attr} />
               ))}
             </Stack>
           </AccordionItem>
@@ -221,11 +228,7 @@ const AttributeConfigForm = (props: AttributeFormProps) => {
           <AccordionItem title="Optional">
             <Stack gap={6} className={addPadding}>
               {optional.map((attr) => (
-                <AttributeInput
-                  key={attr.name}
-                  attr={attr}
-                  nodeId={props.nodeId}
-                />
+                <AttributeInput {...props} key={attr.name} attr={attr} />
               ))}
             </Stack>
           </AccordionItem>

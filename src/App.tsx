@@ -3,7 +3,7 @@ import { Content, Header, HeaderName } from "@carbon/react"
 import "./styles.scss"
 
 import FlowCanvas from "./components/canvas/FlowCanvas"
-import NodeConfigPanel from "./components/config-panel/NodeConfigForm"
+import EipConfigSidePanel from "./components/config-panel/EipConfigSidePanel"
 import NodeChooserPanel from "./components/draggable-panel/NodeChooserPanel"
 
 const App = () => (
@@ -20,7 +20,7 @@ const App = () => (
       <FlowCanvas />
     </Content>
 
-    <NodeConfigPanel />
+    <EipConfigSidePanel />
   </>
 )
 

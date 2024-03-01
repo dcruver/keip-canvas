@@ -77,13 +77,13 @@ const ChildrenSingleSelection = ({
   )
 }
 
-// TODO: Handle multiple child occurences.
-const ChildrenConfigs = ({ nodeId, eipChildren }: ChildrenConfigProps) => {
-  const { updateChildConfig } = useAppActions()
+// TODO: Handle multiple occurences of the same child type.
+const ChildSelector = ({ nodeId, eipChildren }: ChildrenConfigProps) => {
+  const { updateEnabledChildren } = useAppActions()
   const childrenState = useGetChildren(nodeId)
 
   const updateChildrenState = (updates: string[]) =>
-    updateChildConfig(nodeId, updates)
+    updateEnabledChildren(nodeId, updates)
 
   const sortedNames = eipChildren.elements.map((c) => c.name).sort()
 
@@ -106,4 +106,4 @@ const ChildrenConfigs = ({ nodeId, eipChildren }: ChildrenConfigProps) => {
   )
 }
 
-export default ChildrenConfigs
+export default ChildSelector

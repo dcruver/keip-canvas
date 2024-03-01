@@ -2,6 +2,8 @@ interface Restriction {
   enum?: string[]
 }
 
+export type AttributeTypes = string | boolean
+
 export interface Attribute {
   name: string
   type: "string" | "boolean"
