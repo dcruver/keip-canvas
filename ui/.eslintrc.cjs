@@ -23,6 +23,7 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    "@typescript-eslint/switch-exhaustiveness-check": "error",
   },
   settings: {
     react: {
