@@ -9,7 +9,7 @@ import { useAppActions, useGetSelectedChildNode } from "../../singletons/store"
 import ChildNodeConfig from "./ChildNodeConfig"
 import RootNodeConfig from "./RootNodeConfig"
 
-const flowControlledAttributes = new Set(["id", "channel"])
+const flowControlledAttributes = new Set(["id", "channel", "input-channel", "output-channel"])
 
 const getConfigurableAttributes = (attrs: Attribute[] | undefined) => {
   return attrs
@@ -36,7 +36,7 @@ const EipConfigSidePanel = () => {
   let sidePanelContent
   // TODO: Simplify conditionals
   if (selectedChild && selectedNode && eipComponent) {
-    const childElement = eipComponent.children!.elements.find(
+    const childElement = eipComponent.childGroup!.children.find(
       (e) => e.name === selectedChild.name
     )!
     const configurableAttrs = getConfigurableAttributes(childElement.attributes)
@@ -46,7 +46,7 @@ const EipConfigSidePanel = () => {
         childId={selectedChild}
         parentName={eipComponent.name}
         attributes={configurableAttrs}
-        hasChildren={Boolean(childElement?.children)}
+        hasChildren={Boolean(childElement?.childGroup)}
       />
     )
   } else if (selectedNode && eipComponent) {
@@ -57,7 +57,7 @@ const EipConfigSidePanel = () => {
         key={selectedNode.id}
         node={selectedNode}
         attributes={configurableAttrs}
-        eipChildren={eipComponent.children}
+        childGroup={eipComponent.childGroup}
       />
     )
   } else {

@@ -1,12 +1,15 @@
+type RestrictionType = "enum"
+
 interface Restriction {
-  enum?: string[]
+  type: RestrictionType
+  values?: string[]
 }
 
-export type AttributeTypes = string | boolean
+export type AttributeTypes = string | boolean | number
 
 export interface Attribute {
   name: string
-  type: "string" | "boolean"
+  type: "string" | "boolean" | "number"
   description?: string
   default?: string | number | boolean
   required?: boolean
@@ -17,21 +20,22 @@ export type FlowType = "source" | "sink" | "passthru"
 
 export type Role = "endpoint" | "channel"
 
-export interface EipChildGroup {
-  indicator: "all" | "choice" | "sequence"
-  elements: EipElement[]
+interface Occurrence {
+  min?: number
+  max?: number
 }
 
 interface EipElement {
   name: string
   description?: string
   attributes?: Attribute[]
-  children?: EipChildGroup
+  childGroup?: EipChildGroup
 }
 
-interface Occurrence {
-  min?: number
-  max?: number | "unbounded"
+export interface EipChildGroup {
+  indicator: "all" | "choice" | "sequence"
+  children: EipChildElement[]
+  occurrence?: Occurrence
 }
 
 export interface EipChildElement extends EipElement {

@@ -4,7 +4,7 @@ import { useAppActions, useGetChildren } from "../../singletons/store"
 
 interface ChildrenConfigProps {
   nodeId: string
-  eipChildren: EipChildGroup
+  childGroup: EipChildGroup
 }
 
 interface ChildrenInputProps {
@@ -78,18 +78,18 @@ const ChildrenSingleSelection = ({
 }
 
 // TODO: Handle multiple occurences of the same child type.
-const ChildSelector = ({ nodeId, eipChildren }: ChildrenConfigProps) => {
+const ChildSelector = ({ nodeId, childGroup }: ChildrenConfigProps) => {
   const { updateEnabledChildren } = useAppActions()
   const childrenState = useGetChildren(nodeId)
 
   const updateChildrenState = (updates: string[]) =>
     updateEnabledChildren(nodeId, updates)
 
-  const sortedNames = eipChildren.elements.map((c) => c.name).sort()
+  const sortedNames = childGroup.children.map((c) => c.name).sort()
 
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
-      {eipChildren.indicator === "choice" ? (
+      {childGroup.indicator === "choice" ? (
         <ChildrenSingleSelection
           childrenOptions={sortedNames}
           childrenState={childrenState}

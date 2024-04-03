@@ -1,6 +1,6 @@
-import { EipId } from "../api/id"
 import { EipComponent, EipSchema } from "../api/eipSchema"
-import eipDefintion from "../json/sampleComponents.json"
+import { EipId } from "../api/id"
+import eipDefintion from "../json/springIntegrationEipSchema.json"
 
 // TODO: Validate that the parsed JSON matches the schema type
 export const EIP_COMPONENTS: Readonly<EipSchema> = eipDefintion as EipSchema

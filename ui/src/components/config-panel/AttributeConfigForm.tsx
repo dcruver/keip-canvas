@@ -58,8 +58,8 @@ const AttributeSelectInput = ({
   const options = useMemo(
     () =>
       attr.default
-        ? attr.restriction!.enum!
-        : [emptySelect, ...attr.restriction!.enum!],
+        ? attr.restriction!.values!
+        : [emptySelect, ...attr.restriction!.values!],
     [attr.restriction, attr.default]
   )
 
@@ -190,8 +190,10 @@ const AttributeInput = (props: AttributeInputFactoryProps) => {
   )
 
   switch (props.attr.type) {
+    // TODO: Handle number types with more specific input components (e.g. NumberInput, Slider).
+    case "number":
     case "string":
-      if (props.attr.restriction?.enum) {
+      if (props.attr.restriction?.values) {
         return (
           <AttributeSelectInput {...props} attrValue={attrValue as string} />
         )
@@ -200,9 +202,6 @@ const AttributeInput = (props: AttributeInputFactoryProps) => {
 
     case "boolean":
       return <AttributeBoolInput {...props} attrValue={attrValue as boolean} />
-
-    default:
-      console.error("unhandled attribute input type")
   }
 }
 

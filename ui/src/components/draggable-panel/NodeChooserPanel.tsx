@@ -8,8 +8,8 @@ import {
 
 import { useEffect, useState } from "react"
 import { DragPreviewImage, useDrag } from "react-dnd"
-import { EipId } from "../../api/id"
 import { EipComponent } from "../../api/eipSchema"
+import { EipId } from "../../api/id"
 import { EIP_COMPONENTS } from "../../singletons/eipDefinitions"
 import getIconUrl from "../../singletons/eipIconCatalog"
 import { useNodeCount } from "../../singletons/store"
@@ -64,7 +64,7 @@ const EipBlockCollection = ({
   ))
 
   return (
-    <SideNavMenu title={toTitleCase(namespace)} large defaultExpanded>
+    <SideNavMenu title={toTitleCase(namespace)} large>
       {eipItems}
     </SideNavMenu>
   )

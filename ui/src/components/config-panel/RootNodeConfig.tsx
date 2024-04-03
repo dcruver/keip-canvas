@@ -9,7 +9,7 @@ import ConfigurationInputTabs from "./ConfigurationTabs"
 interface PanelContentProps {
   node: EipFlowNode
   attributes: Attribute[]
-  eipChildren?: EipChildGroup
+  childGroup?: EipChildGroup
 }
 
 const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
@@ -42,13 +42,13 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
 const RootNodeConfig = ({
   node,
   attributes,
-  eipChildren,
+  childGroup,
 }: PanelContentProps) => (
   <Stack gap={8}>
     <NodeIdentifierInputs node={node} />
     <ConfigurationInputTabs
       hasAttributes={attributes.length > 0}
-      hasChildren={Boolean(eipChildren && eipChildren.elements.length > 0)}
+      hasChildren={Boolean(childGroup && childGroup.children.length > 0)}
       attributesForm={
         <AttributeConfigForm
           id={node.id}
@@ -57,7 +57,7 @@ const RootNodeConfig = ({
         />
       }
       childrenForm={
-        <ChildSelector nodeId={node.id} eipChildren={eipChildren!} />
+        <ChildSelector nodeId={node.id} childGroup={childGroup!} />
       }
     />
   </Stack>
