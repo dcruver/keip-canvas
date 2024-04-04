@@ -12,8 +12,8 @@ interface ConfigurationTabProps {
 // Workaround for 'TabList' component not filtering out null-like children.
 const getTabs = (hasAttributes: boolean, hasChildren: boolean) => {
   const tabList = [] as ReactNode[]
-  hasAttributes && tabList.push(<Tab>Attributes</Tab>)
-  hasChildren && tabList.push(<Tab>Children</Tab>)
+  hasAttributes && tabList.push(<Tab key="attributes">Attributes</Tab>)
+  hasChildren && tabList.push(<Tab key="children">Children</Tab>)
   return tabList
 }
 
@@ -27,11 +27,11 @@ const getTabPanels = ({
   const tabPanels = [] as ReactNode[]
   hasAttributes &&
     tabPanels.push(
-      <TabPanel className="side-panel-unpadded-container">
+      <TabPanel key="attributes" className="side-panel-unpadded-container">
         {attributesForm}
       </TabPanel>
     )
-  hasChildren && tabPanels.push(<TabPanel>{childrenForm}</TabPanel>)
+  hasChildren && tabPanels.push(<TabPanel key="children">{childrenForm}</TabPanel>)
   return tabPanels
 }
 

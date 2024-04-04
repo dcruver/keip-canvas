@@ -53,6 +53,14 @@
 
   .eip-menu-item {
     cursor: grab;
+    block-size: 3rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .eip-menu-item:hover {
+    background-color: themes.$background-hover;
   }
 
   .eip-item-wrapper {
@@ -60,6 +68,7 @@
     align-items: center;
     column-gap: 1rem;
     text-wrap: wrap;
+    @include type.type-style("label-02");
   }
 
   .eip-item-image {
@@ -70,5 +79,22 @@
   .search-bar-container {
     margin-top: 1rem;
     padding: 1rem;
+  }
+
+  .eip-namespace-list {
+    overflow-y: auto;
+  }
+
+  .cds--accordion__title {
+    @include type.type-style("heading-compact-01");
+  }
+
+  .cds--accordion__wrapper {
+    padding-block-start: 0;
+    padding-block-end: 0.5rem;
+  }
+
+  .cds--accordion__content {
+    padding-inline-end: 0;
   }
 }

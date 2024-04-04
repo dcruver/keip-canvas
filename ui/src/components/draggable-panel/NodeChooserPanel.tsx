@@ -1,8 +1,8 @@
 import {
+  Accordion,
+  AccordionItem,
   Search,
   SideNav,
-  SideNavItems,
-  SideNavMenu,
   SideNavMenuItem,
 } from "@carbon/react"
 
@@ -16,14 +16,20 @@ import { useNodeCount } from "../../singletons/store"
 import { toTitleCase } from "../../utils/titleTransform"
 import { DragTypes } from "./dragTypes"
 
+interface Namespace {
+  name: string
+  components: EipComponent[]
+}
+
 interface EipItemProps {
   eipId: EipId
 }
 
 interface EipBlockCollectionProps {
-  namespace: string
-  components: EipComponent[]
-  searchFilter?: string
+  namespace: Namespace
+  expandedNamespace: string
+  handleExpand: (isExpanded: boolean) => void
+  allExpanded: boolean
 }
 
 // TODO: Show description docs on hover
@@ -50,44 +56,71 @@ const EipItem = ({ eipId }: EipItemProps) => {
   )
 }
 
-const EipBlockCollection = ({
+const EipNamespaceCollection = ({
   namespace,
-  components,
-  searchFilter,
+  expandedNamespace,
+  handleExpand,
+  allExpanded,
 }: EipBlockCollectionProps) => {
-  const filtered = searchFilter
-    ? components.filter((c) => c.name.toLowerCase().includes(searchFilter))
-    : components
-
-  filtered.sort((a, b) => a.name.localeCompare(b.name))
-
-  const eipItems = filtered.map((c) => (
-    <EipItem key={c.name} eipId={{ namespace, name: c.name }} />
+  const eipItems = namespace.components.map((c) => (
+    <EipItem key={c.name} eipId={{ namespace: namespace.name, name: c.name }} />
   ))
 
   return (
-    <SideNavMenu title={toTitleCase(namespace)} large>
-      {eipItems}
-    </SideNavMenu>
+    <AccordionItem
+      title={toTitleCase(namespace.name)}
+      open={allExpanded || expandedNamespace === namespace.name}
+      onHeadingClick={({ isOpen }) => handleExpand(isOpen)}
+    >
+      <ul>{eipItems}</ul>
+    </AccordionItem>
+  )
+}
+
+const namespacesToDisplay = (
+  entries: [string, EipComponent[]][],
+  searchTerm: string
+): Namespace[] => {
+  const withFilteredComponents = entries.map(([namespace, components]) => {
+    const filtered = searchTerm
+      ? components.filter((c) => c.name.toLowerCase().includes(searchTerm))
+      : components
+
+    filtered.sort((a, b) => a.name.localeCompare(b.name))
+    return { name: namespace, components: filtered }
+  })
+
+  return withFilteredComponents.filter(
+    ({ components }) => components.length > 0
   )
 }
 
 const NodeChooserPanel = () => {
   const [searchTerm, setSearchTerm] = useState("")
+  const [expandedNamespace, setExpandedNamespace] = useState("")
   const nodeCount = useNodeCount()
 
   useEffect(() => setSearchTerm(""), [nodeCount])
 
-  const collections = Object.entries(EIP_COMPONENTS).map(
-    ([namespace, components]) => (
-      <EipBlockCollection
-        key={namespace}
-        namespace={namespace}
-        components={components}
-        searchFilter={searchTerm}
-      />
-    )
-  )
+  const resetExpandedNamespace = () => {
+    if (expandedNamespace !== "" && searchTerm.length > 0) {
+      setExpandedNamespace("")
+    }
+  }
+
+  const collections = namespacesToDisplay(
+    Object.entries(EIP_COMPONENTS),
+    searchTerm
+  ).map((ns) => (
+    <EipNamespaceCollection
+      key={ns.name}
+      namespace={ns}
+      expandedNamespace={expandedNamespace}
+      handleExpand={(isExpanded) => isExpanded && setExpandedNamespace(ns.name)}
+      allExpanded={searchTerm.length > 0}
+    />
+  ))
+
   return (
     <SideNav
       className="node-chooser-panel"
@@ -100,10 +133,16 @@ const NodeChooserPanel = () => {
         <Search
           labelText="Narrow component selections"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value)
+            resetExpandedNamespace()
+          }}
         />
       </div>
-      <SideNavItems>{collections}</SideNavItems>
+
+      <Accordion className="eip-namespace-list" size="lg" isFlush>
+        {collections}
+      </Accordion>
     </SideNav>
   )
 }
