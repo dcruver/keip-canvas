@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="21.904mm" height="5.5813mm" version="1.1" viewBox="0 0 21.904 5.5813" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <marker id="TriangleInS-3" overflow="visible" orient="auto">
+   <path transform="scale(-.2)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+  <marker id="TriangleOutS-0" overflow="visible" orient="auto">
+   <path transform="scale(.2)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+  <marker id="marker2752-0-3-1-2" overflow="visible" orient="auto">
+   <path transform="scale(.8)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+  <marker id="marker2752-0-1-5-9" overflow="visible" orient="auto">
+   <path transform="scale(.8)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+ </defs>
+ <g transform="translate(-102.24 -133.16)">
+  <path d="m110.75 133.98h5.0271v4.7625h-5.0271zm0.26458 0.26458v4.2333h4.4979v-4.2333z" stroke-width=".26458"/>
+  <path d="m102.24 136.37c1.8673-1e-3 3.7346-3e-3 5.6019-4e-3" fill="none" marker-end="url(#marker2752-0-3-1-2)" stroke="#000" stroke-width=".243"/>
+  <path d="m117.16 136.3c1.8673-1e-3 3.7346-3e-3 5.6019-4e-3" fill="none" marker-end="url(#marker2752-0-1-5-9)" stroke="#000" stroke-width=".243"/>
+  <g transform="translate(14.435 -4.5666)">
+   <ellipse cx="105.29" cy="138.92" rx="1.2987" ry="1.1358" fill="none" stroke="#000" stroke-linecap="round" stroke-width=".11626"/>
+   <g transform="matrix(1.0014 0 0 .93052 -.22815 9.7256)">
+    <path d="m105.39 137.91c-1e-3 0.33165-2e-3 0.66329-3e-3 0.99494 0.32077-3e-3 0.64153-7e-3 0.9623-0.0104" fill="none" marker-end="url(#TriangleOutS-0)" marker-start="url(#TriangleInS-3)" stroke="#000" stroke-width=".1"/>
+   </g>
+  </g>
+ </g>
+</svg>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="21.908mm" height="14.262mm" version="1.1" viewBox="0 0 21.908 14.262" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <marker id="TriangleInS-5" overflow="visible" orient="auto">
+   <path transform="scale(-.2)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+  <marker id="TriangleOutS-2" overflow="visible" orient="auto">
+   <path transform="scale(.2)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+  <marker id="marker2752-0-3-1-5" overflow="visible" orient="auto">
+   <path transform="scale(.8)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+  <marker id="marker2752-0-1-5-0" overflow="visible" orient="auto">
+   <path transform="scale(.8)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+  <marker id="marker2752-0-1-0-0-2" overflow="visible" orient="auto">
+   <path transform="scale(.8)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+ </defs>
+ <g transform="translate(-94.874 -130.1)">
+  <g transform="matrix(.87625 0 0 .87625 18.98 16.58)">
+   <g transform="translate(-3.3354 -1.7022)">
+    <ellipse cx="105.29" cy="138.92" rx="1.2987" ry="1.1358" fill="none" stroke="#000" stroke-linecap="round" stroke-width=".11626"/>
+    <g transform="matrix(1.0014 0 0 .93052 -.22815 9.7256)">
+     <path d="m105.39 137.91-3e-3 0.99494 0.9623-0.0104" fill="none" marker-end="url(#TriangleOutS-2)" marker-start="url(#TriangleInS-5)" stroke="#000" stroke-width=".1"/>
+    </g>
+   </g>
+  </g>
+  <path d="m103.35 130.1h5.0271v5.0271h-5.0271zm0.26458 0.26458v4.4979h4.4979v-4.4979z" stroke-width=".26458"/>
+  <path d="m103.39 139.6h5.0271v4.7625h-5.0271zm0.26458 0.26458v4.2333h4.4979v-4.2333z" stroke-width=".26458"/>
+  <g fill="none" stroke="#000">
+   <path d="m94.874 141.99c1.8673-1e-3 3.7346-3e-3 5.6019-4e-3" marker-end="url(#marker2752-0-3-1-5)" stroke-width=".243"/>
+   <path d="m109.8 141.92c1.8673-1e-3 3.7346-3e-3 5.6019-4e-3" marker-end="url(#marker2752-0-1-5-0)" stroke-width=".243"/>
+   <path d="m105.95 135.52c-0.0134 0.90276-0.0262 1.8055-0.0396 2.7083" marker-end="url(#marker2752-0-1-0-0-2)" stroke-width=".159"/>
+  </g>
+ </g>
+</svg>

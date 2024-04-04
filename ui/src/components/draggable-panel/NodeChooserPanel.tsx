@@ -59,6 +59,8 @@ const EipBlockCollection = ({
     ? components.filter((c) => c.name.toLowerCase().includes(searchFilter))
     : components
 
+  filtered.sort((a, b) => a.name.localeCompare(b.name))
+
   const eipItems = filtered.map((c) => (
     <EipItem key={c.name} eipId={{ namespace, name: c.name }} />
   ))

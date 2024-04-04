@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="30.956mm" height="9.525mm" version="1.1" viewBox="0 0 30.956 9.525" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <marker id="marker2752" overflow="visible" orient="auto">
+   <path transform="scale(.8)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+ </defs>
+ <g transform="translate(-98.289 -137.91)">
+  <path d="m119.46 137.91h9.7896v9.525h-9.7896v-9.525zm0.26458 0.26458v8.9958h9.2604v-8.9958h-9.2604z" stroke-width=".26458"/>
+  <path d="m98.289 140.29h4.7625v4.7625h-4.7625v-4.7625zm0.26458 0.26458v4.2333h4.2333v-4.2333h-4.2333z" stroke-width=".26458"/>
+  <path d="m107.77 142.63c1.8673-1e-3 3.7346-3e-3 5.6019-4e-3" fill="none" marker-end="url(#marker2752)" stroke="#000" stroke-width=".443"/>
+ </g>
+</svg>

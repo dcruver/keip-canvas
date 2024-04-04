@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generator: visioncortex VTracer 0.6.3 -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="106" height="60">
+<path d="M0,0 L5,0 L5,1 L6,1 L6,2 L4,2 L4,1 L0,1 Z " fill="#000000" transform="translate(51,0)"/>
+<path d="M0,0 L1,0 L1,1 L0,1 Z " fill="#000000" transform="translate(50,1)"/>
+<path d="M0,0 L1,0 L1,1 L0,1 Z " fill="#000000" transform="translate(49,2)"/>
+<path d="M0,0 L1,0 L1,1 L2,1 L2,7 L1,7 L1,2 L0,2 Z " fill="#000000" transform="translate(57,2)"/>
+<path d="M0,0 L1,0 L1,2 L0,2 Z " fill="#000000" transform="translate(48,3)"/>
+<path d="M0,0 L1,0 L1,2 L0,2 Z " fill="#000000" transform="translate(47,5)"/>
+<path d="M0,0 L1,0 L1,2 L2,2 L2,3 L3,3 L3,4 L1,4 L1,3 L0,3 Z " fill="#000000" transform="translate(48,7)"/>
+<path d="M0,0 L1,0 L1,1 L0,1 Z " fill="#000000" transform="translate(57,9)"/>
+<path d="M0,0 L1,0 L1,1 L0,1 Z " fill="#000000" transform="translate(56,10)"/>
+<path d="M0,0 L5,0 L5,1 L3,1 L3,13 L2,13 L2,14 L0,14 L0,13 L1,13 L1,12 L2,12 L2,1 L0,1 Z " fill="#000000" transform="translate(51,11)"/>
+<path d="M0,0 L2,0 L2,1 L3,1 L3,2 L1,2 L1,1 L0,1 Z " fill="#000000" transform="translate(54,24)"/>
+<path d="M0,0 L2,0 L2,1 L1,1 L1,2 L-1,2 L-1,1 L0,1 Z " fill="#000000" transform="translate(49,25)"/>
+<path d="M0,0 L2,0 L2,1 L0,1 Z " fill="#000000" transform="translate(57,26)"/>
+<path d="M0,0 L2,0 L2,1 L0,1 Z " fill="#000000" transform="translate(46,27)"/>
+<path d="M0,0 L1,0 L1,1 L0,1 Z " fill="#000000" transform="translate(59,27)"/>
+<path d="M0,0 L1,0 L1,1 L0,1 Z " fill="#000000" transform="translate(45,28)"/>
+<path d="M0,0 L2,0 L2,1 L0,1 Z " fill="#000000" transform="translate(60,28)"/>
+<path d="M0,0 L2,0 L2,1 L0,1 Z " fill="#000000" transform="translate(43,29)"/>
+<path d="M0,0 L2,0 L2,1 L3,1 L3,2 L1,2 L1,1 L0,1 Z " fill="#000000" transform="translate(62,29)"/>
+<path d="M0,0 L2,0 L2,1 L1,1 L1,2 L-1,2 L-1,1 L0,1 Z " fill="#000000" transform="translate(41,30)"/>
+<path d="M0,0 L2,0 L2,1 L27,1 L27,10 L41,10 L41,29 L11,29 L11,10 L26,10 L26,2 L2,2 L2,3 L0,3 L0,2 L1,2 L1,1 L0,1 Z M12,11 L12,28 L40,28 L40,11 Z " fill="#000000" transform="translate(65,31)"/>
+<path d="M0,0 L25,0 L25,1 L1,1 L1,9 L16,9 L16,27 L-14,27 L-14,9 L0,9 Z M-13,10 L-13,26 L15,26 L15,10 Z " fill="#000000" transform="translate(15,32)"/>
+<path d="M0,0 L2,0 L2,1 L3,1 L3,2 L1,2 L1,1 L0,1 Z " fill="#000000" transform="translate(40,33)"/>
+<path d="M0,0 L2,0 L2,1 L1,1 L1,2 L-1,2 L-1,1 L0,1 Z " fill="#000000" transform="translate(63,34)"/>
+<path d="M0,0 L2,0 L2,1 L0,1 Z " fill="#000000" transform="translate(43,35)"/>
+<path d="M0,0 L2,0 L2,1 L3,1 L3,2 L1,2 L1,1 L0,1 Z " fill="#000000" transform="translate(45,36)"/>
+<path d="M0,0 L2,0 L2,1 L0,1 Z " fill="#000000" transform="translate(60,36)"/>
+<path d="M0,0 L2,0 L2,1 L1,1 L1,2 L-1,2 L-1,1 L0,1 Z " fill="#000000" transform="translate(58,37)"/>
+<path d="M0,0 L2,0 L2,1 L0,1 Z " fill="#000000" transform="translate(48,38)"/>
+<path d="M0,0 L2,0 L2,1 L0,1 Z " fill="#000000" transform="translate(55,39)"/>
+<path d="M0,0 L2,0 L2,1 L3,1 L3,2 L4,2 L4,1 L5,1 L5,2 L18,2 L18,20 L-11,20 L-11,2 L1,2 L1,1 L0,1 Z M-10,3 L-10,19 L17,19 L17,3 Z " fill="#000000" transform="translate(50,39)"/>
+</svg>

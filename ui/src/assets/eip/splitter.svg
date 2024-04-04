@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="26.192mm" height="17.202mm" version="1.1" viewBox="0 0 26.192 17.202" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <marker id="marker2752-8-5" overflow="visible" orient="auto">
+   <path transform="scale(.8)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+  </marker>
+ </defs>
+ <g transform="translate(-115.28 -128.11)">
+  <g transform="translate(27.525 -1.6157)" stroke-width=".26458">
+   <path d="m108.92 129.73h5.0271v5.0271h-5.0271v-5.0271zm0.26458 0.26458v4.4979h4.4979v-4.4979h-4.4979z"/>
+   <path d="m87.755 136.08h5.0271v4.7625h-5.0271v-4.7625zm0.26458 0.26458v4.2333h4.4979v-4.2333h-4.4979z"/>
+   <path d="m108.92 136.08h5.0271v4.7625h-5.0271v-4.7625zm0.26458 0.26458v4.2333h4.4979v-4.2333h-4.4979z"/>
+   <path d="m108.92 142.17h5.0271v4.7625h-5.0271v-4.7625zm0.26458 0.26458v4.2333h4.4979v-4.2333h-4.4979z"/>
+  </g>
+  <path d="m124.27 136.62c1.8673-1e-3 3.7346-3e-3 5.6019-4e-3" fill="none" marker-end="url(#marker2752-8-5)" stroke="#000" stroke-width=".443"/>
+ </g>
+</svg>

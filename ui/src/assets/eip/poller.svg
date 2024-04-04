@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="19.278mm" height="9.951mm" version="1.1" viewBox="0 0 19.278 9.951" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <marker id="Arrow2Lend" overflow="visible" orient="auto">
+   <path transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="m8.7186 4.0337-10.926-4.0177 10.926-4.0177c-1.7455 2.3721-1.7354 5.6175-6e-7 8.0354z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-linejoin="round" stroke-width=".625"/>
+  </marker>
+ </defs>
+ <g transform="translate(-118.48 -97.787)">
+  <g>
+   <g transform="translate(.83468 -33.53)">
+    <path d="m127.94 132.23c-0.8735 0.1965-1.6839 0.67593-2.2832 1.4062a0.15 0.15 0 0 0 0.0215 0.21289 0.15 0.15 0 0 0 0.21094-0.0215c1.1124-1.3555 3.0022-1.7818 4.5879-1.0332 1.5857 0.74856 2.4568 2.4789 2.1172 4.1992-0.33963 1.7203-1.8035 2.9884-3.5547 3.0781-1.7512 0.0898-3.3378-1.0226-3.8516-2.6992a0.15 0.15 0 0 0-0.1875-0.0996 0.15 0.15 0 0 0-0.0996 0.1875c0.55362 1.8066 2.2673 3.0069 4.1543 2.9102s3.468-1.4646 3.834-3.3184c0.36597-1.8537-0.57646-3.7207-2.2852-4.5274-0.85434-0.40331-1.7906-0.49142-2.6641-0.29492z" color="#000000" stroke-linecap="round" stroke-linejoin="bevel"/>
+    <g fill-rule="evenodd">
+     <path d="m125.33 134.26 0.19465-1.183 0.92764 0.76125z" color="#000000"/>
+     <path d="m125.47 132.93-0.24023 1.4551 0.13086-0.0469 1.252-0.4707zm0.11328 0.29883 0.71289 0.58594-0.86328 0.32421z" color="#000000"/>
+    </g>
+   </g>
+   <rect x="120.13" y="97.834" width="17.575" height="9.857" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width=".094"/>
+   <path d="m118.48 102.43 7.1071-3e-3" fill="none" marker-end="url(#Arrow2Lend)" stroke="#000" stroke-width=".165"/>
+  </g>
+ </g>
+</svg>
