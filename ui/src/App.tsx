@@ -10,7 +10,7 @@ import "./styles.scss"
 import FlowCanvas from "./components/canvas/FlowCanvas"
 import EipConfigSidePanel from "./components/config-panel/EipConfigSidePanel"
 import NodeChooserPanel from "./components/draggable-panel/NodeChooserPanel"
-import ExportToPngButton from "./export/exportToPng"
+import ExportToPngButton from "./components/export/exportToPng"
 
 const App = () => (
   <>

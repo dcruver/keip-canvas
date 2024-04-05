@@ -3,7 +3,7 @@ import { HeaderGlobalAction } from "@carbon/react"
 import { layer01 } from "@carbon/themes"
 import { toPng } from "html-to-image"
 import { getNodesBounds, getViewportForBounds } from "reactflow"
-import { useGetNodes } from "../singletons/store"
+import { useGetNodes } from "../../singletons/store"
 
 const IMAGE_WIDTH = 1024
 const IMAGE_HEIGHT = 768
