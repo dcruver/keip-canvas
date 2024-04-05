@@ -1,10 +1,16 @@
-import { Content, Header, HeaderName } from "@carbon/react"
+import {
+  Content,
+  Header,
+  HeaderGlobalBar,
+  HeaderName
+} from "@carbon/react"
 
 import "./styles.scss"
 
 import FlowCanvas from "./components/canvas/FlowCanvas"
 import EipConfigSidePanel from "./components/config-panel/EipConfigSidePanel"
 import NodeChooserPanel from "./components/draggable-panel/NodeChooserPanel"
+import ExportToPngButton from "./export/exportToPng"
 
 const App = () => (
   <>
@@ -12,6 +18,9 @@ const App = () => (
       <HeaderName prefix="" className="header-main-text">
         Keip Canvas
       </HeaderName>
+      <HeaderGlobalBar className="header-action-bar">
+        <ExportToPngButton />
+      </HeaderGlobalBar>
     </Header>
 
     <NodeChooserPanel />

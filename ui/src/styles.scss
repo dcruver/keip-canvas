@@ -10,11 +10,19 @@
 
 .header-main {
   background-color: themes.$background-inverse;
-}
 
-.header-main-text {
-  color: themes.$text-inverse !important;
-  font-size: type.type-scale(3) !important;
+  .header-main-text {
+    color: themes.$text-inverse !important;
+    font-size: type.type-scale(3) !important;
+  }
+
+  .header-action-bar {
+    padding-right: layout.$spacing-05;
+  }
+
+  svg.header-icon {
+    fill: themes.$icon-inverse !important;
+  }
 }
 
 .canvas {

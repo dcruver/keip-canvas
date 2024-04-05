@@ -178,6 +178,8 @@ const removeDeletedNodeConfigs = (state: AppStore, changes: NodeChange[]) => {
 
 export const useNodeCount = () => useStore((state) => state.nodes.length)
 
+export const useGetNodes = () => useStore((state) => state.nodes)
+
 export const useGetEipAttribute = (
   id: string,
   parentId: string,
