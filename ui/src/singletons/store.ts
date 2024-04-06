@@ -1,4 +1,5 @@
 import { create } from "zustand"
+import { createJSONStorage, persist } from "zustand/middleware"
 
 import { nanoid } from "nanoid/non-secure"
 import {
@@ -23,7 +24,9 @@ import { lookupEipComponent } from "./eipDefinitions"
 
 export const ROOT_PARENT = "root"
 
-interface FlowActions {
+const NO_PERSIST = new Set(["appActions", "reactFlowActions"])
+
+interface ReactFlowActions {
   onNodesChange: OnNodesChange
   onEdgesChange: OnEdgesChange
   onConnect: OnConnect
@@ -53,6 +56,8 @@ interface AppActions {
   updateSelectedChildNode: (childId: ChildNodeId) => void
 
   clearSelectedChildNode: () => void
+
+  clearFlow: () => void
 }
 
 interface AppStore {
@@ -61,89 +66,110 @@ interface AppStore {
   eipNodeConfigs: Record<string, EipNodeConfig>
   selectedChildNode: ChildNodeId | null
 
-  flowActions: FlowActions
+  reactFlowActions: ReactFlowActions
   appActions: AppActions
 }
 
-const useStore = create<AppStore>()((set) => ({
-  nodes: [],
-  edges: [],
-  eipNodeConfigs: {},
-  selectedChildNode: null,
+// If app becomes too slow, might need to switch to async storage.
+const useStore = create<AppStore>()(
+  persist(
+    (set) => ({
+      nodes: [],
+      edges: [],
+      eipNodeConfigs: {},
+      selectedChildNode: null,
 
-  flowActions: {
-    onNodesChange: (changes: NodeChange[]) =>
-      set((state) => {
-        const updates: Partial<AppStore> = {
-          nodes: applyNodeChanges(changes, state.nodes),
-        }
+      reactFlowActions: {
+        onNodesChange: (changes: NodeChange[]) =>
+          set((state) => {
+            const updates: Partial<AppStore> = {
+              nodes: applyNodeChanges(changes, state.nodes),
+            }
 
-        const updatedEipConfigs = removeDeletedNodeConfigs(state, changes)
-        if (updatedEipConfigs) {
-          updates.eipNodeConfigs = updatedEipConfigs
-        }
+            const updatedEipConfigs = removeDeletedNodeConfigs(state, changes)
+            if (updatedEipConfigs) {
+              updates.eipNodeConfigs = updatedEipConfigs
+            }
 
-        return updates
-      }),
+            return updates
+          }),
 
-    onEdgesChange: (changes: EdgeChange[]) =>
-      set((state) => ({
-        edges: applyEdgeChanges(changes, state.edges),
-      })),
+        onEdgesChange: (changes: EdgeChange[]) =>
+          set((state) => ({
+            edges: applyEdgeChanges(changes, state.edges),
+          })),
 
-    onConnect: (connection: Connection) =>
-      set((state) => ({
-        edges: addEdge(connection, state.edges),
-      })),
-  },
+        onConnect: (connection: Connection) =>
+          set((state) => ({
+            edges: addEdge(connection, state.edges),
+          })),
+      },
 
-  appActions: {
-    createDroppedNode: (eipId, position) =>
-      set((state) => {
-        const node = newNode(eipId, position)
-        return {
-          nodes: [...state.nodes, node],
-          eipNodeConfigs: {
-            ...state.eipNodeConfigs,
-            [node.id]: { attributes: {}, children: {} },
-          },
-        }
-      }),
-    updateNodeLabel: (id, label) =>
-      set((state) => ({
-        nodes: state.nodes.map((node) =>
-          node.id === id ? { ...node, data: { ...node.data, label } } : node
+      appActions: {
+        createDroppedNode: (eipId, position) =>
+          set((state) => {
+            const node = newNode(eipId, position)
+            return {
+              nodes: [...state.nodes, node],
+              eipNodeConfigs: {
+                ...state.eipNodeConfigs,
+                [node.id]: { attributes: {}, children: {} },
+              },
+            }
+          }),
+        updateNodeLabel: (id, label) =>
+          set((state) => ({
+            nodes: state.nodes.map((node) =>
+              node.id === id ? { ...node, data: { ...node.data, label } } : node
+            ),
+          })),
+
+        updateEipAttribute: (id, parentId, attrName, value) =>
+          set((state) => {
+            const configs = { ...state.eipNodeConfigs }
+            if (parentId === ROOT_PARENT) {
+              configs[id].attributes[attrName] = value
+            } else {
+              configs[parentId].children[id][attrName] = value
+            }
+            return { eipNodeConfigs: configs }
+          }),
+
+        updateEnabledChildren: (nodeId, children) =>
+          set((state) => {
+            const configs = { ...state.eipNodeConfigs }
+            configs[nodeId].children = children.reduce((accum, child) => {
+              accum[child] = {}
+              return accum
+            }, {} as Record<string, AttributeMapping>)
+
+            return { eipNodeConfigs: configs }
+          }),
+
+        updateSelectedChildNode: (childId) =>
+          set(() => ({ selectedChildNode: childId })),
+
+        clearSelectedChildNode: () => set(() => ({ selectedChildNode: null })),
+
+        clearFlow: () =>
+          set(() => ({
+            nodes: [],
+            edges: [],
+            eipNodeConfigs: {},
+            selectedChildNode: null,
+          })),
+      },
+    }),
+    {
+      name: "eipFlow",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) =>
+        Object.fromEntries(
+          Object.entries(state).filter(([key]) => !NO_PERSIST.has(key))
         ),
-      })),
-
-    updateEipAttribute: (id, parentId, attrName, value) =>
-      set((state) => {
-        const configs = { ...state.eipNodeConfigs }
-        if (parentId === ROOT_PARENT) {
-          configs[id].attributes[attrName] = value
-        } else {
-          configs[parentId].children[id][attrName] = value
-        }
-        return { eipNodeConfigs: configs }
-      }),
-
-    updateEnabledChildren: (nodeId, children) =>
-      set((state) => {
-        const configs = { ...state.eipNodeConfigs }
-        configs[nodeId].children = children.reduce((accum, child) => {
-          accum[child] = {}
-          return accum
-        }, {} as Record<string, AttributeMapping>)
-
-        return { eipNodeConfigs: configs }
-      }),
-
-    updateSelectedChildNode: (childId) =>
-      set(() => ({ selectedChildNode: childId })),
-
-    clearSelectedChildNode: () => set(() => ({ selectedChildNode: null })),
-  },
-}))
+    }
+  )
+)
 
 const newNode = (eipId: EipId, position: XYPosition) => {
   const id = nanoid(10)
@@ -217,9 +243,9 @@ export const useFlowStore = () =>
     useShallow((state: AppStore) => ({
       nodes: state.nodes,
       edges: state.edges,
-      onNodesChange: state.flowActions.onNodesChange,
-      onEdgesChange: state.flowActions.onEdgesChange,
-      onConnect: state.flowActions.onConnect,
+      onNodesChange: state.reactFlowActions.onNodesChange,
+      onEdgesChange: state.reactFlowActions.onEdgesChange,
+      onConnect: state.reactFlowActions.onConnect,
     }))
   )
 

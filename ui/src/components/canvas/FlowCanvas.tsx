@@ -1,6 +1,7 @@
 import ReactFlow, {
   Background,
   BackgroundVariant,
+  ControlButton,
   Controls,
   useReactFlow,
 } from "reactflow"
@@ -9,6 +10,7 @@ import { useAppActions, useFlowStore } from "../../singletons/store"
 
 import "reactflow/dist/base.css"
 
+import { TrashCan } from "@carbon/icons-react"
 import { useDrop } from "react-dnd"
 import { EipId } from "../../api/id"
 import { DragTypes } from "../draggable-panel/dragTypes"
@@ -21,7 +23,7 @@ const nodeTypes = {
 const FlowCanvas = () => {
   const reactFlowInstance = useReactFlow()
   const flowStore = useFlowStore()
-  const { createDroppedNode, clearSelectedChildNode } = useAppActions()
+  const { createDroppedNode, clearSelectedChildNode, clearFlow } = useAppActions()
 
   const [, drop] = useDrop<EipId, unknown, unknown>(
     () => ({
@@ -51,7 +53,11 @@ const FlowCanvas = () => {
         onPaneClick={() => clearSelectedChildNode()}
         fitView
       >
-        <Controls />
+        <Controls>
+          <ControlButton title="clear" onClick={clearFlow}>
+            <TrashCan />
+          </ControlButton>
+        </Controls>
         {/* <MiniMap /> */}
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
