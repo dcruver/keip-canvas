@@ -64,12 +64,14 @@
 
   .chat-toolbar {
     background-color: themes.$layer-02;
+    box-shadow: 0 -1px 0 themes.$background-inverse;
   }
 
   .chat-history {
     flex: 2;
     min-height: 0;
     overflow-y: auto;
+    padding-left: layout.$spacing-06;
   }
 
   .chat-history-entry {
@@ -81,15 +83,16 @@
   .chat-input-container {
     display: flex;
     justify-content: space-between;
-    gap: layout.$spacing-05;
+    gap: 0;
     align-items: flex-end;
     padding: layout.$spacing-05;
-    flex: 1;
   }
 
   textarea#chat-input {
     @include type.type-style("body-compact-02");
     background-color: themes.$layer-02;
+    resize: none;
+    padding: 0.7875rem var(--cds-layout-density-padding-inline-local);
   }
 
   .chat-input-waiting {
