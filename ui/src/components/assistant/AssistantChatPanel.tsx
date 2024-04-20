@@ -11,7 +11,7 @@ import {
 } from "@carbon/react"
 import { CloseOutline, MachineLearning, Send } from "@carbon/react/icons"
 import { interactive } from "@carbon/themes"
-import { useState } from "react"
+import { forwardRef, useEffect, useRef, useState } from "react"
 import { useAppActions } from "../../singletons/store"
 import LlmClient from "./llmClient"
 
@@ -101,29 +101,39 @@ const getEntryColor = (source: ChatEntrySource) => {
   }
 }
 
-const ChatHistory = ({ entries, streamingResponse }: ChatHistoryProps) => {
-  const allEntries = streamingResponse
-    ? [...entries, { message: streamingResponse, source: "AI" } as ChatEntry]
-    : entries
+const ChatHistory = forwardRef<HTMLParagraphElement, ChatHistoryProps>(
+  (props, ref) => {
+    const allEntries = props.streamingResponse
+      ? [
+          ...props.entries,
+          { message: props.streamingResponse, source: "AI" } as ChatEntry,
+        ]
+      : props.entries
 
-  return (
-    <Tile className="chat-history">
-      <Stack gap={5}>
-        {allEntries.map((entry, idx) => (
-          <span
-            key={idx}
-            className="chat-history-entry"
-            style={getEntryColor(entry.source)}
-          >
-            <p>{entry.message}</p>
-          </span>
-        ))}
-      </Stack>
-    </Tile>
-  )
-}
+    return (
+      <Tile className="chat-history">
+        <Stack gap={5}>
+          {allEntries.map((entry, idx) => (
+            <span
+              key={idx}
+              className="chat-history-entry"
+              style={getEntryColor(entry.source)}
+            >
+              <p>{entry.message}</p>
+            </span>
+          ))}
+        </Stack>
+        {/* Dummy element to enable scrolling to bottom of history*/}
+        <p ref={ref} />
+      </Tile>
+    )
+  }
+)
+
+ChatHistory.displayName = "ChatHistory"
 
 const AssistantChatPanel = () => {
+  const chatHistoryEndRef = useRef<HTMLParagraphElement | null>(null)
   // TODO: Create a new action to set nodes/edges directly from object instead of JSON string.
   const { importFlowFromJson } = useAppActions()
   const [isOpen, setOpen] = useState(false)
@@ -147,6 +157,10 @@ const AssistantChatPanel = () => {
   }
 
   const display = isOpen ? { height: "30vh" } : { height: "2rem" }
+
+  useEffect(() => {
+    chatHistoryEndRef.current?.scrollIntoView()
+  }, [streamingResponse])
 
   // TODO: Can probably ditch Carbon's Toolbar
   return (
@@ -173,6 +187,7 @@ const AssistantChatPanel = () => {
           <ChatHistory
             entries={chatEntries}
             streamingResponse={streamingResponse}
+            ref={chatHistoryEndRef}
           />
           <ChatInput handleInput={sendPrompt} />
         </>
