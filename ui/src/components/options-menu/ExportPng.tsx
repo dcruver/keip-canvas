@@ -4,7 +4,7 @@ import { layer01 } from "@carbon/themes"
 import { toPng } from "html-to-image"
 import { forwardRef } from "react"
 import { getNodesBounds, getViewportForBounds } from "reactflow"
-import { useGetNodes } from "../../singletons/store"
+import { useAppActions, useGetNodes } from "../../singletons/store"
 
 const IMAGE_WIDTH = 1024
 const IMAGE_HEIGHT = 768
@@ -20,8 +20,10 @@ const downloadImage = (dataUrl: string) => {
 const ExportPng = forwardRef<HTMLElement>(
   (props: OverflowMenuItemProps, ref) => {
     const nodes = useGetNodes()
+    const { clearDiagramSelections } = useAppActions()
 
     const handleClick = () => {
+      clearDiagramSelections()
       const nodeBounds = getNodesBounds(nodes)
       const transform = getViewportForBounds(
         nodeBounds,

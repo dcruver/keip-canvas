@@ -58,6 +58,8 @@ interface AppActions {
 
   clearFlow: () => void
 
+  clearDiagramSelections: () => void
+
   importFlowFromJson: (json: string) => void
 }
 
@@ -158,6 +160,12 @@ const useStore = create<AppStore>()(
             edges: [],
             eipNodeConfigs: {},
             selectedChildNode: null,
+          })),
+
+        clearDiagramSelections: () =>
+          set((state) => ({
+            nodes: state.nodes.map((node) => ({ ...node, selected: false })),
+            edges: state.edges.map((edge) => ({ ...edge, selected: false })),
           })),
 
         importFlowFromJson: (json: string) =>
