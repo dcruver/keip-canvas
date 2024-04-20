@@ -33,6 +33,39 @@ interface ChatInputProps {
 
 const llmClient = new LlmClient()
 
+const logKeipAssistantStatus = (available: boolean) => {
+  if (available) {
+    console.log(
+      `Enable Keip Assistant: An LLM server is available at ${llmClient.serverBaseUrl}`
+    )
+  } else {
+    console.log(
+      `Disable Keip Assistant: Did not find an LLM server at ${llmClient.serverBaseUrl}`
+    )
+  }
+}
+
+const useLlmServerStatus = () => {
+  const [isAvailable, setIsAvailable] = useState(false)
+
+  useEffect(() => {
+    let abortPing: () => void
+    void (async () => {
+      const result = llmClient.ping()
+      abortPing = result.abort
+      const success = await result.success
+      logKeipAssistantStatus(success)
+      setIsAvailable(success)
+    })()
+
+    return () => {
+      abortPing && abortPing()
+    }
+  }, [])
+
+  return isAvailable
+}
+
 const ChatInput = ({ handleInput }: ChatInputProps) => {
   const [content, setContent] = useState("")
   const [isWaiting, setWaiting] = useState(false)
@@ -78,7 +111,7 @@ const ChatInput = ({ handleInput }: ChatInputProps) => {
             hasIconOnly
             iconDescription="cancel"
             renderIcon={() => <CloseOutline size={24} />}
-            onClick={() => llmClient.abort()}
+            onClick={() => llmClient.abortPrompt()}
           />
         </>
       ) : (
@@ -139,6 +172,7 @@ const AssistantChatPanel = () => {
   const [isOpen, setOpen] = useState(false)
   const [chatEntries, setChatEntries] = useState<ChatEntry[]>([])
   const [streamingResponse, setStreamingResponse] = useState("")
+  const isLlmServerAvailable = useLlmServerStatus()
 
   const handleStreamUpdate = (chunk: string) =>
     setStreamingResponse((prev) => prev + chunk)
@@ -174,6 +208,7 @@ const AssistantChatPanel = () => {
             kind="secondary"
             size="lg"
             onClick={() => setOpen((prev) => !prev)}
+            disabled={!isLlmServerAvailable}
           >
             <MachineLearning />
           </IconButton>

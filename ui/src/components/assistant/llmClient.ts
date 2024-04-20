@@ -21,10 +21,11 @@ interface PromptResponse {
 class LlmClient {
   private llm
   private abortCtrl
+  public serverBaseUrl = "http://localhost:11434"
 
   constructor() {
     this.llm = new Ollama({
-      baseUrl: "http://localhost:11434",
+      baseUrl: this.serverBaseUrl,
       maxRetries: 3,
       model: "mistral",
       format: "json",
@@ -68,8 +69,17 @@ class LlmClient {
     }
   }
 
-  public abort(): void {
+  public abortPrompt(): void {
     this.abortCtrl.abort()
+  }
+
+  public ping(): { success: Promise<boolean>; abort: () => void } {
+    const ctrl = new AbortController()
+    setTimeout(() => ctrl.abort(), 5000)
+    const success = fetch(this.serverBaseUrl, { signal: ctrl.signal })
+      .then((res) => res.ok)
+      .catch(() => false)
+    return { success: success, abort: () => ctrl.abort() }
   }
 
   private async generatePrompt() {
