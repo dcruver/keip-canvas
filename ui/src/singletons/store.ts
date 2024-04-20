@@ -36,12 +36,15 @@ type AttributeMapping = Record<string, AttributeTypes>
 interface EipNodeConfig {
   attributes: AttributeMapping
   children: Record<string, AttributeMapping>
+  description?: string
 }
 
 interface AppActions {
   createDroppedNode: (eipId: EipId, position: XYPosition) => void
 
   updateNodeLabel: (nodeId: string, label: string) => void
+
+  updateNodeDescription: (nodeId: string, description: string) => void
 
   updateEipAttribute: (
     id: string,
@@ -120,12 +123,20 @@ const useStore = create<AppStore>()(
               },
             }
           }),
+
         updateNodeLabel: (id, label) =>
           set((state) => ({
             nodes: state.nodes.map((node) =>
               node.id === id ? { ...node, data: { ...node.data, label } } : node
             ),
           })),
+
+        updateNodeDescription: (id, description) =>
+          set((state) => {
+            const configs = { ...state.eipNodeConfigs }
+            configs[id].description = description
+            return { eipNodeConfigs: configs }
+          }),
 
         updateEipAttribute: (id, parentId, attrName, value) =>
           set((state) => {
@@ -244,6 +255,9 @@ export const useSerializedStore = () =>
       eipNodeConfigs: state.eipNodeConfigs,
     })
   )
+
+export const useGetNodeDescription = (id: string) =>
+  useStore((state) => state.eipNodeConfigs[id]?.description)
 
 export const useGetEipAttribute = (
   id: string,

@@ -1,7 +1,13 @@
 import { Stack, TextArea, TextInput } from "@carbon/react"
+import { ChangeEvent, useMemo } from "react"
 import { Attribute, EipChildGroup } from "../../api/eipSchema"
 import { EipFlowNode } from "../../api/flow"
-import { ROOT_PARENT, useAppActions } from "../../singletons/store"
+import {
+  ROOT_PARENT,
+  useAppActions,
+  useGetNodeDescription,
+} from "../../singletons/store"
+import debounce from "../../utils/debounce"
 import AttributeConfigForm from "./AttributeConfigForm"
 import ChildSelector from "./ChildSelector"
 import ConfigurationInputTabs from "./ConfigurationTabs"
@@ -13,7 +19,19 @@ interface PanelContentProps {
 }
 
 const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
-  const { updateNodeLabel } = useAppActions()
+  const { updateNodeLabel, updateNodeDescription } = useAppActions()
+  const description = useGetNodeDescription(node.id)
+
+  const handleDescriptionUpdates = useMemo(
+    () =>
+      debounce(
+        (ev: ChangeEvent<HTMLTextAreaElement>) =>
+          updateNodeDescription(node.id, ev.target.value),
+        1000
+      ),
+    [node.id, updateNodeDescription]
+  )
+
   return (
     <Stack gap={6} className="side-panel-padded-container">
       <TextInput
@@ -34,6 +52,8 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
         helperText="Optional description of the selected node's behavior"
         enableCounter
         maxCount={600}
+        defaultValue={description}
+        onChange={handleDescriptionUpdates}
       ></TextArea>
     </Stack>
   )
@@ -56,9 +76,7 @@ const RootNodeConfig = ({
           attrs={attributes}
         />
       }
-      childrenForm={
-        <ChildSelector nodeId={node.id} childGroup={childGroup!} />
-      }
+      childrenForm={<ChildSelector nodeId={node.id} childGroup={childGroup!} />}
     />
   </Stack>
 )

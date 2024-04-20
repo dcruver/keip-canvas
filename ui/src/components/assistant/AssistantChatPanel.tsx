@@ -215,7 +215,6 @@ const AssistantChatPanel = () => {
         </TableToolbarContent>
       </TableToolbar>
 
-      {/* TODO: Ensure request is still processing if panel is collapsed */}
       {/* TODO: Display an error pop-up if LLM prompt fails  */}
       {isOpen && (
         <>
