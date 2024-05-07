@@ -1,27 +1,25 @@
 package com.octo.keip.schema.client;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-import org.apache.ws.commons.schema.XmlSchema;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.apache.ws.commons.schema.XmlSchemaCollection;
-import org.apache.ws.commons.schema.XmlSchemaImport;
-import org.apache.ws.commons.schema.XmlSchemaSerializer.XmlSchemaSerializerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /** Fetches remote XML schemas using HTTP and read them into an {@link XmlSchemaCollection}. */
 public class XmlSchemaHttpClient implements XmlSchemaClient {
@@ -31,19 +29,17 @@ public class XmlSchemaHttpClient implements XmlSchemaClient {
   private static final Duration CONNECTION_TIMEOUT = Duration.ofSeconds(20);
   private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(20);
 
-  private final Map<String, URI> additionalSchemaLocations;
-
-  private final Map<URI, XmlSchema> fetchedSchemas = new HashMap<>();
+  private final Map<String, URI> customSchemaLocations;
 
   private final HttpClient httpClient;
 
-  public XmlSchemaHttpClient(Map<String, URI> additionalSchemaLocations) {
-    this.additionalSchemaLocations = additionalSchemaLocations;
+  public XmlSchemaHttpClient(Map<String, URI> customSchemaLocations) {
+    this.customSchemaLocations = customSchemaLocations;
     this.httpClient = HttpClient.newBuilder().connectTimeout(CONNECTION_TIMEOUT).build();
   }
 
-  XmlSchemaHttpClient(HttpClient httpClient, Map<String, URI> additionalSchemaLocations) {
-    this.additionalSchemaLocations = additionalSchemaLocations;
+  XmlSchemaHttpClient(HttpClient httpClient, Map<String, URI> customSchemaLocations) {
+    this.customSchemaLocations = customSchemaLocations;
     this.httpClient = httpClient;
   }
 
@@ -58,10 +54,13 @@ public class XmlSchemaHttpClient implements XmlSchemaClient {
     HttpResponse<InputStream> response = httpClient.send(request, BodyHandlers.ofInputStream());
     if (response.statusCode() == 200) {
       var schemaCollection = new XmlSchemaCollection();
-      try (var reader = toReader(response.body())) {
-        schemaCollection.read(reader);
-        collectUnderDefinedImports(schemaCollection, targetNamespace);
+      try (var inputStream = response.body()) {
+        Document doc = toDomDocument(inputStream);
+        overwriteSchemaLocations(doc);
+        schemaCollection.read(doc);
         return schemaCollection;
+      } catch (ParserConfigurationException | SAXException e) {
+        throw new RuntimeException(e);
       }
     }
 
@@ -69,105 +68,30 @@ public class XmlSchemaHttpClient implements XmlSchemaClient {
     throw new RuntimeException("Failed to retrieve the target schema");
   }
 
-  /**
-   * Collect imported schemas that have no "schemaLocation" attribute defined. Instead, the
-   * locations are provided by a user-supplied configuration.
-   */
-  private void collectUnderDefinedImports(
-      XmlSchemaCollection schemaCollection, String targetNamespace) {
-    List<URI> fetchableImports =
-        namespaceToURI(getImportsWithNoLocation(schemaCollection, targetNamespace)).toList();
-
-    fetchableImports.stream()
-        .filter(fetchedSchemas::containsKey)
-        .forEach(uri -> collectCachedImports(schemaCollection, uri));
-
-    Stream<CompletableFuture<HttpResponse<InputStream>>> responseFutures =
-        fetchableImports.stream()
-            .filter(Predicate.not(fetchedSchemas::containsKey))
-            .map(uri -> fetchImports(schemaCollection, uri));
-
-    CompletableFuture.allOf(responseFutures.toArray(CompletableFuture[]::new)).join();
+  private Document toDomDocument(InputStream xmlStream)
+      throws ParserConfigurationException, IOException, SAXException {
+    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    dbf.setNamespaceAware(true);
+    DocumentBuilder builder = dbf.newDocumentBuilder();
+    return builder.parse(xmlStream);
   }
 
-  private void collectCachedImports(XmlSchemaCollection schemaCollection, URI importLocation) {
-    XmlSchema cached = fetchedSchemas.get(importLocation);
-    if (cached != null) {
-      try {
-        schemaCollection.read(cached.getSchemaDocument());
-      } catch (XmlSchemaSerializerException e) {
-        throw new RuntimeException(e);
+  /**
+   * Search all import elements in the schema and update any namespaces found in the {@link
+   * #customSchemaLocations} map to point to the custom schemaLocation.
+   */
+  private void overwriteSchemaLocations(Document doc) {
+    NodeList importedNodes =
+        doc.getElementsByTagNameNS("http://www.w3.org/2001/XMLSchema", "import");
+    for (int i = 0; i < importedNodes.getLength(); i++) {
+      Node node = importedNodes.item(i);
+      if (node.getNodeType() == Node.ELEMENT_NODE) {
+        Element el = (Element) node;
+        URI schemaLocation = this.customSchemaLocations.get(el.getAttribute("namespace"));
+        if (schemaLocation != null) {
+          el.setAttribute("schemaLocation", schemaLocation.toString());
+        }
       }
     }
-  }
-
-  private CompletableFuture<HttpResponse<InputStream>> fetchImports(
-      XmlSchemaCollection schemaCollection, URI importLocation) {
-    LOGGER.info("Fetching: {}", importLocation);
-    return httpClient
-        .sendAsync(
-            HttpRequest.newBuilder(importLocation).timeout(REQUEST_TIMEOUT).GET().build(),
-            BodyHandlers.ofInputStream())
-        .handle(
-            (response, ex) -> {
-              if (ex != null) {
-                LOGGER.warn("Failed to collect schema at: {}", importLocation, ex);
-                return null;
-              }
-              if (response != null) {
-                XmlSchema schema = readResponseIntoCollection(schemaCollection, response);
-                if (schema != null) {
-                  fetchedSchemas.put(importLocation, schema);
-                }
-              }
-              return response;
-            });
-  }
-
-  private Stream<String> getImportsWithNoLocation(
-      XmlSchemaCollection schemaCollection, String targetNamespace) {
-    XmlSchema target = schemaCollection.schemaForNamespace(targetNamespace);
-    return target.getExternals().stream()
-        .filter(ext -> isNullOrBlank(ext.getSchemaLocation()) && ext instanceof XmlSchemaImport)
-        .map(ext -> ((XmlSchemaImport) ext).getNamespace());
-  }
-
-  private Stream<URI> namespaceToURI(Stream<String> namespaces) {
-    return namespaces
-        .filter(
-            ns -> {
-              if (!additionalSchemaLocations.containsKey(ns)) {
-                LOGGER.warn("No matching URI was provided for linked namespace: {}", ns);
-                return false;
-              }
-              return true;
-            })
-        .map(additionalSchemaLocations::get);
-  }
-
-  private XmlSchema readResponseIntoCollection(
-      XmlSchemaCollection schemaCollection, HttpResponse<InputStream> response) {
-    if (response.statusCode() != 200) {
-      LOGGER.warn(
-          "Failed to retrieve xml schema at: '{}'. response code: '{}'",
-          response.uri(),
-          response.statusCode());
-      return null;
-    }
-
-    try (var reader = toReader(response.body())) {
-      return schemaCollection.read(reader);
-    } catch (Exception e) {
-      LOGGER.error("Unable to parse xml schema obtained from: {}", response.uri(), e);
-    }
-    return null;
-  }
-
-  private BufferedReader toReader(InputStream is) {
-    return new BufferedReader(new InputStreamReader(is));
-  }
-
-  private boolean isNullOrBlank(String str) {
-    return str == null || str.isBlank();
   }
 }

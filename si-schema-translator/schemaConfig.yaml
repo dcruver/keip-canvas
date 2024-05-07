@@ -5,7 +5,7 @@
 schemas:
   - alias: "integration"
     namespace: "http://www.springframework.org/schema/integration"
-    location: "http://localhost:8080/spring-integration-5.2.xsd"
+    location: "https://www.springframework.org/schema/integration/spring-integration-5.2.xsd"
     excludedElements:
       - "selector-chain"
       - "spel-property-accessors"
@@ -14,32 +14,54 @@ schemas:
 
   - alias: "jms"
     namespace: "http://www.springframework.org/schema/integration/jms"
-    location: "http://localhost:8080/spring-integration-jms-5.2.xsd"
+    location: "https://www.springframework.org/schema/integration/jms/spring-integration-jms-5.2.xsd"
 
   - alias: "http"
     namespace: "http://www.springframework.org/schema/integration/http"
-    location: "http://localhost:8080/spring-integration-http-5.2.xsd"
+    location: "https://www.springframework.org/schema/integration/http/spring-integration-http-5.2.xsd"
 
   # The 'nio-locker' element had no type defined, causing the schema walker to throw an exception.
-  - alias: "file"
-    namespace: "http://www.springframework.org/schema/integration/file"
-    location: "http://localhost:8080/spring-integration-file-5.2.xsd"
-    excludedElements:
-      - "locker"
-      - "nio-locker"
+  #  - alias: "file"
+  #    namespace: "http://www.springframework.org/schema/integration/file"
+  #    location: "https://www.springframework.org/schema/integration/file/spring-integration-file-5.2.xsd"
+  #    excludedElements:
+  #      - "locker"
+  #      - "nio-locker"
 
-  # The schemaLocation provided for the core spring-integration schema was outdated. Changed the URL to point to the
-  # latest version.
   - alias: "kafka"
     namespace: "http://www.springframework.org/schema/integration/kafka"
-    location: "http://localhost:8080/spring-integration-kafka-3.1.xsd"
+    location: "https://www.springframework.org/schema/integration/kafka/spring-integration-kafka-3.1.xsd"
 
   - alias: "groovy"
     namespace: "http://www.springframework.org/schema/integration/groovy"
-    location: "http://localhost:8080/spring-integration-groovy-5.2.xsd"
+    location: "https://www.springframework.org/schema/integration/groovy/spring-integration-groovy-5.2.xsd"
 
+  - alias: "ftp"
+    namespace: "http://www.springframework.org/schema/integration/ftp"
+    location: "https://www.springframework.org/schema/integration/ftp/spring-integration-ftp-5.2.xsd"
+
+  - alias: "sftp"
+    namespace: "http://www.springframework.org/schema/integration/sftp"
+    location: "https://www.springframework.org/schema/integration/sftp/spring-integration-sftp-5.2.xsd"
+
+  - alias: "tcp/udp"
+    namespace: "http://www.springframework.org/schema/integration/ip"
+    location: "https://www.springframework.org/schema/integration/ip/spring-integration-ip-5.2.xsd"
+
+  - alias: "web-services"
+    namespace: "http://www.springframework.org/schema/integration/ws"
+    location: "https://www.springframework.org/schema/integration/ws/spring-integration-ws-5.2.xsd"
+#
+#  - alias: "xml"
+#    namespace: "http://www.springframework.org/schema/integration/xml"
+#    location: "https://www.springframework.org/schema/integration/xml/spring-integration-xml-5.2.xsd"
+
+# schemaLocations provided here will override any schemaLocations provided in <xsd:import> elements
+# for the listed namespaces
 importedSchemaLocations:
+  - namespace: "http://www.springframework.org/schema/integration"
+    location: "https://www.springframework.org/schema/integration/spring-integration-5.2.xsd"
   - namespace: "http://www.springframework.org/schema/beans"
-    location: "http://localhost:8080/spring-beans.xsd"
+    location: "https://www.springframework.org/schema/beans/spring-beans-4.3.xsd"
   - namespace: "http://www.springframework.org/schema/tool"
-    location: "http://localhost:8080/spring-tool.xsd"
+    location: "https://www.springframework.org/schema/tool/spring-tool-4.3.xsd"
