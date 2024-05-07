@@ -30,12 +30,11 @@ public class EipSchemaTranslation {
   }
 
   private EipSchema translate(XmlSchemaSourceConfiguration sourceConfiguration) {
-    EipSchema eipSchema = new EipSchema();
+    EipSchema translatedSchema = new EipSchema();
 
     for (SchemaIdentifier targetSchema : sourceConfiguration.getSchemas()) {
       try {
-        XmlSchemaCollection schemaCollection =
-            xmlSchemaClient.collect(targetSchema.getNamespace(), targetSchema.getLocation());
+        XmlSchemaCollection schemaCollection = xmlSchemaClient.collect(targetSchema.getLocation());
 
         var translator = new SchemaTranslator(targetSchema.getExcludedElements());
 
@@ -43,12 +42,12 @@ public class EipSchemaTranslation {
             translator.translate(
                 schemaCollection, schemaCollection.schemaForNamespace(targetSchema.getNamespace()));
 
-        eipSchema.addComponents(targetSchema.getAlias(), components);
+        translatedSchema.addComponents(targetSchema.getAlias(), components);
       } catch (Exception e) {
         LOGGER.error("Failed to translate schema: {}", targetSchema.getNamespace(), e);
       }
     }
 
-    return eipSchema;
+    return translatedSchema;
   }
 }

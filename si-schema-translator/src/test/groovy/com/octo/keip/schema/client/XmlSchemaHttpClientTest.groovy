@@ -6,8 +6,6 @@ import spock.lang.Specification
 import spock.lang.TempDir
 import spock.util.io.FileSystemFixture
 
-import java.net.http.HttpClient
-import java.net.http.HttpResponse
 import java.nio.file.Path
 
 import static org.apache.ws.commons.schema.XmlSchemaSerializer.XSD_NAMESPACE
@@ -19,23 +17,21 @@ class XmlSchemaHttpClientTest extends Specification {
     static final SECOND_NAMESPACE = "http://www.example.com/second"
     static final THIRD_NAMESPACE = "http://www.example.com/third"
 
-    static final TARGET_URI = URI.create("http://localhost/test-target")
-
     @TempDir
     @Shared
     FileSystemFixture fsFixture
+
+    final URI FILE_URI = fsFixture.resolve("test-target.xsd").toUri()
 
     Map<String, URI> userProvidedSchemaLocations = [
             (FIRST_NAMESPACE) : fsFixture.resolve("first.xsd").toUri(),
             (SECOND_NAMESPACE): fsFixture.resolve("second.xsd").toUri()
     ]
 
-    HttpClient httpClient = mockHttpClient()
-
-    def xmlSchemaClient = new XmlSchemaHttpClient(httpClient, userProvidedSchemaLocations)
+    def xmlSchemaClient = new XmlSchemaClient(userProvidedSchemaLocations)
 
     def setupSpec() {
-        def XSD_PARENT_PATH = Path.of("/schemas", "xml", "http-client")
+        def XSD_PARENT_PATH = Path.of("/schemas", "xml", "client")
         fsFixture.create {
             copyFromClasspath(XSD_PARENT_PATH.resolve("first.xsd").toString())
             copyFromClasspath(XSD_PARENT_PATH.resolve("second.xsd").toString())
@@ -44,35 +40,47 @@ class XmlSchemaHttpClientTest extends Specification {
         }
     }
 
-    def "Collect target and imported schemas success"() {
+    def "Collect HTTP/S target and import schemas success"(String uri) {
         when:
-        def schemaCollection = xmlSchemaClient.collect(TARGET_NAMESPACE, TARGET_URI)
+        xmlSchemaClient.registerUriResolver(mockUriResolver(), "http", "https")
+        def schemaCollection = xmlSchemaClient.collect(URI.create(uri))
+
+        then:
+        def namespaces = getNamespaces(schemaCollection)
+        namespaces ==~ [TARGET_NAMESPACE, FIRST_NAMESPACE, SECOND_NAMESPACE, THIRD_NAMESPACE, XSD_NAMESPACE]
+
+        where:
+        uri << ["http://localhost/test-target", "https://localhost/test-target"]
+    }
+
+    def "Collect File targets and import schemas success"() {
+        when:
+        def schemaCollection = xmlSchemaClient.collect(FILE_URI)
 
         then:
         def namespaces = getNamespaces(schemaCollection)
         namespaces ==~ [TARGET_NAMESPACE, FIRST_NAMESPACE, SECOND_NAMESPACE, THIRD_NAMESPACE, XSD_NAMESPACE]
     }
 
-    def "Response from target-schema URI with error status code throws exception"() {
+    def "UriResolver fetch URI throws exception"() {
         given:
-        def errorResponse = Mock(HttpResponse)
-        errorResponse.statusCode() >> 404
+        def uriResolver = Mock(UriResolver)
+        uriResolver.fetchUri(_ as URI) >> { throw new RuntimeException("failure") }
+        xmlSchemaClient.registerUriResolver(uriResolver, "http")
 
         when:
-        xmlSchemaClient.collect(TARGET_NAMESPACE, TARGET_URI)
+        xmlSchemaClient.collect(URI.create("http://localhost"))
 
         then:
-        httpClient.send(_, _) >> errorResponse
         thrown(RuntimeException)
     }
 
-    def "Target-schema request throws an exception, exception is uncaught"() {
+    def "Unsupported URI scheme throws exception"() {
         when:
-        xmlSchemaClient.collect(TARGET_NAMESPACE, TARGET_URI)
+        xmlSchemaClient.collect(URI.create("mailto:localhost"))
 
         then:
-        httpClient.send(_, _) >> { throw new ConnectException("server down") }
-        thrown(ConnectException)
+        thrown(RuntimeException)
     }
 
     def "When an import location is not provided in the user-supplied locations map, ignore the missing URI and collect the rest"() {
@@ -80,24 +88,17 @@ class XmlSchemaHttpClientTest extends Specification {
         userProvidedSchemaLocations.remove(FIRST_NAMESPACE)
 
         when:
-        def schemaCollection = xmlSchemaClient.collect(TARGET_NAMESPACE, TARGET_URI)
+        def schemaCollection = xmlSchemaClient.collect(FILE_URI)
 
         then:
         def namespaces = getNamespaces(schemaCollection)
         namespaces ==~ [TARGET_NAMESPACE, SECOND_NAMESPACE, THIRD_NAMESPACE, XSD_NAMESPACE]
     }
 
-    private HttpClient mockHttpClient() {
-        HttpClient httpClient = Mock(HttpClient)
-        httpClient.send(_, _) >>> [mockHttpResponse(), mockHttpResponse()]
-        return httpClient
-    }
-
-    private HttpResponse<InputStream> mockHttpResponse() {
-        HttpResponse<InputStream> schemaResponse = Mock(HttpResponse)
-        schemaResponse.body() >> fsFixture.resolve("test-target.xsd").toFile().newInputStream()
-        schemaResponse.statusCode() >> 200
-        return schemaResponse
+    private UriResolver mockUriResolver() {
+        def resolver = Mock(UriResolver)
+        resolver.fetchUri(_ as URI) >> fsFixture.resolve("test-target.xsd").toFile().newInputStream()
+        return resolver
     }
 
     private static getNamespaces(XmlSchemaCollection schemaCollection) {

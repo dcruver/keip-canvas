@@ -68,6 +68,12 @@
             <version>2.4-M2-groovy-4.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-nio</artifactId>
+            <version>4.0.18</version>
+            <scope>test</scope>
+        </dependency>
         <dependency> <!-- spock: enables mocking of classes (in addition to interfaces) -->
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
@@ -152,12 +158,12 @@
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.93</minimum>
+                                            <minimum>0.94</minimum>
                                         </limit>
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.91</minimum>
+                                            <minimum>0.92</minimum>
                                         </limit>
                                         <limit>
                                             <counter>COMPLEXITY</counter>
@@ -167,7 +173,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.93</minimum>
+                                            <minimum>0.94</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

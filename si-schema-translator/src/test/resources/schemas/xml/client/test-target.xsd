@@ -15,7 +15,7 @@
 
     <!-- This schemaLocation should resolve to the proper xsd. It should not be overwritten in the happy path test -->
     <xsd:import namespace="http://www.example.com/third"
-                schemaLocation="src/test/resources/schemas/xml/http-client/third.xsd"/>
+                schemaLocation="src/test/resources/schemas/xml/client/third.xsd"/>
 
     <xsd:element name="element1">
         <xsd:complexType>

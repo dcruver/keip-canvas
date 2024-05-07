@@ -17,6 +17,9 @@ import java.nio.file.Path
 
 class EipSchemaTranslationTest extends Specification {
 
+    static final URI ns1Location = URI.create("http://localhost:8080/ns1.xsd")
+    static final URI ns2Location = URI.create("http://localhost:8080/ns2.xsd")
+
     @Shared
             expectedEipMap = importEipSchema(Path.of("end-to-end-eip-schema.json")).toMap()
 
@@ -32,7 +35,7 @@ class EipSchemaTranslationTest extends Specification {
         schemaCollectionSecond.read(TestIOUtils.getXmlSchemaFileReader(Path.of("end-to-end", "ns2.xml")))
 
         def schemaClient = Mock(XmlSchemaClient)
-        schemaClient.collect(_, _) >> { args -> args[0].equals("http://www.example.com/schema/ns1") ? schemaCollectionFirst : schemaCollectionSecond }
+        schemaClient.collect(_ as URI) >> { args -> args[0] == ns1Location ? schemaCollectionFirst : schemaCollectionSecond }
 
         when:
         def eipTranslation = new EipSchemaTranslation(schemaSourceConfig, schemaClient)
@@ -50,12 +53,12 @@ class EipSchemaTranslationTest extends Specification {
         schemaCollectionSecond.read(TestIOUtils.getXmlSchemaFileReader(Path.of("end-to-end", "ns2.xml")))
 
         def schemaClient = Mock(XmlSchemaClient)
-        schemaClient.collect(_, _) >> { args ->
+        schemaClient.collect(_ as URI) >> { args ->
             {
-                if (args[0].equals("http://www.example.com/schema/ns1")) {
-                    throw new RuntimeException("schema fail")
+                if (args[0] == ns2Location) {
+                    return schemaCollectionSecond
                 }
-                return schemaCollectionSecond
+                throw new RuntimeException("schema fail")
             }
         }
 
