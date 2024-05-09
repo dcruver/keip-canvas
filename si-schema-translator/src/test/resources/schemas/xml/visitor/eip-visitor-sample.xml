@@ -28,8 +28,39 @@
         <xsd:complexType>
             <xsd:sequence minOccurs="0" maxOccurs="unbounded">
                 <xsd:element name="altChildElement1" type="baseExampleType"/>
+                <xsd:element name="altChildElement2" type="baseExampleType">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            override base docs
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
             </xsd:sequence>
             <xsd:attribute name="attr1" type="xsd:integer" default="-1"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="test-circular-refs">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="recursive-parent-element"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="recursive-parent-element">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="recursive-child-element"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="recursive-child-element">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="recursive-parent-element"/>
+            </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
 

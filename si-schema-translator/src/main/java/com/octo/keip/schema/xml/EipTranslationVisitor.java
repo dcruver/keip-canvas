@@ -27,11 +27,17 @@ import org.apache.ws.commons.schema.XmlSchemaParticle;
 import org.apache.ws.commons.schema.XmlSchemaSequence;
 import org.apache.ws.commons.schema.walker.XmlSchemaAttrInfo;
 import org.apache.ws.commons.schema.walker.XmlSchemaTypeInfo;
+import org.apache.ws.commons.schema.walker.XmlSchemaTypeInfo.Type;
 import org.apache.ws.commons.schema.walker.XmlSchemaVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO: Add logging
+
+/**
+ * A custom {@link XmlSchemaVisitor} that parses an Integration XSD into the {@link
+ * com.octo.keip.schema.model.eip.EipSchema} model.
+ */
 public class EipTranslationVisitor implements XmlSchemaVisitor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(EipTranslationVisitor.class);
@@ -42,6 +48,8 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
 
   private final Map<QName, EipChildElement> visitedElements;
 
+  private final Map<QName, EipChildElement> visitedBaseTypes;
+
   private EipComponent.Builder eipComponentBuilder;
 
   private ChildCompositeWrapper currElement;
@@ -50,6 +58,7 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
     this.attributeTranslator = new AttributeTranslator();
     this.annotationTranslator = new AnnotationTranslator();
     this.visitedElements = new HashMap<>();
+    this.visitedBaseTypes = new HashMap<>();
   }
 
   public EipComponent getEipComponent() {
@@ -71,20 +80,14 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
 
     EipChildElement element;
     if (visited) {
-      element = visitedElements.get(getKey(xmlSchemaElement));
-      // Even if SchemaType is the same as a visited element, name/occurrence could be different.
-      element =
-          new EipChildElement.Builder(element)
-              .name(xmlSchemaElement.getName())
-              .occurrence(getOccurrence(xmlSchemaElement))
-              .build();
+      element = retrieveVisitedElement(xmlSchemaElement);
     } else {
       element =
           new EipChildElement.Builder(xmlSchemaElement.getName())
               .occurrence(getOccurrence(xmlSchemaElement))
               .description(annotationTranslator.getDescription(xmlSchemaElement))
               .build();
-      visitedElements.putIfAbsent(getKey(xmlSchemaElement), element);
+      storeVisitedElement(xmlSchemaElement, xmlSchemaTypeInfo, element);
     }
 
     var wrapper = new ChildCompositeWrapper(element, currElement);
@@ -189,6 +192,41 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
         .description(annotationTranslator.getDescription(xmlSchemaElement));
   }
 
+  private EipChildElement retrieveVisitedElement(XmlSchemaElement xmlSchemaElement) {
+    // Check if element is a direct ref
+    EipChildElement element = visitedElements.get(xmlSchemaElement.getQName());
+
+    if (element == null) {
+      // check if element is a type ref
+      element = visitedBaseTypes.get(xmlSchemaElement.getSchemaTypeName());
+      // Even if SchemaType is the same as a visited element, name/occurrence/description could be
+      // different. Create a new child element and copy over the similar properties.
+      element =
+          new EipChildElement.Builder(element)
+              .name(xmlSchemaElement.getName())
+              .description(annotationTranslator.getDescription(xmlSchemaElement))
+              .occurrence(getOccurrence(xmlSchemaElement))
+              .build();
+    }
+    return element;
+  }
+
+  /**
+   * The schema walker only visits an element's attributes once, even if the element is references
+   * multiple times by the schema. Therefore, newly visited elements and base types need to be
+   * cached.
+   */
+  private void storeVisitedElement(
+      XmlSchemaElement xmlSchemaElement,
+      XmlSchemaTypeInfo xmlSchemaTypeInfo,
+      EipChildElement element) {
+    visitedElements.putIfAbsent(xmlSchemaElement.getQName(), element);
+    if (xmlSchemaElement.getSchemaTypeName() != null
+        && Type.COMPLEX.equals(xmlSchemaTypeInfo.getType())) {
+      visitedBaseTypes.putIfAbsent(xmlSchemaElement.getSchemaTypeName(), element);
+    }
+  }
+
   private Role getRole(XmlSchemaElement element) {
     if (getExtensionBaseName(element).equals("channelType")) {
       return Role.CHANNEL;
@@ -229,9 +267,4 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
   }
 
   private record ChildCompositeWrapper(ChildComposite wrappedChild, ChildCompositeWrapper parent) {}
-
-  private QName getKey(XmlSchemaElement element) {
-    QName qName = element.getSchemaTypeName();
-    return qName == null ? element.getQName() : qName;
-  }
 }

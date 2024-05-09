@@ -180,4 +180,56 @@ class ChildGroupReducerTest extends Specification {
         then:
         result.children().collect { it.getName() } == ["c1", "c2", "c3", "c4"]
     }
+
+    def "Circular references from descendants to ancestors are broken"() {
+        given:
+        def top = new EipChildElement.Builder("c1").build()
+        def middle = new EipChildElement.Builder("c2").build()
+        def bottom = new EipChildElement.Builder("c3").build()
+
+        top.addChild(new ChildGroup(Indicator.SEQUENCE, [middle]))
+        middle.addChild(new ChildGroup(Indicator.SEQUENCE, [bottom]))
+        // create cycle
+        bottom.addChild(new ChildGroup(Indicator.SEQUENCE, [top]))
+
+        def rootGroup = new ChildGroup(Indicator.SEQUENCE, [top])
+
+        when:
+        def result = reducer.reduceGroup(rootGroup)
+
+        then:
+        def topResult = (result.children()[0] as EipChildElement)
+        topResult.getName() == top.getName()
+
+        def middleResult = (topResult.children()[0] as EipChildElement)
+        middleResult.getName() == middle.getName()
+
+        def bottomResult = (middleResult.children()[0] as EipChildElement)
+        bottomResult.getName() == bottom.getName()
+
+        def backRef = (bottomResult.children()[0] as EipChildElement)
+        backRef.getName() == top.getName()
+        backRef.getChildGroup() == null
+    }
+
+    def "Terminate traversal when max child nesting depth is reached"() {
+        given:
+        def first = new EipChildElement.Builder("c1").build()
+        def second = new EipChildElement.Builder("c2").build()
+        def third = new EipChildElement.Builder("c3").build()
+        def fourth = new EipChildElement.Builder("c4").build()
+
+        first.addChild(new ChildGroup(Indicator.SEQUENCE, [second]))
+        second.addChild(new ChildGroup(Indicator.SEQUENCE, [third]))
+        third.addChild(new ChildGroup(Indicator.SEQUENCE, [fourth]))
+
+        def rootGroup = new ChildGroup(Indicator.SEQUENCE, [first])
+
+        when:
+        def result = new ChildGroupReducer(2).reduceGroup(rootGroup)
+
+        then:
+        def thirdResult = result.children()[0].children()[0].children()[0] as EipChildElement
+        thirdResult.getChildGroup() == null
+    }
 }

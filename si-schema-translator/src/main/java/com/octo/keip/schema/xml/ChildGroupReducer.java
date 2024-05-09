@@ -6,33 +6,63 @@ import com.octo.keip.schema.model.eip.EipChildElement;
 import com.octo.keip.schema.model.eip.Indicator;
 import com.octo.keip.schema.model.eip.Occurrence;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * TODO: Add some documentation regarding circular references and limiting the child nesting depth.
+ * Discuss switching to reference-based schemas.
+ */
 public class ChildGroupReducer {
 
-  // TODO: Might potentially want to limit recursion depth to prevent StackOverflow errors.
+  private final int maxDepth;
+
+  public ChildGroupReducer() {
+    this.maxDepth = 3;
+  }
+
+  public ChildGroupReducer(int maxDepth) {
+    this.maxDepth = maxDepth;
+  }
+
   public ChildGroup reduceGroup(ChildComposite group) {
-    ChildComposite reduced = reduce(group);
+    ChildComposite reduced = reduce(group, new IdentityHashMap<>(), 0);
     return (ChildGroup) reduced;
   }
 
-  private ChildComposite reduce(ChildComposite composite) {
-    return switch (composite) {
-      case null -> null;
-      case EipChildElement element -> {
-        ChildComposite group = reduce(element.getChildGroup());
-        yield reduce(element.withChildGroup(group));
-      }
-      case ChildGroup group -> {
-        List<ChildComposite> children = group.children().stream().map(this::reduce).toList();
-        yield reduce(group.withChildren(children));
-      }
-    };
+  private ChildComposite reduce(
+      ChildComposite composite, Map<ChildComposite, Boolean> inProcess, int depth) {
+    if (composite == null) {
+      return null;
+    }
+
+    ChildComposite reduced =
+        switch (composite) {
+          case EipChildElement element -> {
+            if (inProcess.containsKey(element) || depth >= maxDepth) {
+              // Terminate the traversal if a back edge (cycle) is found or
+              // the max child nesting depth is reached
+              yield makeTerminalNode(element);
+            }
+            inProcess.put(composite, true);
+            ChildComposite group = reduce(element.getChildGroup(), inProcess, depth + 1);
+            yield reduce(element.withChildGroup(group));
+          }
+          case ChildGroup group -> {
+            List<ChildComposite> children =
+                group.children().stream().map(c -> this.reduce(c, inProcess, depth)).toList();
+            yield reduce(group.withChildren(children));
+          }
+        };
+
+    inProcess.remove(composite);
+    return reduced;
   }
 
   private ChildComposite reduce(EipChildElement element) {
@@ -54,6 +84,10 @@ public class ChildGroupReducer {
     }
 
     return reduced;
+  }
+
+  private EipChildElement makeTerminalNode(EipChildElement element) {
+    return new EipChildElement.Builder(element).childGroup(null).build();
   }
 
   /** Remove any duplicate (by name) element siblings in a child group. */

@@ -30,6 +30,7 @@ class EipTranslationVisitorTest extends Specification {
         when:
         walker.walk(getTopLevelComponent(xmlSchemaCollection, "top-level-component"))
         def eipComponent = visitor.getEipComponent()
+        def reduceGroup = new ChildGroupReducer().reduceGroup(eipComponent.getChildGroup())
 
         then:
         eipComponent.getName() == "top-level-component"
@@ -91,15 +92,47 @@ class EipTranslationVisitorTest extends Specification {
         then:
         eipComponent.getName() == "alt-top-level-component"
         def group = eipComponent.getChildGroup() as ChildGroup
-        group.children().size() == 1
+        group.occurrence() == new Occurrence(0, Occurrence.UNBOUNDED)
+        group.children().size() == 2
 
-        def childElement = group.children().getFirst() as EipChildElement
-        childElement.getName() == "altChildElement1"
-        childElement.occurrence() == Occurrence.DEFAULT
-        childElement.getDescription() == "baseType example docs"
+        def childElement1 = group.children().getFirst() as EipChildElement
+        childElement1.getName() == "altChildElement1"
+        childElement1.occurrence() == Occurrence.DEFAULT
+        childElement1.getDescription() == "baseType example docs"
+
+        def childElement2 = group.children().getLast() as EipChildElement
+        childElement2.getName() == "altChildElement2"
+        childElement2.occurrence() == Occurrence.DEFAULT
+        childElement2.getDescription() == "override base docs"
 
         def expectedAttrs = [new Attribute.Builder("child-attr-1", AttributeType.BOOLEAN).description("Enable thing").build()] as HashSet
-        childElement.attributes == expectedAttrs
+        childElement1.attributes == expectedAttrs
+        childElement2.attributes == expectedAttrs
+    }
+
+    def "Circular references (non-top-level) are handled with back-references in EipSchema"() {
+        when:
+        walker.walk(getTopLevelComponent(xmlSchemaCollection, "test-circular-refs"))
+        def eipComponent = visitor.getEipComponent()
+
+        then:
+        eipComponent.getName() == "test-circular-refs"
+        def recursiveParent = eipComponent.getChildGroup().children().getFirst() as EipChildElement
+        recursiveParent.getName() == "recursive-parent-element"
+
+        def recursiveChild = recursiveParent.children().getFirst() as EipChildElement
+        recursiveChild.getName() == "recursive-child-element"
+
+        def backRef = recursiveChild.children().getFirst() as EipChildElement
+        backRef.is(recursiveParent)
+    }
+
+    def "Circular reference to a top-level component is not supported"() {
+        when:
+        walker.walk(getTopLevelComponent(xmlSchemaCollection, "recursive-parent-element"))
+
+        then:
+        thrown(NullPointerException)
     }
 
     def "Visit handle nested children"() {
