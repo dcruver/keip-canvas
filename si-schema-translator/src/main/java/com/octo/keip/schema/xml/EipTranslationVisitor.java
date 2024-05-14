@@ -32,11 +32,12 @@ import org.apache.ws.commons.schema.walker.XmlSchemaVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO: Add logging
-
 /**
  * A custom {@link XmlSchemaVisitor} that parses an Integration XSD into the {@link
  * com.octo.keip.schema.model.eip.EipSchema} model.
+ *
+ * <p>TODO: Consider switching to a reference-based schema (rather than inlining children). Could
+ * potentially decrease the size of output files and enable us to better handle circular refs.
  */
 public class EipTranslationVisitor implements XmlSchemaVisitor {
 

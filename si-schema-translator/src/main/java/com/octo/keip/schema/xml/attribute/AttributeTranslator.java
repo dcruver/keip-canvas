@@ -52,7 +52,7 @@ public class AttributeTranslator {
     }
 
     return switch (typeInfo.getType()) {
-      case LIST -> throw new IllegalStateException("TODO: Figure out how to handle list types");
+      case LIST -> throw new IllegalStateException("List types are unsupported");
       case UNION -> resolveUnionType(typeInfo);
       case ATOMIC -> toAttributeType(typeInfo.getBaseType());
       case COMPLEX ->

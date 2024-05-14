@@ -12,7 +12,6 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(
-    name = "translate",
     mixinStandardHelpOptions = true,
     version = "0.1.0",
     description =
@@ -29,7 +28,7 @@ public class TranslateCommand implements Callable<Integer> {
       names = {"-o", "--output"},
       required = true,
       description =
-          "Specify the path to write the translated EIP Schema. If a file does not exist at the path, it will be created. If a file already exists, it will be overwritten.")
+          "Specify the path to write the translated EIP Schema JSON. If a file does not exist at the path, it will be created. If a file already exists, it will be overwritten.")
   private File output;
 
   @Override

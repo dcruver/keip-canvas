@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * TODO: Add some documentation regarding circular references and limiting the child nesting depth.
- * Discuss switching to reference-based schemas.
+ * Attempts to reduce the levels of child nesting by collapsing redundant child groups and limiting
+ * max nesting depth.
  */
 public class ChildGroupReducer {
 
@@ -226,7 +226,6 @@ public class ChildGroupReducer {
     return group.withChildren(reducedChildren);
   }
 
-  // TODO: Is the CHOICE exception still necessary?
   private boolean isReducibleIndicator(Indicator indicator) {
     return !Indicator.CHOICE.equals(indicator);
   }
