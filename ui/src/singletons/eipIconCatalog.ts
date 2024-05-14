@@ -5,6 +5,7 @@ import barrierImg from "../assets/eip/barrier.svg"
 import bridgeImg from "../assets/eip/bridge.svg"
 import channelImg from "../assets/eip/channel.svg"
 import claimCheckImg from "../assets/eip/claim_check.svg"
+import connectionFactoryImg from "../assets/eip/connection--factory.svg"
 import controlBusImg from "../assets/eip/control_bus.svg"
 import delayerImg from "../assets/eip/delayer.svg"
 import enricherImg from "../assets/eip/enricher.svg"
@@ -39,13 +40,15 @@ const findIcon = (name: string) => {
     case name.endsWith("gateway"):
       return gatewayImg
     case name === "message-driven-channel-adapter":
-    case name.includes("inbound-channel-adapter"):
+    case name.includes("inbound") && name.includes("channel-adapter"):
       return inboundAdapterImg
     case name === "logging-channel-adapter":
-    case name.includes("outbound-channel-adapter"):
+    case name.includes("outbound") && name.includes("channel-adapter"):
       return outboundAdapterImg
     case name.endsWith("router"):
       return routerImg
+    case name.includes("splitter"):
+      return splitterImg
     case name.includes("transformer"):
       return transformerImg
     default:
@@ -96,13 +99,16 @@ const findIcon = (name: string) => {
       return serviceActivatorImg
     case "spel-function":
       return spelFunctionImg
-    case "splitter":
-      return splitterImg
+    case "tcp-connection-factory":
+      return connectionFactoryImg
     case "transaction-synchronization-factory":
       return processManagerImg
     case "wire-tap":
       return wireTapImg
+    case "xpath-expression":
+      return scriptImg
     default:
+      console.log(`No icon found for ${name}`)
       return undefined
   }
 }

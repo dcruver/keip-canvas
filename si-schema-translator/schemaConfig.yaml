@@ -1,16 +1,13 @@
-# Some minor errors were present in some spring-integration schemas.
-# The XMLs were corrected and served on a local http server.
-# The errors for each schema (if present) are commented below
-
 schemas:
   - alias: "integration"
     namespace: "http://www.springframework.org/schema/integration"
     location: "https://www.springframework.org/schema/integration/spring-integration-5.2.xsd"
     excludedElements:
+      - "application-event-multicaster"
+      - "chain"
+      - "converter"
       - "selector-chain"
       - "spel-property-accessors"
-      - "converter"
-      - "chain"
 
   - alias: "jms"
     namespace: "http://www.springframework.org/schema/integration/jms"
@@ -43,7 +40,7 @@ schemas:
     namespace: "http://www.springframework.org/schema/integration/sftp"
     location: "https://www.springframework.org/schema/integration/sftp/spring-integration-sftp-5.2.xsd"
 
-  - alias: "tcp/udp"
+  - alias: "tcp-udp"
     namespace: "http://www.springframework.org/schema/integration/ip"
     location: "https://www.springframework.org/schema/integration/ip/spring-integration-ip-5.2.xsd"
 
@@ -51,9 +48,9 @@ schemas:
     namespace: "http://www.springframework.org/schema/integration/ws"
     location: "https://www.springframework.org/schema/integration/ws/spring-integration-ws-5.2.xsd"
 
-#  - alias: "xml"
-#    namespace: "http://www.springframework.org/schema/integration/xml"
-#    location: "https://www.springframework.org/schema/integration/xml/spring-integration-xml-5.2.xsd"
+  - alias: "xml"
+    namespace: "http://www.springframework.org/schema/integration/xml"
+    location: "https://www.springframework.org/schema/integration/xml/spring-integration-xml-5.2.xsd"
 
 # schemaLocations provided here will override any schemaLocations provided in <xsd:import> elements
 # for the listed namespaces

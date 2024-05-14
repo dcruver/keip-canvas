@@ -1,1 +1,1 @@
-Images are taken from https://github.com/plantuml-stdlib/EIP-PlantUML and converted to SVGs
+Some images were taken from https://github.com/plantuml-stdlib/EIP-PlantUML and converted to SVGs

@@ -26,16 +26,12 @@
   background-color: themes.$background-inverse;
 
   .header-main-text {
-    color: themes.$text-inverse !important;
-    font-size: type.type-scale(3) !important;
+    color: themes.$text-inverse;
+    font-size: type.type-scale(3);
   }
 
   .header-action-bar {
     padding-right: layout.$spacing-05;
-  }
-
-  svg.header-icon {
-    fill: themes.$icon-inverse !important;
   }
 
   .options-menu:hover {
@@ -141,6 +137,7 @@
 
   .eip-item-image {
     width: 2rem;
+    min-width: 2rem;
     height: 2rem;
   }
 
