@@ -1,4 +1,4 @@
-name: Deploy Keip Canvas webapp to GitHub Pages
+name: GitHub Pages Pipeline
 
 on:
   push:
