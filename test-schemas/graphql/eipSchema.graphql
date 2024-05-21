@@ -1,0 +1,76 @@
+enum RestrictionType {
+  ENUM
+}
+
+enum FlowType {
+  SOURCE
+  SINK
+  PASSTHRU
+}
+
+enum Role {
+  ENDPOINT
+  CHANNEL
+}
+
+enum AttributeType {
+  STRING
+  BOOLEAN
+  NUMBER
+}
+
+enum Indicator {
+  ALL
+  CHOICE
+  SEQUENCE
+}
+
+type Restriction {
+  type: RestrictionType!
+  values: [String!]
+}
+
+type Attribute {
+  name: String!
+  type: AttributeType!
+  description: String
+  defaultVal: String
+  required: Boolean
+  restriction: Restriction
+}
+
+type Occurrence {
+  min: Int
+  max: Int
+}
+
+interface EipElement {
+  name: String!
+  description: String
+  attributes: [Attribute!]
+  childGroup: EipChildGroup
+}
+
+type EipChildGroup {
+  indicator: Indicator!
+  children: [EipChildElement!]!
+  occurrence: Occurrence
+}
+
+type EipChildElement implements EipElement {
+  occurrence: Occurrence
+}
+
+type EipComponent implements EipElement {
+  role: Role!
+  flowType: FlowType!
+}
+
+type EipNamespaceTuple {
+  namespace: String!
+  components: [EipComponent!]!
+}
+
+type EipSchema {
+  namespaces: [EipNamespaceTuple!]!
+}

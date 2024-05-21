@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package eip;
+
+enum RestrictionType {
+  ENUM = 0;
+}
+
+message Restriction {
+  RestrictionType type = 1;
+  repeated string values = 2;
+}
+
+message Attribute {
+  string name = 1;
+  enum AttributeType {
+    STRING = 0;
+    BOOLEAN = 1;
+    NUMBER = 2;
+  }
+  AttributeType type = 2;
+  string description = 3;
+  string defaultValue = 4;
+  bool required = 5;
+  Restriction restriction = 6;
+}
+
+enum FlowType {
+  SOURCE = 0;
+  SINK = 1;
+  PASSTHRU = 2;
+}
+
+enum Role {
+  ENDPOINT = 0;
+  CHANNEL = 1;
+}
+
+message Occurrence {
+  int32 min = 1;
+  int32 max = 2;
+}
+
+message EipElement {
+  string name = 1;
+  string description = 2;
+  repeated Attribute attributes = 3;
+  EipChildGroup childGroup = 4;
+}
+
+message EipChildGroup {
+  enum Indicator {
+    ALL = 0;
+    CHOICE = 1;
+    SEQUENCE = 2;
+  }
+  Indicator indicator = 1;
+  repeated EipChildElement children = 2;
+  Occurrence occurrence = 3;
+}
+
+message EipChildElement {
+  EipElement eipElement = 1;
+  Occurrence occurrence = 2;
+}
+
+message EipComponent {
+  EipElement eipElement = 1;
+  Role role = 2;
+  FlowType flowType = 3;
+}
+
+message EipSchema {
+  map<string, EipComponents> schema = 1;
+}
+
+message EipComponents {
+  repeated EipComponent components = 1;
+}

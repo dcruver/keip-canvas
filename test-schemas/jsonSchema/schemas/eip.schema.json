@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schema:eip",
+  "title": "EipSchema",
+  "type": "object",
+  "properties": {
+    "namespaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "namespace": {
+            "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/EipComponent"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AttributeTypes": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" }
+      ]
+    },
+    "Role": {
+      "type": "string",
+      "enum": ["endpoint", "channel"]
+    },
+    "FlowType": {
+      "type": "string",
+      "enum": ["source", "sink", "passthru"]
+    },
+    "Restriction": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["enum"]
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["type"]
+    },
+    "Attribute": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "boolean", "number"]
+        },
+        "description": {
+          "type": "string"
+        },
+        "default": {
+          "$ref": "#/definitions/AttributeTypes"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "restriction": {
+          "$ref": "#/definitions/Restriction"
+        }
+      },
+      "required": ["name", "type"]
+    },
+    "Occurrence": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        }
+      }
+    },
+    "EipElement": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Attribute"
+          }
+        },
+        "childGroup": {
+          "$ref": "#/definitions/EipChildGroup"
+        }
+      },
+      "required": ["name"]
+    },
+    "EipChildGroup": {
+      "type": "object",
+      "properties": {
+        "indicator": {
+          "type": "string",
+          "enum": ["all", "choice", "sequence"]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EipChildElement"
+          }
+        },
+        "occurrence": {
+          "$ref": "#/definitions/Occurrence"
+        }
+      },
+      "required": ["indicator", "children"]
+    },
+    "EipChildElement": {
+      "extends": {
+        "$ref": "#/definitions/EipElement"
+      },
+      "properties": {
+        "occurrence": {
+          "$ref": "#/definitions/Occurrence"
+        }
+      }
+    },
+    "EipComponent": {
+      "extends": {
+        "$ref": "#/definitions/EipElement"
+      },
+      "properties": {
+        "role": {
+          "$ref": "#/definitions/Role"
+        },
+        "flowType": {
+          "$ref": "#/definitions/FlowType"
+        }
+      }
+    }
+  }
+}
