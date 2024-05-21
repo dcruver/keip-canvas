@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/OctoConsulting/keip-canvas/schemas/v0.1.0/eipNode.schema.json",
+  "title": "EipNode",
+  "description": "An instance of an EIP component as a node in the flow diagram",
+  "type": "object",
+  "required": [
+    "id",
+    "eipId",
+    "role",
+    "connectionType"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "eipId": {
+      "$ref": "#/$defs/EipId"
+    },
+    "label": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "role": {
+      "$ref": "eipRole.schema.json"
+    },
+    "connectionType": {
+      "$ref": "connectionType.schema.json"
+    },
+    "attributes": {
+      "$ref": "#/$defs/Attributes"
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ChildNode"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "EipId": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "namespace",
+        "name"
+      ]
+    },
+    "Attributes": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "attributeType.schema.json"
+      }
+    },
+    "ChildNode": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "attributes": {
+          "$ref": "#/$defs/Attributes"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChildNode"
+          }
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

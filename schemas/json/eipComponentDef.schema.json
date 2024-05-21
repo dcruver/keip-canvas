@@ -1,0 +1,162 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/OctoConsulting/keip-canvas/schemas/v0.1.0/eipComponentDef.schema.json",
+  "title": "EipComponentDefinition",
+  "description": "Defines the collection of EIP components available for use",
+  "type": "object",
+  "additionalProperties": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/EipComponent"
+    }
+  },
+  "$defs": {
+    "Restriction": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "enum"
+          ]
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "Attribute": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "boolean",
+            "number"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "default": {
+          "$ref": "attributeType.schema.json"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "restriction": {
+          "$ref": "#/$defs/Restriction"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ]
+    },
+    "Occurrence": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max": {
+          "type": "integer",
+          "minimum": -1
+        }
+      }
+    },
+    "EipElement": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Attribute"
+          }
+        },
+        "childGroup": {
+          "$ref": "#/$defs/EipChildGroup"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "EipChildGroup": {
+      "type": "object",
+      "properties": {
+        "indicator": {
+          "type": "string",
+          "enum": [
+            "all",
+            "choice",
+            "sequence"
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EipChildElement"
+          }
+        },
+        "occurrence": {
+          "$ref": "#/$defs/Occurrence"
+        }
+      },
+      "required": [
+        "indicator",
+        "children"
+      ]
+    },
+    "EipChildElement": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/EipElement"
+        }
+      ],
+      "properties": {
+        "occurrence": {
+          "$ref": "#/$defs/Occurrence"
+        }
+      }
+    },
+    "EipComponent": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/EipElement"
+        }
+      ],
+      "properties": {
+        "role": {
+          "$ref": "eipRole.schema.json"
+        },
+        "connectionType": {
+          "$ref": "connectionType.schema.json"
+        }
+      },
+      "required": [
+        "role",
+        "connectionType"
+      ]
+    }
+  }
+}
