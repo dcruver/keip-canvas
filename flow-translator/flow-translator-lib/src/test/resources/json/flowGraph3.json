@@ -1,0 +1,89 @@
+{
+  "nodes": [
+    {
+      "id": "inbound",
+      "eipId": {
+        "namespace": "integration",
+        "name": "inbound-channel-adapter"
+      },
+      "description": "Fixed message sourced at a fixed rate",
+      "role": "endpoint",
+      "connectionType": "source",
+      "attributes": {
+        "expression": "'Test Message'"
+      }
+    },
+    {
+      "id": "testRouter",
+      "eipId": {
+        "namespace": "integration",
+        "name": "router"
+      },
+      "role": "router",
+      "connectionType": "content_based_router",
+      "attributes": {
+        "expression": "headers['status']"
+      },
+      "children": [
+        {
+          "name": "mapping",
+          "attributes": {
+            "channel": "ch-testRouter-httpProd",
+            "value": "ok"
+          }
+        },
+        {
+          "name": "mapping",
+          "attributes": {
+            "channel": "ch-testRouter-jmsProd",
+            "value": "failed"
+          }
+        }
+      ]
+    },
+    {
+      "id": "httpProd",
+      "eipId": {
+        "namespace": "http",
+        "name": "outbound-channel-adapter"
+      },
+      "role": "endpoint",
+      "connectionType": "sink",
+      "attributes": {
+        "url": "http://localhost/example",
+        "http-method": "POST"
+      }
+    },
+    {
+      "id": "jmsProd",
+      "eipId": {
+        "namespace": "jms",
+        "name": "outbound-channel-adapter"
+      },
+      "role": "endpoint",
+      "connectionType": "sink",
+      "attributes": {
+        "destination-name": "test.error",
+        "pub-sub-domain": "true"
+      },
+      "children": []
+    }
+  ],
+  "edges": [
+    {
+      "source": "inbound",
+      "target": "testRouter",
+      "id": "ch-inbound-testRouter"
+    },
+    {
+      "source": "testRouter",
+      "target": "httpProd",
+      "id": "ch-testRouter-httpProd"
+    },
+    {
+      "source": "testRouter",
+      "target": "jmsProd",
+      "id": "ch-testRouter-jmsProd"
+    }
+  ]
+}

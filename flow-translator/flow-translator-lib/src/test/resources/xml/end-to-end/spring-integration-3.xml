@@ -1,0 +1,36 @@
+<?xml version='1.0'?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:integration="http://www.springframework.org/schema/integration"
+       xmlns:http="http://www.springframework.org/schema/integration/http"
+       xmlns:jms="http://www.springframework.org/schema/integration/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/integration
+           https://www.springframework.org/schema/integration/spring-integration.xsd
+           http://www.springframework.org/schema/integration/http
+           https://www.springframework.org/schema/integration/http/spring-integration-http.xsd
+           http://www.springframework.org/schema/integration/jms
+           https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd">
+
+    <integration:inbound-channel-adapter id="inbound" channel="ch-inbound-testRouter"
+                                         expression="'Test Message'"/>
+
+    <integration:channel id="ch-inbound-testRouter"/>
+
+    <integration:router id="testRouter" input-channel="ch-inbound-testRouter" expression="headers['status']">
+        <integration:mapping value="ok" channel="ch-testRouter-httpProd"/>
+        <integration:mapping value="failed" channel="ch-testRouter-jmsProd"/>
+    </integration:router>
+
+    <integration:channel id="ch-testRouter-httpProd"/>
+    <integration:channel id="ch-testRouter-jmsProd"/>
+
+    <http:outbound-channel-adapter id="httpProd"
+                                   channel="ch-testRouter-httpProd"
+                                   url="http://localhost/example"
+                                   http-method="POST"/>
+
+    <jms:outbound-channel-adapter id="jmsProd" channel="ch-testRouter-jmsProd"
+                                  destination-name="test.error" pub-sub-domain="true"/>
+
+</beans>

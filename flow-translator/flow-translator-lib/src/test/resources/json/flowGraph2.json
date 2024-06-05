@@ -1,0 +1,97 @@
+{
+  "nodes": [
+    {
+      "id": "qi1dPaIdpm",
+      "eipId": {
+        "namespace": "integration",
+        "name": "filter"
+      },
+      "label": "op header filter",
+      "role": "router",
+      "connectionType": "tee",
+      "attributes": {
+        "expression": "headers['op'] == 'ok'"
+      },
+      "children": []
+    },
+    {
+      "id": "XC1NpnW_V0",
+      "eipId": {
+        "namespace": "jms",
+        "name": "message-driven-channel-adapter"
+      },
+      "label": "test-echo Listener",
+      "description": "Receives the message that was sent by the outbound adapter",
+      "role": "endpoint",
+      "connectionType": "source",
+      "attributes": {
+        "destination-name": "test-echo",
+        "pub-sub-domain": "false"
+      }
+    },
+    {
+      "id": "nOSRl8ygMY",
+      "eipId": {
+        "namespace": "integration",
+        "name": "logging-channel-adapter"
+      },
+      "label": "Logger",
+      "description": "Logs the discarded message",
+      "role": "endpoint",
+      "connectionType": "sink",
+      "attributes": {}
+    },
+    {
+      "id": "34vHRfjQPU",
+      "eipId": {
+        "namespace": "http",
+        "name": "outbound-gateway"
+      },
+      "label": "Send to web server",
+      "description": "Sends the message to an HTTP server",
+      "role": "endpoint",
+      "connectionType": "request_reply",
+      "attributes": {
+        "url": "http://localhost/example",
+        "http-method": "POST"
+      },
+      "children": []
+    },
+    {
+      "id": "I91fywAfMc",
+      "eipId": {
+        "namespace": "integration",
+        "name": "logging-channel-adapter"
+      },
+      "label": "Logger",
+      "description": "Logs the http reply",
+      "role": "endpoint",
+      "connectionType": "sink",
+      "attributes": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": "XC1NpnW_V0",
+      "target": "qi1dPaIdpm",
+      "id": "edge-XC1NpnW_V0-qi1dPaIdpm"
+    },
+    {
+      "source": "qi1dPaIdpm",
+      "type": "discard",
+      "target": "nOSRl8ygMY",
+      "id": "edge-qi1dPaIdpm-nOSRl8ygMY"
+    },
+    {
+      "source": "qi1dPaIdpm",
+      "target": "34vHRfjQPU",
+      "type": "default",
+      "id": "edge-qi1dPaIdpm-34vHRfjQPU"
+    },
+    {
+      "source": "34vHRfjQPU",
+      "target": "I91fywAfMc",
+      "id": "edge-34vHRfjQPU-I91fywAfMc"
+    }
+  ]
+}

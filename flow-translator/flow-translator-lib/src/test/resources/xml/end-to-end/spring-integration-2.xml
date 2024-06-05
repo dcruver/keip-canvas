@@ -1,0 +1,42 @@
+<?xml version='1.0'?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jms="http://www.springframework.org/schema/integration/jms"
+       xmlns:integration="http://www.springframework.org/schema/integration"
+       xmlns:http="http://www.springframework.org/schema/integration/http"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/integration/jms
+           https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+           http://www.springframework.org/schema/integration
+           https://www.springframework.org/schema/integration/spring-integration.xsd
+           http://www.springframework.org/schema/integration/http
+    https://www.springframework.org/schema/integration/http/spring-integration-http.xsd">
+
+    <jms:message-driven-channel-adapter id="XC1NpnW_V0" channel="edge-XC1NpnW_V0-qi1dPaIdpm"
+                                        destination-name="test-echo" pub-sub-domain="false"/>
+
+    <integration:channel id="edge-XC1NpnW_V0-qi1dPaIdpm"/>
+
+    <integration:filter id="qi1dPaIdpm" input-channel="edge-XC1NpnW_V0-qi1dPaIdpm"
+                        output-channel="edge-qi1dPaIdpm-34vHRfjQPU"
+                        discard-channel="edge-qi1dPaIdpm-nOSRl8ygMY"
+                        expression="headers['op'] == 'ok'"
+    />
+
+    <integration:channel id="edge-qi1dPaIdpm-nOSRl8ygMY"/>
+
+    <integration:channel id="edge-qi1dPaIdpm-34vHRfjQPU"/>
+
+    <integration:logging-channel-adapter id="nOSRl8ygMY" channel="edge-qi1dPaIdpm-nOSRl8ygMY"/>
+
+    <http:outbound-gateway id="34vHRfjQPU"
+                                   request-channel="edge-qi1dPaIdpm-34vHRfjQPU"
+                                   reply-channel="edge-34vHRfjQPU-I91fywAfMc"
+                                   url="http://localhost/example"
+                                   http-method="POST"/>
+
+    <integration:channel id="edge-34vHRfjQPU-I91fywAfMc"/>
+
+    <integration:logging-channel-adapter id="I91fywAfMc" channel="edge-34vHRfjQPU-I91fywAfMc"/>
+
+</beans>
