@@ -152,10 +152,13 @@ const useStore = create<AppStore>()(
         updateEnabledChildren: (nodeId, children) =>
           set((state) => {
             const configs = { ...state.eipNodeConfigs }
-            configs[nodeId].children = children.reduce((accum, child) => {
-              accum[child] = {}
-              return accum
-            }, {} as Record<string, AttributeMapping>)
+            configs[nodeId].children = children.reduce(
+              (accum, child) => {
+                accum[child] = {}
+                return accum
+              },
+              {} as Record<string, AttributeMapping>
+            )
 
             return { eipNodeConfigs: configs }
           }),
