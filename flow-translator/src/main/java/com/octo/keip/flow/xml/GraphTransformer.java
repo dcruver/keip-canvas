@@ -3,9 +3,8 @@ package com.octo.keip.flow.xml;
 import com.ctc.wstx.stax.WstxEventFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
 import com.octo.keip.flow.model.EipGraph;
-import com.octo.keip.flow.xml.spring.DefaultNodeTransformer;
+import com.octo.keip.flow.model.EipId;
 import java.io.Writer;
-import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,41 +22,25 @@ import javax.xml.stream.events.StartElement;
 
 // TODO: EipNodeXmlTranslator registry
 // TODO: Support pretty-printing?
-// TODO: Make abstract?
-public final class GraphXmlTransformer {
+public abstract class GraphTransformer {
 
   private final XMLEventFactory eventFactory = WstxEventFactory.newFactory();
   private final XMLOutputFactory outputFactory = WstxOutputFactory.newFactory();
 
   private static final String XSI_PREFIX = "xsi";
 
-  // TODO: Make these configurable (builder pattern maybe?)
-  private static final String DEFAULT_NAMESPACE = "http://www.springframework.org/schema/beans";
-  private static final URI BASE_SCHEMA_LOCATION =
-      URI.create("https://www.springframework.org/schema/integration/");
-
-  private final Map<String, String> mappedNamespaceUris;
-
-  public GraphXmlTransformer(Map<String, String> mappedNamespaceUris) {
-    this.mappedNamespaceUris = mappedNamespaceUris;
-  }
-
   // TODO: Could potentially move Writer to ctor
   // TODO: Handle explicit connections to channel components
-  public void toXml(EipGraph graph, Writer output) throws XMLStreamException {
-    NodeTransformerFactory transformerFactory = new NodeTransformerFactory(graph);
-    transformerFactory.setDefaultTransformer(DefaultNodeTransformer::new);
-
-    // TODO: Set default namespace
+  public final void toXml(EipGraph graph, Writer output) throws XMLStreamException {
     XMLEventWriter writer = outputFactory.createXMLEventWriter(output);
-    writer.setDefaultNamespace(DEFAULT_NAMESPACE);
+    writer.setDefaultNamespace(defaultNamespace());
 
     writer.add(eventFactory.createStartDocument());
 
     StartElement root = createRootElement(graph);
     writer.add(root);
 
-    writeNodes(graph, writer, transformerFactory);
+    writeNodes(graph, writer);
 
     writer.add(eventFactory.createEndElement(root.getName(), null));
 
@@ -67,13 +50,21 @@ public final class GraphXmlTransformer {
     writer.close();
   }
 
+  protected abstract String defaultNamespace();
+
+  protected abstract QName rootElement();
+
+  protected abstract NodeTransformer getTransformer(EipId id);
+
+  protected abstract String getNamespace(String prefix);
+
+  protected abstract String getSchemaLocation(String namespaceUri);
+
   // TODO: Abstract creating the root element
   private StartElement createRootElement(EipGraph graph) {
     List<String> eipNamespaces = collectEipNamespaces(graph);
     return eventFactory.createStartElement(
-        new QName("http://www.springframework.org/schema/beans", "beans"),
-        getRootAttributes(eipNamespaces),
-        getRootNamespaces(eipNamespaces));
+        rootElement(), getRootAttributes(eipNamespaces), getRootNamespaces(eipNamespaces));
   }
 
   /**
@@ -89,11 +80,9 @@ public final class GraphXmlTransformer {
 
   private Iterator<Attribute> getRootAttributes(List<String> eipNamespaces) {
     Stream<String> defaultNamespaceLocation =
-        Stream.of(
-            DEFAULT_NAMESPACE, "https://www.springframework.org/schema/beans/spring-beans.xsd");
+        Stream.of(defaultNamespace(), getSchemaLocation(defaultNamespace()));
     Stream<String> collectedLocations =
-        eipNamespaces.stream()
-            .flatMap(ns -> Stream.of(this.mappedNamespaceUris.get(ns), getSchemaLocation(ns)));
+        eipNamespaces.stream().flatMap(ns -> Stream.of(getNamespace(ns), getSchemaLocation(ns)));
 
     // TODO: Figure out how to use line breaks as the separator
     String locString =
@@ -110,23 +99,21 @@ public final class GraphXmlTransformer {
   }
 
   private Iterator<Namespace> getRootNamespaces(List<String> eipNamespaces) {
-    Namespace defaultNamespace = this.eventFactory.createNamespace(DEFAULT_NAMESPACE);
+    Namespace defaultNamespace = this.eventFactory.createNamespace(defaultNamespace());
     Namespace xsiNamespace =
         this.eventFactory.createNamespace(XSI_PREFIX, XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI);
     Stream<Namespace> collectedNamespaces =
-        eipNamespaces.stream()
-            .map(ns -> this.eventFactory.createNamespace(ns, this.mappedNamespaceUris.get(ns)));
-
+        eipNamespaces.stream().map(ns -> this.eventFactory.createNamespace(ns, getNamespace(ns)));
     return Stream.concat(Stream.of(defaultNamespace, xsiNamespace), collectedNamespaces).iterator();
   }
 
-  private void writeNodes(EipGraph graph, XMLEventWriter writer, NodeTransformerFactory factory) {
+  private void writeNodes(EipGraph graph, XMLEventWriter writer) {
     graph
         .traverse()
         .forEach(
             node -> {
-              NodeTransformer transformer = factory.getTransformer(node.eipId());
-              List<XmlElement> elements = transformer.apply(node);
+              NodeTransformer transformer = getTransformer(node.eipId());
+              List<XmlElement> elements = transformer.apply(node, graph);
               elements.forEach(e -> writeElement(e, writer));
             });
   }
@@ -136,7 +123,7 @@ public final class GraphXmlTransformer {
       writer.add(
           this.eventFactory.createStartElement(
               element.prefix(),
-              this.mappedNamespaceUris.get(element.prefix()),
+              getNamespace(element.prefix()),
               element.localName(),
               attributeIterator(element.attributes()),
               null));
@@ -147,9 +134,7 @@ public final class GraphXmlTransformer {
 
       writer.add(
           this.eventFactory.createEndElement(
-              element.prefix(),
-              this.mappedNamespaceUris.get(element.prefix()),
-              element.localName()));
+              element.prefix(), getNamespace(element.prefix()), element.localName()));
     } catch (XMLStreamException e) {
       throw new RuntimeException(e);
     }
@@ -159,14 +144,5 @@ public final class GraphXmlTransformer {
     return attributes.entrySet().stream()
         .map(e -> this.eventFactory.createAttribute(e.getKey(), e.getValue().toString()))
         .iterator();
-  }
-
-  // TODO: Should this be calculated or configured?
-  private static String getSchemaLocation(String eipNamespace) {
-    String path =
-        ("integration".equals(eipNamespace))
-            ? "spring-integration.xsd"
-            : String.format("%s/spring-integration-%s.xsd", eipNamespace, eipNamespace);
-    return BASE_SCHEMA_LOCATION.resolve(path).toString();
   }
 }

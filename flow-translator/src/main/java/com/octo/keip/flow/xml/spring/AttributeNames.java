@@ -1,7 +1,7 @@
 package com.octo.keip.flow.xml.spring;
 
 
-public class SpringIntegrationAttrNames {
+public class AttributeNames {
   // TODO: Check which of these needs to be made configurable/extracted.
   public static final String ID = "id";
   public static final String CHANNEL = "channel";

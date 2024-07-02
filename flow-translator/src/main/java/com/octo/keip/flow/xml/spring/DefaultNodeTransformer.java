@@ -1,10 +1,10 @@
 package com.octo.keip.flow.xml.spring;
 
-import static com.octo.keip.flow.xml.spring.SpringIntegrationAttrNames.CHANNEL;
-import static com.octo.keip.flow.xml.spring.SpringIntegrationAttrNames.DISCARD_CHANNEL;
-import static com.octo.keip.flow.xml.spring.SpringIntegrationAttrNames.ID;
-import static com.octo.keip.flow.xml.spring.SpringIntegrationAttrNames.INPUT_CHANNEL;
-import static com.octo.keip.flow.xml.spring.SpringIntegrationAttrNames.OUTPUT_CHANNEL;
+import static com.octo.keip.flow.xml.spring.AttributeNames.CHANNEL;
+import static com.octo.keip.flow.xml.spring.AttributeNames.DISCARD_CHANNEL;
+import static com.octo.keip.flow.xml.spring.AttributeNames.ID;
+import static com.octo.keip.flow.xml.spring.AttributeNames.INPUT_CHANNEL;
+import static com.octo.keip.flow.xml.spring.AttributeNames.OUTPUT_CHANNEL;
 
 import com.octo.keip.flow.model.ConnectionType;
 import com.octo.keip.flow.model.EdgeProps;
@@ -23,105 +23,110 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+// TODO: Add some explanatory docs here.
 public class DefaultNodeTransformer implements NodeTransformer {
 
   private static final EipId DIRECT_CHANNEL = new EipId("integration", "channel");
 
-  private final EipGraph graph;
-
-  public DefaultNodeTransformer(EipGraph graph) {
-    this.graph = graph;
-  }
-
   @Override
-  public List<XmlElement> apply(EipNode node) {
+  public List<XmlElement> apply(EipNode node, EipGraph graph) {
     if (!validate(node, graph.predecessors(node), graph.successors(node))) {
       throw new IllegalArgumentException(
           "The default node to xml transformer only handles single input/output components");
     }
 
     XmlElement element = BaseNodeTransformation.toXmlElement(node);
-    element = updateAttributes(node, element);
+    DefaultTransformation transformation = new DefaultTransformation(node, graph);
+    element = transformation.updateAttributes(element);
 
     List<XmlElement> elements = new ArrayList<>();
     elements.add(element);
-    elements.addAll(createAdditionalElements(node));
+    elements.addAll(transformation.createAdditionalElements());
     return elements;
   }
 
-  public XmlElement updateAttributes(EipNode node, XmlElement element) {
-    Map<String, Object> updatedAttrs = new LinkedHashMap<>();
-    updatedAttrs.put(ID, node.id());
-    addChannelAttributes(updatedAttrs, node);
-    updatedAttrs.putAll(element.attributes());
-    return new XmlElement(element.prefix(), element.localName(), updatedAttrs, element.children());
-  }
+  private record DefaultTransformation(EipNode node, EipGraph graph) {
 
-  // TODO: Consider rolling into toXml method
-  public List<XmlElement> createAdditionalElements(EipNode node) {
-    if (Role.CHANNEL.equals(node.role())) {
-      return Collections.emptyList();
+    public XmlElement updateAttributes(XmlElement element) {
+      Map<String, Object> updatedAttrs = new LinkedHashMap<>();
+      updatedAttrs.put(ID, this.node.id());
+      addChannelAttributes(updatedAttrs);
+      updatedAttrs.putAll(element.attributes());
+      return new XmlElement(
+          element.prefix(), element.localName(), updatedAttrs, element.children());
     }
 
-    // Create downstream channels
-    return this.graph.successors(node).stream()
-        .map(s -> getChannelId(node, s))
-        .map(
-            channelId ->
-                new XmlElement(
-                    DIRECT_CHANNEL.namespace(),
-                    DIRECT_CHANNEL.name(),
-                    Map.of(ID, channelId),
-                    Collections.emptyList()))
-        .toList();
-  }
-
-  private void addChannelAttributes(Map<String, Object> attributes, EipNode node) {
-    if (Role.CHANNEL.equals(node.role())) {
-      return;
-    }
-    Optional<EipNode> predecessor = this.graph.predecessors(node).stream().findFirst();
-    Optional<EipNode> successor = this.graph.successors(node).stream().findFirst();
-
-    switch (node.connectionType()) {
-      case PASSTHRU -> {
-        predecessor.ifPresent(p -> attributes.put(INPUT_CHANNEL, getChannelId(p, node)));
-        successor.ifPresent(s -> attributes.put(OUTPUT_CHANNEL, getChannelId(node, s)));
+    public List<XmlElement> createAdditionalElements() {
+      if (Role.CHANNEL.equals(this.node.role())) {
+        return Collections.emptyList();
       }
-      case SINK -> predecessor.ifPresent(p -> attributes.put(CHANNEL, getChannelId(p, node)));
-      case SOURCE -> successor.ifPresent(s -> attributes.put(CHANNEL, getChannelId(node, s)));
-      case TEE -> {
-        // Assumes exactly two successors - an output-channel and a discard-channel
-        predecessor.ifPresent(p -> attributes.put(INPUT_CHANNEL, getChannelId(p, node)));
-        attributes.putAll(getTeeOutgoingChannelAttrs(node));
-      }
-      default ->
-          throw new IllegalStateException("Unexpected connectionType: " + node.connectionType());
-    }
-  }
 
-  private Map<String, Object> getTeeOutgoingChannelAttrs(EipNode node) {
-    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-    for (EipNode successor : this.graph.successors(node)) {
-      EdgeType type =
-          this.graph.getEdgeProps(node, successor).map(EdgeProps::type).orElse(EdgeType.DEFAULT);
-      if (type.equals(EdgeType.DISCARD)) {
-        map.put(DISCARD_CHANNEL, getChannelId(node, successor));
+      // Create downstream channels
+      return this.graph.successors(this.node).stream()
+          .map(s -> getChannelId(this.node, s))
+          .map(
+              channelId ->
+                  new XmlElement(
+                      DIRECT_CHANNEL.namespace(),
+                      DIRECT_CHANNEL.name(),
+                      Map.of(ID, channelId),
+                      Collections.emptyList()))
+          .toList();
+    }
+
+    private void addChannelAttributes(Map<String, Object> attributes) {
+      if (Role.CHANNEL.equals(this.node.role())) {
+        return;
+      }
+      Optional<EipNode> predecessor = this.graph.predecessors(this.node).stream().findFirst();
+      Optional<EipNode> successor = this.graph.successors(this.node).stream().findFirst();
+
+      switch (this.node.connectionType()) {
+        case PASSTHRU -> {
+          predecessor.ifPresent(p -> attributes.put(INPUT_CHANNEL, getChannelId(p, this.node)));
+          successor.ifPresent(s -> attributes.put(OUTPUT_CHANNEL, getChannelId(this.node, s)));
+        }
+        case SINK ->
+            predecessor.ifPresent(p -> attributes.put(CHANNEL, getChannelId(p, this.node)));
+        case SOURCE ->
+            successor.ifPresent(s -> attributes.put(CHANNEL, getChannelId(this.node, s)));
+        case TEE -> {
+          // Assumes exactly two successors - an output-channel and a discard-channel
+          predecessor.ifPresent(p -> attributes.put(INPUT_CHANNEL, getChannelId(p, this.node)));
+          attributes.putAll(getTeeOutgoingChannelAttrs());
+        }
+        default ->
+            throw new IllegalStateException(
+                "Unexpected connectionType: " + this.node.connectionType());
+      }
+    }
+
+    private Map<String, Object> getTeeOutgoingChannelAttrs() {
+      LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+      for (EipNode successor : this.graph.successors(this.node)) {
+        EdgeType type =
+            this.graph
+                .getEdgeProps(this.node, successor)
+                .map(EdgeProps::type)
+                .orElse(EdgeType.DEFAULT);
+        if (type.equals(EdgeType.DISCARD)) {
+          map.put(DISCARD_CHANNEL, getChannelId(this.node, successor));
+        } else {
+          map.put(OUTPUT_CHANNEL, getChannelId(this.node, successor));
+        }
+      }
+      return map;
+    }
+
+    // TODO: Might be used by other transformers. Consider extracting.
+    public String getChannelId(EipNode source, EipNode target) {
+      if (Role.CHANNEL.equals(source.role())) {
+        return source.id();
+      } else if (Role.CHANNEL.equals(target.role())) {
+        return target.id();
       } else {
-        map.put(OUTPUT_CHANNEL, getChannelId(node, successor));
+        return this.graph.getEdgeProps(source, target).map(EdgeProps::id).orElseThrow();
       }
-    }
-    return map;
-  }
-
-  // TODO: Might be used by other transformers. Consider extracting.
-  public String getChannelId(EipNode source, EipNode target) {
-    if (Role.CHANNEL.equals(source.role())) {
-      return source.id();
-    } else if (Role.CHANNEL.equals(target.role())) {
-      return target.id();
-    } else {
-      return this.graph.getEdgeProps(source, target).map(EdgeProps::id).orElseThrow();
     }
   }
 

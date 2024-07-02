@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.octo.keip.flow.dto.Flow
 import com.octo.keip.flow.graph.GuavaGraph
+import com.octo.keip.flow.xml.spring.IntegrationGraphTransformer
 import spock.lang.Specification
 
 import javax.xml.transform.OutputKeys
@@ -14,7 +15,7 @@ import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.stream.StreamSource
 import java.nio.file.Path
 
-class GraphXmlTransformerTest extends Specification {
+class GraphTransformerTest extends Specification {
 
     private static final NAMESPACES = [
             "beans"      : "http://www.springframework.org/schema/beans",
@@ -29,7 +30,7 @@ class GraphXmlTransformerTest extends Specification {
         // TODO: Directly create a graph fake
         def flow = mapper.readValue(getFlowJson(), Flow.class)
         def graph = GuavaGraph.from(flow)
-        def xmlTransformer = new GraphXmlTransformer(NAMESPACES)
+        def xmlTransformer = new IntegrationGraphTransformer(NAMESPACES)
         def baos = new ByteArrayOutputStream()
         def writer = new BufferedWriter(new OutputStreamWriter(baos))
 
@@ -43,7 +44,7 @@ class GraphXmlTransformerTest extends Specification {
     // TODO: remove
     static BufferedReader getFlowJson() {
         Path path = Path.of("tmp").resolve("flowGraph.json")
-        return GraphXmlTransformerTest.class.getClassLoader().getResource(path.toString()).newReader()
+        return GraphTransformerTest.class.getClassLoader().getResource(path.toString()).newReader()
     }
 
     private static String formatXml(ByteArrayOutputStream byteStream) throws TransformerException {
