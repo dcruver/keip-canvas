@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 
 // TODO: Add some explanatory docs here.
+// TODO: Handle explicit connections to channel components
 public class DefaultNodeTransformer implements NodeTransformer {
 
   private static final EipId DIRECT_CHANNEL = new EipId("integration", "channel");

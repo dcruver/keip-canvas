@@ -4,6 +4,12 @@ import com.ctc.wstx.stax.WstxEventFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
 import com.octo.keip.flow.model.EipGraph;
 import com.octo.keip.flow.model.EipId;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
@@ -19,9 +25,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
-// TODO: EipNodeXmlTranslator registry
-// TODO: Support pretty-printing?
 public abstract class GraphTransformer {
 
   private final XMLEventFactory eventFactory = WstxEventFactory.newFactory();
@@ -30,7 +40,6 @@ public abstract class GraphTransformer {
   private static final String XSI_PREFIX = "xsi";
 
   // TODO: Could potentially move Writer to ctor
-  // TODO: Handle explicit connections to channel components
   public final void toXml(EipGraph graph, Writer output) throws XMLStreamException {
     XMLEventWriter writer = outputFactory.createXMLEventWriter(output);
     writer.setDefaultNamespace(defaultNamespace());
@@ -48,6 +57,16 @@ public abstract class GraphTransformer {
 
     writer.flush();
     writer.close();
+  }
+
+  public final String prettyPrintXml(EipGraph graph) throws TransformerException {
+    try (var baos = new ByteArrayOutputStream();
+        var writer = new BufferedWriter(new OutputStreamWriter(baos))) {
+      toXml(graph, writer);
+      return formatXml(baos);
+    } catch (IOException | XMLStreamException e) {
+      throw new TransformerException(e);
+    }
   }
 
   protected abstract String defaultNamespace();
@@ -144,5 +163,20 @@ public abstract class GraphTransformer {
     return attributes.entrySet().stream()
         .map(e -> this.eventFactory.createAttribute(e.getKey(), e.getValue().toString()))
         .iterator();
+  }
+
+  private static String formatXml(ByteArrayOutputStream baos) throws TransformerException {
+    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    Transformer transformer = transformerFactory.newTransformer();
+
+    // pretty print by indention
+    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+    // add standalone="yes", add line break before the root element
+    transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+
+    var source = new StreamSource(new ByteArrayInputStream(baos.toByteArray()));
+    var result = new StringWriter();
+    transformer.transform(source, new StreamResult(result));
+    return result.toString();
   }
 }
