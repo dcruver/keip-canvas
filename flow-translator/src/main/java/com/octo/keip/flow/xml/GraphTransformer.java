@@ -79,7 +79,6 @@ public abstract class GraphTransformer {
 
   protected abstract String getSchemaLocation(String namespaceUri);
 
-  // TODO: Abstract creating the root element
   private StartElement createRootElement(EipGraph graph) {
     List<String> eipNamespaces = collectEipNamespaces(graph);
     return eventFactory.createStartElement(

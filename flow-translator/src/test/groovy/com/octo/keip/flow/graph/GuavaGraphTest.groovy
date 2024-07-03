@@ -3,6 +3,7 @@ package com.octo.keip.flow.graph
 import com.octo.keip.flow.dto.Flow
 import com.octo.keip.flow.dto.FlowEdge
 import com.octo.keip.flow.model.EdgeProps
+import com.octo.keip.flow.model.EipId
 import com.octo.keip.flow.model.EipNode
 import spock.lang.Specification
 
@@ -199,9 +200,8 @@ class GuavaGraphTest extends Specification {
         thrown(IllegalArgumentException)
     }
 
-    // TODO: Use Builder?
     private static EipNode newNode(String id) {
-        return new EipNode(id, null, null, null, null, null, null, null)
+        return EipNode.builder(id, new EipId("test", "a")).build()
     }
 
     private static List<String> getIds(Stream<EipNode> nodes) {
