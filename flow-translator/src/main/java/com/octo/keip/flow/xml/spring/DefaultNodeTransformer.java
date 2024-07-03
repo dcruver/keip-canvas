@@ -120,7 +120,7 @@ public class DefaultNodeTransformer implements NodeTransformer {
     }
 
     // TODO: Might be used by other transformers. Consider extracting.
-    public String getChannelId(EipNode source, EipNode target) {
+    private String getChannelId(EipNode source, EipNode target) {
       if (Role.CHANNEL.equals(source.role())) {
         return source.id();
       } else if (Role.CHANNEL.equals(target.role())) {

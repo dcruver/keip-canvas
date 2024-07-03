@@ -56,12 +56,39 @@ public record EipNode(
     return id;
   }
 
-  public static EipNodeBuilder builder(String id, EipId eipId) {
-    EipNodeBuilder builder = new EipNodeBuilder();
-    return builder.id(id).eipId(eipId);
+  public interface IdStep {
+    EipIdStep id(String id);
   }
 
-  public static class EipNodeBuilder {
+  public interface EipIdStep {
+    RoleStep eipId(EipId eipId);
+  }
+
+  public interface RoleStep {
+    ConnectionTypeStep role(Role role);
+  }
+
+  public interface ConnectionTypeStep {
+    Build connectionType(ConnectionType connectionType);
+  }
+
+  public interface Build {
+    EipNode build();
+
+    Build label(String label);
+
+    Build description(String description);
+
+    Build attributes(Map<String, Object> attributes);
+
+    Build children(List<EipChild> children);
+  }
+
+  public static IdStep builder() {
+    return new Builder();
+  }
+
+  public static class Builder implements Build, IdStep, EipIdStep, RoleStep, ConnectionTypeStep {
     private String id;
     private EipId eipId;
     private String label;
@@ -71,53 +98,9 @@ public record EipNode(
     private Map<String, Object> attributes;
     private List<EipChild> children;
 
-    private EipNodeBuilder() {}
-
-    public EipNodeBuilder id(String id) {
-      this.id = id;
-      return this;
-    }
-
-    public EipNodeBuilder eipId(EipId eipId) {
-      this.eipId = eipId;
-      return this;
-    }
-
-    public EipNodeBuilder label(String label) {
-      this.label = label;
-      return this;
-    }
-
-    public EipNodeBuilder description(String description) {
-      this.description = description;
-      return this;
-    }
-
-    public EipNodeBuilder role(Role role) {
-      this.role = role;
-      return this;
-    }
-
-    public EipNodeBuilder connectionType(ConnectionType connectionType) {
-      this.connectionType = connectionType;
-      return this;
-    }
-
-    public EipNodeBuilder attributes(Map<String, Object> attributes) {
-      this.attributes = attributes;
-      return this;
-    }
-
-    public EipNodeBuilder children(List<EipChild> children) {
-      this.children = children;
-      return this;
-    }
+    private Builder() {}
 
     public EipNode build() {
-      if (this.id == null || this.id.isBlank() || this.eipId == null) {
-        throw new IllegalArgumentException("Both 'id' and 'eipId' fields must be defined");
-      }
-
       Map<String, Object> wrappedAttributes =
           this.attributes == null
               ? Collections.emptyMap()
@@ -130,6 +113,54 @@ public record EipNode(
 
       return new EipNode(
           id, eipId, label, description, role, connectionType, wrappedAttributes, wrappedChildren);
+    }
+
+    @Override
+    public EipIdStep id(String id) {
+      this.id = id;
+      return this;
+    }
+
+    @Override
+    public RoleStep eipId(EipId eipId) {
+      this.eipId = eipId;
+      return this;
+    }
+
+    @Override
+    public ConnectionTypeStep role(Role role) {
+      this.role = role;
+      return this;
+    }
+
+    @Override
+    public Build connectionType(ConnectionType connectionType) {
+      this.connectionType = connectionType;
+      return this;
+    }
+
+    @Override
+    public Build label(String label) {
+      this.label = label;
+      return this;
+    }
+
+    @Override
+    public Build description(String description) {
+      this.description = description;
+      return this;
+    }
+
+    @Override
+    public Build attributes(Map<String, Object> attributes) {
+      this.attributes = attributes;
+      return this;
+    }
+
+    @Override
+    public Build children(List<EipChild> children) {
+      this.children = children;
+      return this;
     }
   }
 }

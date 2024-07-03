@@ -2,9 +2,11 @@ package com.octo.keip.flow.graph
 
 import com.octo.keip.flow.dto.Flow
 import com.octo.keip.flow.dto.FlowEdge
+import com.octo.keip.flow.model.ConnectionType
 import com.octo.keip.flow.model.EdgeProps
 import com.octo.keip.flow.model.EipId
 import com.octo.keip.flow.model.EipNode
+import com.octo.keip.flow.model.Role
 import spock.lang.Specification
 
 import java.util.stream.Stream
@@ -201,7 +203,11 @@ class GuavaGraphTest extends Specification {
     }
 
     private static EipNode newNode(String id) {
-        return EipNode.builder(id, new EipId("test", "a")).build()
+        return EipNode.builder().id(id)
+                .eipId(new EipId("test", "a"))
+                .role(Role.TRANSFORMER)
+                .connectionType(ConnectionType.PASSTHRU)
+                .build()
     }
 
     private static List<String> getIds(Stream<EipNode> nodes) {
