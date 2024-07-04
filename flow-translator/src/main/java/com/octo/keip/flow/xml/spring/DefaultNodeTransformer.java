@@ -27,7 +27,7 @@ import java.util.Set;
 // TODO: Handle explicit connections to channel components
 public class DefaultNodeTransformer implements NodeTransformer {
 
-  private static final EipId DIRECT_CHANNEL = new EipId("integration", "channel");
+  static final EipId DIRECT_CHANNEL = new EipId("integration", "channel");
 
   @Override
   public List<XmlElement> apply(EipNode node, EipGraph graph) {
@@ -42,13 +42,13 @@ public class DefaultNodeTransformer implements NodeTransformer {
 
     List<XmlElement> elements = new ArrayList<>();
     elements.add(element);
-    elements.addAll(transformation.createAdditionalElements());
+    elements.addAll(transformation.createDirectChannels());
     return elements;
   }
 
-  private record DefaultTransformation(EipNode node, EipGraph graph) {
+  record DefaultTransformation(EipNode node, EipGraph graph) {
 
-    public XmlElement updateAttributes(XmlElement element) {
+    private XmlElement updateAttributes(XmlElement element) {
       Map<String, Object> updatedAttrs = new LinkedHashMap<>();
       updatedAttrs.put(ID, this.node.id());
       addChannelAttributes(updatedAttrs);
@@ -57,13 +57,20 @@ public class DefaultNodeTransformer implements NodeTransformer {
           element.prefix(), element.localName(), updatedAttrs, element.children());
     }
 
-    public List<XmlElement> createAdditionalElements() {
+    /**
+     * Creates the intermediate channels between the node and its direct successors, provided the
+     * current node and the successors are not channel nodes themselves.
+     *
+     * @return A list of direct channels
+     */
+    List<XmlElement> createDirectChannels() {
       if (Role.CHANNEL.equals(this.node.role())) {
         return Collections.emptyList();
       }
 
       // Create downstream channels
       return this.graph.successors(this.node).stream()
+          .filter(s -> !Role.CHANNEL.equals(s.role()))
           .map(s -> getChannelId(this.node, s))
           .map(
               channelId ->
@@ -75,7 +82,7 @@ public class DefaultNodeTransformer implements NodeTransformer {
           .toList();
     }
 
-    private void addChannelAttributes(Map<String, Object> attributes) {
+    void addChannelAttributes(Map<String, Object> attributes) {
       if (Role.CHANNEL.equals(this.node.role())) {
         return;
       }
@@ -102,7 +109,7 @@ public class DefaultNodeTransformer implements NodeTransformer {
       }
     }
 
-    private Map<String, Object> getTeeOutgoingChannelAttrs() {
+    Map<String, Object> getTeeOutgoingChannelAttrs() {
       LinkedHashMap<String, Object> map = new LinkedHashMap<>();
       for (EipNode successor : this.graph.successors(this.node)) {
         EdgeType type =

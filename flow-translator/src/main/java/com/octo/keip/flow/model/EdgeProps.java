@@ -9,6 +9,10 @@ public record EdgeProps(String id, EdgeType type) {
     DISCARD;
   }
 
+  public EdgeProps(String id) {
+    this(id, EdgeType.DEFAULT);
+  }
+
   public static EdgeProps from(FlowEdge edge) {
     return new EdgeProps(edge.id(), edge.sourceHandle());
   }
