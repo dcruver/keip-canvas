@@ -14,11 +14,7 @@ class BaseNodeTransformationTest extends Specification {
     def "single node to xml element"() {
         given:
         def name = "top"
-        def node = EipNode.builder().id("1")
-                .eipId(new EipId(TEST_NS, name))
-                .role(Role.TRANSFORMER)
-                .connectionType(ConnectionType.PASSTHRU)
-                .build()
+        def node = createNodeStub("1", "top")
 
         when:
         def element = BaseNodeTransformation.toXmlElement(node)
@@ -40,13 +36,9 @@ class BaseNodeTransformationTest extends Specification {
 
         def name = "top"
         def topAttrs = ["attr1": "123", "attr2": "abc"]
-        def node = EipNode.builder().id("1")
-                .eipId(new EipId(TEST_NS, name))
-                .role(Role.TRANSFORMER)
-                .connectionType(ConnectionType.PASSTHRU)
-                .attributes(topAttrs)
-                .children([child])
-                .build()
+        def node = createNodeStub("1", name)
+        node.attributes() >> topAttrs
+        node.children() >> [child]
 
         when:
         def element = BaseNodeTransformation.toXmlElement(node)
@@ -79,12 +71,8 @@ class BaseNodeTransformationTest extends Specification {
         def child2 = new EipChild("child2", childAttrs2, null)
 
         def name = "top"
-        def node = EipNode.builder().id("1")
-                .eipId(new EipId(TEST_NS, name))
-                .role(Role.TRANSFORMER)
-                .connectionType(ConnectionType.PASSTHRU)
-                .children([child1, child2])
-                .build()
+        def node = createNodeStub("1", name)
+        node.children() >> [child1, child2]
 
         when:
         def element = BaseNodeTransformation.toXmlElement(node)
@@ -106,5 +94,15 @@ class BaseNodeTransformationTest extends Specification {
         aChild2.localName() == child2.name()
         aChild2.attributes() == childAttrs2
         aChild2.children().isEmpty()
+    }
+
+    EipNode createNodeStub(String nodeId, String eipName) {
+        EipNode stub = Stub {
+            id() >> nodeId
+            eipId() >> new EipId(TEST_NS, eipName)
+            role() >> Role.TRANSFORMER
+            connectionType() >> ConnectionType.PASSTHRU
+        }
+        return stub
     }
 }

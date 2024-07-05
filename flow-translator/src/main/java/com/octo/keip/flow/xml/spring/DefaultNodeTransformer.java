@@ -82,6 +82,10 @@ public class DefaultNodeTransformer implements NodeTransformer {
           .toList();
     }
 
+    /**
+     * Adds attributes for targeting the intermediate channels connecting each node with its
+     * immediate predecessors and successors.
+     */
     void addChannelAttributes(Map<String, Object> attributes) {
       if (Role.CHANNEL.equals(this.node.role())) {
         return;
@@ -109,7 +113,7 @@ public class DefaultNodeTransformer implements NodeTransformer {
       }
     }
 
-    Map<String, Object> getTeeOutgoingChannelAttrs() {
+    private Map<String, Object> getTeeOutgoingChannelAttrs() {
       LinkedHashMap<String, Object> map = new LinkedHashMap<>();
       for (EipNode successor : this.graph.successors(this.node)) {
         EdgeType type =

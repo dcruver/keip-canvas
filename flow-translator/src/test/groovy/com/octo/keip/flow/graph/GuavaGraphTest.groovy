@@ -203,11 +203,9 @@ class GuavaGraphTest extends Specification {
     }
 
     private static EipNode newNode(String id) {
-        return EipNode.builder().id(id)
-                .eipId(new EipId("test", "a"))
-                .role(Role.TRANSFORMER)
-                .connectionType(ConnectionType.PASSTHRU)
-                .build()
+        return new EipNode(
+                id, new EipId("test", "a"), null, null,
+                Role.TRANSFORMER, ConnectionType.PASSTHRU, null, null)
     }
 
     private static List<String> getIds(Stream<EipNode> nodes) {
