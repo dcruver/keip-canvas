@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 
 // TODO: Add some explanatory docs here.
-// TODO: Handle explicit connections to channel components
 public class DefaultNodeTransformer implements NodeTransformer {
 
   static final EipId DIRECT_CHANNEL = new EipId("integration", "channel");
@@ -103,7 +102,7 @@ public class DefaultNodeTransformer implements NodeTransformer {
         case SOURCE ->
             successor.ifPresent(s -> attributes.put(CHANNEL, getChannelId(this.node, s)));
         case TEE -> {
-          // Assumes exactly two successors - an output-channel and a discard-channel
+          // Assumes at most two successors - an output-channel and an optional discard-channel
           predecessor.ifPresent(p -> attributes.put(INPUT_CHANNEL, getChannelId(p, this.node)));
           attributes.putAll(getTeeOutgoingChannelAttrs());
         }

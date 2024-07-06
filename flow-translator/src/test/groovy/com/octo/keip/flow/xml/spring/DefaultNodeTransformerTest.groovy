@@ -8,7 +8,11 @@ import com.octo.keip.flow.model.EipNode
 import com.octo.keip.flow.model.Role
 import spock.lang.Specification
 
+import static com.octo.keip.flow.xml.spring.AttributeNames.CHANNEL
+import static com.octo.keip.flow.xml.spring.AttributeNames.DISCARD_CHANNEL
 import static com.octo.keip.flow.xml.spring.AttributeNames.ID
+import static com.octo.keip.flow.xml.spring.AttributeNames.INPUT_CHANNEL
+import static com.octo.keip.flow.xml.spring.AttributeNames.OUTPUT_CHANNEL
 import static com.octo.keip.flow.xml.spring.DefaultNodeTransformer.DIRECT_CHANNEL
 
 class DefaultNodeTransformerTest extends Specification {
@@ -51,35 +55,23 @@ class DefaultNodeTransformerTest extends Specification {
         thrown(IllegalArgumentException)
     }
 
-    // TODO: Fix
-//    def "nodes with a tee connection type are allowed an optional discard channel"() {
-//        given:
-//        def node = EipNode.builder()
-//                          .id("1")
-//                          .eipId(createEipId("main"))
-//                          .role(Role.ROUTER)
-//                          .connectionType(ConnectionType.TEE)
-//                          .build()
-//
-//        def out = EipNode.builder()
-//                         .id("out")
-//                         .eipId(createEipId("target"))
-//                         .role(Role.TRANSFORMER)
-//                         .connectionType(ConnectionType.PASSTHRU)
-//                         .build()
-//
-//        def discard = EipNode.builder()
-//                             .id("discard")
-//                             .eipId(createEipId("side"))
-//                             .role(Role.TRANSFORMER)
-//                             .connectionType(ConnectionType.PASSTHRU)
-//                             .build()
-//        graph.predecessors(node) >> []
-//        graph.successors(node) >> [out, discard]
-//
-//        expect:
-//        transformer.apply(node, graph)
-//    }
+
+    def "'tee' node with 3 successors fails validation"() {
+        given:
+        def postNode = createNodeStub("post1")
+        def discardNode = createNodeStub("post2")
+        def extraNode = createNodeStub("post3")
+
+        graph.successors(testNode) >> [postNode, discardNode, extraNode]
+
+        when:
+        transformer.apply(testNode, graph)
+
+        then:
+        testNode.connectionType() >> ConnectionType.TEE
+
+        thrown(IllegalArgumentException)
+    }
 
     def "create intermediate channel between two non-channel nodes"() {
         given:
@@ -89,7 +81,7 @@ class DefaultNodeTransformerTest extends Specification {
         graph.successors(testNode) >> [target]
 
         def channelId = "chan1"
-        graph.getEdgeProps(testNode, target) >> Optional.of(new EdgeProps(channelId))
+        graph.getEdgeProps(testNode, target) >> createEdgeProps(channelId)
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
@@ -130,7 +122,7 @@ class DefaultNodeTransformerTest extends Specification {
         Role.CHANNEL  | Role.CHANNEL
     }
 
-    def "addChannelAttributes with no predecessors or successors -> attributes unchanged"() {
+    def "addChannelAttributes with no predecessors or successors -> attributes unchanged"(ConnectionType connectionType) {
         given:
         def attributes = [:] as Map<String, Object>
         graph.predecessors(testNode) >> []
@@ -141,7 +133,12 @@ class DefaultNodeTransformerTest extends Specification {
         transformation.addChannelAttributes(attributes)
 
         then:
+        testNode.connectionType() >> connectionType
+
         attributes.isEmpty()
+
+        where:
+        connectionType << ConnectionType.values()
     }
 
     def "addChannelAttributes with channel node -> attributes unchanged"() {
@@ -160,6 +157,162 @@ class DefaultNodeTransformerTest extends Specification {
         attributes.isEmpty()
     }
 
+    def "addChannelAttributes with 'passthru' node -> input and output channel attributes added"() {
+        given:
+        def attributes = [:] as Map<String, Object>
+
+        def preNode = createNodeStub("pre1")
+        def postNode = createNodeStub("post1")
+
+        graph.predecessors(testNode) >> [preNode]
+        graph.successors(testNode) >> [postNode]
+
+        graph.getEdgeProps(preNode, testNode) >> createEdgeProps("in")
+        graph.getEdgeProps(testNode, postNode) >> createEdgeProps("out")
+
+        when:
+        def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
+        transformation.addChannelAttributes(attributes)
+
+        then:
+        testNode.connectionType() >> ConnectionType.PASSTHRU
+
+        attributes.size() == 2
+        attributes[INPUT_CHANNEL] == "in"
+        attributes[OUTPUT_CHANNEL] == "out"
+    }
+
+    def "addChannelAttributes with 'sink' node -> channel attribute is added"() {
+        given:
+        def attributes = [:] as Map<String, Object>
+
+        def preNode = createNodeStub("pre1")
+        graph.predecessors(testNode) >> [preNode]
+        graph.getEdgeProps(preNode, testNode) >> createEdgeProps("chanId")
+
+        when:
+        def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
+        transformation.addChannelAttributes(attributes)
+
+        then:
+        testNode.connectionType() >> ConnectionType.SINK
+
+        attributes.size() == 1
+        attributes[CHANNEL] == "chanId"
+    }
+
+    def "addChannelAttributes with 'source' node -> channel attribute is added"() {
+        given:
+        def attributes = [:] as Map<String, Object>
+
+        def postNode = createNodeStub("pre1")
+        graph.successors(testNode) >> [postNode]
+        graph.getEdgeProps(testNode, postNode) >> createEdgeProps("chanId")
+
+        when:
+        def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
+        transformation.addChannelAttributes(attributes)
+
+        then:
+        testNode.connectionType() >> ConnectionType.SOURCE
+
+        attributes.size() == 1
+        attributes[CHANNEL] == "chanId"
+    }
+
+    def "addChannelAttributes with 'tee' node and no discard channel -> input and output channel attributes added"() {
+        given:
+        def attributes = [:] as Map<String, Object>
+
+        def preNode = createNodeStub("pre1")
+        def postNode = createNodeStub("post1")
+
+        graph.predecessors(testNode) >> [preNode]
+        graph.successors(testNode) >> [postNode]
+
+        graph.getEdgeProps(preNode, testNode) >> createEdgeProps("in")
+        graph.getEdgeProps(testNode, postNode) >> createEdgeProps("out")
+
+        when:
+        def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
+        transformation.addChannelAttributes(attributes)
+
+        then:
+        testNode.connectionType() >> ConnectionType.TEE
+
+        attributes.size() == 2
+        attributes[INPUT_CHANNEL] == "in"
+        attributes[OUTPUT_CHANNEL] == "out"
+    }
+
+    def "addChannelAttributes with 'tee' node and discard channel -> input, output, and discard channel attributes added"() {
+        given:
+        def attributes = [:] as Map<String, Object>
+
+        def preNode = createNodeStub("pre1")
+        def postNode = createNodeStub("post1")
+        def discardNode = createNodeStub("post2")
+
+        graph.predecessors(testNode) >> [preNode]
+        graph.successors(testNode) >> [postNode, discardNode]
+
+        graph.getEdgeProps(preNode, testNode) >> createEdgeProps("in")
+        graph.getEdgeProps(testNode, postNode) >> createEdgeProps("out")
+        graph.getEdgeProps(testNode, discardNode) >> Optional.of(new EdgeProps("discard",
+                EdgeProps.EdgeType.DISCARD))
+
+        when:
+        def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
+        transformation.addChannelAttributes(attributes)
+
+        then:
+        testNode.connectionType() >> ConnectionType.TEE
+
+        attributes.size() == 3
+        attributes[INPUT_CHANNEL] == "in"
+        attributes[OUTPUT_CHANNEL] == "out"
+        attributes[DISCARD_CHANNEL] == "discard"
+    }
+
+    def "addChannelAttributes with missing edge props throws exception"() {
+        given:
+        def attributes = [:] as Map<String, Object>
+
+        def preNode = createNodeStub("pre1")
+        graph.predecessors(testNode) >> [preNode]
+
+        when:
+        def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
+        transformation.addChannelAttributes(attributes)
+
+        then:
+        testNode.connectionType() >> ConnectionType.SINK
+
+        thrown(NoSuchElementException)
+    }
+
+    def "addChannelAttributes with connection to an explicit channel -> channel attributes match channel node id"() {
+        given:
+        def attributes = [:] as Map<String, Object>
+
+        def preNode = createNodeStub("pre1")
+        def postNode = createNodeStub("post1")
+        graph.predecessors(testNode) >> [preNode]
+        graph.successors(testNode) >> [postNode]
+
+        when:
+        def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
+        transformation.addChannelAttributes(attributes)
+
+        then:
+        preNode.role() >> Role.CHANNEL
+        postNode.role() >> Role.CHANNEL
+
+        attributes.size() == 2
+        attributes[INPUT_CHANNEL] == "pre1"
+        attributes[OUTPUT_CHANNEL] == "post1"
+    }
+
     EipNode createNodeStub(String nodeId) {
         EipNode stub = Stub {
             id() >> nodeId
@@ -168,5 +321,9 @@ class DefaultNodeTransformerTest extends Specification {
             connectionType() >> ConnectionType.PASSTHRU
         }
         return stub
+    }
+
+    Optional<EdgeProps> createEdgeProps(String id) {
+        return Optional.of(new EdgeProps(id))
     }
 }
