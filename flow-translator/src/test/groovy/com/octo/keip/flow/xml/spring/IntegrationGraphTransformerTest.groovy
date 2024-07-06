@@ -1,9 +1,9 @@
-package com.octo.keip.flow.xml
+package com.octo.keip.flow.xml.spring
 
 
 import spock.lang.Specification
 
-class GraphTransformerTest extends Specification {
+class IntegrationGraphTransformerTest extends Specification {
 
     private static final NAMESPACES = [
             "beans"      : "http://www.springframework.org/schema/beans",

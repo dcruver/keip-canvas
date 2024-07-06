@@ -2,6 +2,7 @@ package com.octo.keip.flow.xml.spring
 
 import com.octo.keip.flow.model.ConnectionType
 import com.octo.keip.flow.model.EdgeProps
+import com.octo.keip.flow.model.EipChild
 import com.octo.keip.flow.model.EipGraph
 import com.octo.keip.flow.model.EipId
 import com.octo.keip.flow.model.EipNode
@@ -311,6 +312,62 @@ class DefaultNodeTransformerTest extends Specification {
         attributes.size() == 2
         attributes[INPUT_CHANNEL] == "pre1"
         attributes[OUTPUT_CHANNEL] == "post1"
+    }
+
+    def "end-to-end default node transformer apply"() {
+        EipNode inbound = Stub() {
+            id() >> "inbound"
+            eipId() >> new EipId(TEST_NS, "inbound-comp")
+            role() >> Role.ENDPOINT
+            connectionType() >> ConnectionType.SOURCE
+        }
+
+        EipNode outbound = Stub() {
+            id() >> "outbound"
+            eipId() >> new EipId(TEST_NS, "outbound-comp")
+            role() >> Role.ENDPOINT
+            connectionType() >> ConnectionType.SINK
+        }
+
+        def childNode = new EipChild("child1", ["childAttr": "testval3"], null)
+        def attrs = ["testkey1": "testval1"]
+        EipNode middle = Stub() {
+            id() >> "middle"
+            eipId() >> new EipId(TEST_NS, "middle-comp")
+            role() >> Role.TRANSFORMER
+            connectionType() >> ConnectionType.PASSTHRU
+            attributes() >> attrs
+            children() >> [childNode]
+        }
+
+        graph.predecessors(middle) >> [inbound]
+        graph.successors(middle) >> [outbound]
+        graph.getEdgeProps(inbound, middle) >> createEdgeProps("input")
+        graph.getEdgeProps(middle, outbound) >> createEdgeProps("output")
+
+        when:
+        def elements = transformer.apply(middle, graph)
+
+        then:
+        elements.size() == 2
+
+        def first = elements[0]
+        first.prefix() == TEST_NS
+        first.localName() == "middle-comp"
+        first.attributes() == attrs + [(ID): "middle", (INPUT_CHANNEL): "input", (OUTPUT_CHANNEL): "output"]
+        first.children().size() == 1
+
+        def aChild = first.children()[0]
+        aChild.prefix() == TEST_NS
+        aChild.localName() == "child1"
+        aChild.attributes() == childNode.attributes()
+        aChild.children().isEmpty()
+
+        def second = elements[1]
+        second.prefix() == DIRECT_CHANNEL.namespace()
+        second.localName() == DIRECT_CHANNEL.name()
+        second.attributes() == [(ID): "output"]
+        second.children().isEmpty()
     }
 
     EipNode createNodeStub(String nodeId) {
