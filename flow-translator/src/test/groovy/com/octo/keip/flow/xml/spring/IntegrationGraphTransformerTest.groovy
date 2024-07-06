@@ -10,4 +10,6 @@ class IntegrationGraphTransformerTest extends Specification {
             "integration": "http://www.springframework.org/schema/integration",
             "jms"        : "http://www.springframework.org/schema/integration/jms"]
 
+
+
 }
