@@ -129,7 +129,7 @@ export const EipNode = (props: NodeProps<EipNodeData>) => {
     >
       <div>{getNamespacedTitle(data.eipId)}</div>
       <img className="eip-node-image" src={getIconUrl(data.eipId)} />
-      <div style={hasChildren ? { paddingBottom: "0.5rem" } : {}}>
+      <div className="eip-node-label" style={hasChildren ? { marginBottom: "0.5rem" } : {}}>
         <strong>{data.label}</strong>
       </div>
       {hasChildren && (

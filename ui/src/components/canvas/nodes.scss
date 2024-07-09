@@ -15,7 +15,7 @@ $icon-button-focus-shadow:
   min-inline-size: 2rem;
   min-block-size: 2rem;
   max-width: 8rem;
-  max-height: 8rem;
+  max-height: 12rem;
   font-size: 0.5rem;
 
   &:hover {
@@ -49,6 +49,12 @@ $icon-button-focus-shadow:
 
 .eip-node-image {
   padding: layout.$spacing-02;
+}
+
+.eip-node-label {
+  overflow-wrap: break-word;
+  max-height: 3rem;
+  overflow-y: hidden;
 }
 
 .eip-endpoint-node .eip-node-image {
