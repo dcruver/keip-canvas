@@ -136,7 +136,11 @@ public class DefaultNodeTransformer implements NodeTransformer {
       } else if (Role.CHANNEL.equals(target.role())) {
         return target.id();
       } else {
-        return this.graph.getEdgeProps(source, target).map(EdgeProps::id).orElseThrow();
+        // TODO: Consider defaulting to "sourceId-targetId" if no edge prop is found.
+        return this.graph
+            .getEdgeProps(source, target)
+            .map(EdgeProps::id)
+            .orElse(source.id() + "-" + target.id());
       }
     }
   }
