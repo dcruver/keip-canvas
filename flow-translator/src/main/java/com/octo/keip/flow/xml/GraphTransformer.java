@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+// TODO: Provide option to indicate if output XML passed XSD validation
 public abstract class GraphTransformer {
 
   private final XMLEventFactory eventFactory = WstxEventFactory.newFactory();
@@ -39,10 +43,22 @@ public abstract class GraphTransformer {
 
   private static final String XSI_PREFIX = "xsi";
 
+  private final Map<String, NamespaceSpec> registeredNamespaces;
+
+  protected GraphTransformer() {
+    this(Collections.emptyList());
+  }
+
+  protected GraphTransformer(Collection<NamespaceSpec> namespaceSpecs) {
+    this.registeredNamespaces = new HashMap<>();
+    this.registeredNamespaces.put(defaultNamespace().eipNamespace(), defaultNamespace());
+    namespaceSpecs.forEach(s -> this.registeredNamespaces.put(s.eipNamespace(), s));
+  }
+
   // TODO: Could potentially move Writer to ctor
   public final void toXml(EipGraph graph, Writer output) throws XMLStreamException {
     XMLEventWriter writer = outputFactory.createXMLEventWriter(output);
-    writer.setDefaultNamespace(defaultNamespace());
+    writer.setDefaultNamespace(defaultNamespace().xmlNamespace());
 
     writer.add(eventFactory.createStartDocument());
 
@@ -69,15 +85,17 @@ public abstract class GraphTransformer {
     }
   }
 
-  protected abstract String defaultNamespace();
+  public final void registerNamespace(
+      String eipNamespace, String xmlNamespace, String schemaLocation) {
+    this.registeredNamespaces.put(
+        eipNamespace, new NamespaceSpec(eipNamespace, xmlNamespace, schemaLocation));
+  }
+
+  protected abstract NamespaceSpec defaultNamespace();
 
   protected abstract QName rootElement();
 
   protected abstract NodeTransformer getTransformer(EipId id);
-
-  protected abstract String getNamespace(String prefix);
-
-  protected abstract String getSchemaLocation(String namespaceUri);
 
   private StartElement createRootElement(EipGraph graph) {
     List<String> eipNamespaces = collectEipNamespaces(graph);
@@ -98,9 +116,9 @@ public abstract class GraphTransformer {
 
   private Iterator<Attribute> getRootAttributes(List<String> eipNamespaces) {
     Stream<String> defaultNamespaceLocation =
-        Stream.of(defaultNamespace(), getSchemaLocation(defaultNamespace()));
+        Stream.of(defaultNamespace().xmlNamespace(), defaultNamespace().schemaLocation());
     Stream<String> collectedLocations =
-        eipNamespaces.stream().flatMap(ns -> Stream.of(getNamespace(ns), getSchemaLocation(ns)));
+        eipNamespaces.stream().flatMap(ns -> Stream.of(getXmlNamespace(ns), getSchemaLocation(ns)));
 
     // TODO: Figure out how to use line breaks as the separator
     String locString =
@@ -117,11 +135,13 @@ public abstract class GraphTransformer {
   }
 
   private Iterator<Namespace> getRootNamespaces(List<String> eipNamespaces) {
-    Namespace defaultNamespace = this.eventFactory.createNamespace(defaultNamespace());
+    Namespace defaultNamespace =
+        this.eventFactory.createNamespace(defaultNamespace().xmlNamespace());
     Namespace xsiNamespace =
         this.eventFactory.createNamespace(XSI_PREFIX, XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI);
     Stream<Namespace> collectedNamespaces =
-        eipNamespaces.stream().map(ns -> this.eventFactory.createNamespace(ns, getNamespace(ns)));
+        eipNamespaces.stream()
+            .map(ns -> this.eventFactory.createNamespace(ns, getXmlNamespace(ns)));
     return Stream.concat(Stream.of(defaultNamespace, xsiNamespace), collectedNamespaces).iterator();
   }
 
@@ -141,7 +161,7 @@ public abstract class GraphTransformer {
       writer.add(
           this.eventFactory.createStartElement(
               element.prefix(),
-              getNamespace(element.prefix()),
+              getXmlNamespace(element.prefix()),
               element.localName(),
               attributeIterator(element.attributes()),
               null));
@@ -152,10 +172,20 @@ public abstract class GraphTransformer {
 
       writer.add(
           this.eventFactory.createEndElement(
-              element.prefix(), getNamespace(element.prefix()), element.localName()));
+              element.prefix(), getXmlNamespace(element.prefix()), element.localName()));
     } catch (XMLStreamException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private String getXmlNamespace(String eipNamespace) {
+    NamespaceSpec spec = this.registeredNamespaces.get(eipNamespace);
+    return spec == null ? null : spec.xmlNamespace();
+  }
+
+  private String getSchemaLocation(String eipNamespace) {
+    NamespaceSpec spec = this.registeredNamespaces.get(eipNamespace);
+    return spec == null ? null : spec.schemaLocation();
   }
 
   private Iterator<Attribute> attributeIterator(Map<String, Object> attributes) {

@@ -10,6 +10,7 @@ import spock.lang.Specification
 
 import java.nio.file.Path
 
+// TODO: Validate against spring integration XSDs
 class EndToEndTest extends Specification {
     private static final NAMESPACES = [
             "beans"      : "http://www.springframework.org/schema/beans",
@@ -17,7 +18,9 @@ class EndToEndTest extends Specification {
             "jms"        : "http://www.springframework.org/schema/integration/jms"]
 
 
-    def mapper = JsonMapper.builder().enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS).disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build()
+    def mapper =
+            JsonMapper.builder().enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build()
 
     def "draft"() {
         given:
