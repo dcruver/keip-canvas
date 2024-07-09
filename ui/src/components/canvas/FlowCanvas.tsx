@@ -7,17 +7,21 @@ import ReactFlow, {
   useReactFlow,
 } from "reactflow"
 
-import { useAppActions, useFlowStore } from "../../singletons/store"
-
+import { useAppActions, useFlowStore, useGetLayout } from "../../singletons/store"
 import "reactflow/dist/base.css"
-
-import { TrashCan } from "@carbon/icons-react"
+import {
+  TrashCan,
+  ArrowsHorizontal,
+  ArrowsVertical,
+  Maximize,
+} from "@carbon/icons-react"
 import { ErrorBoundary } from "@carbon/react"
 import { DropTargetMonitor, useDrop } from "react-dnd"
 import { NativeTypes } from "react-dnd-html5-backend"
 import { EipId } from "../../api/id"
 import { DragTypes } from "../draggable-panel/dragTypes"
-import EipNode from "./EipNode"
+import { EipNode } from "./EipNode"
+import { useEffect } from "react"
 
 const FLOW_ERROR_MESSAGE =
   "Failed to load the canvas - the stored flow is malformed. Clearing the flow from the state store."
@@ -63,12 +67,19 @@ const nodeTypes = {
 const FlowCanvas = () => {
   const reactFlowInstance = useReactFlow()
   const flowStore = useFlowStore()
+  const layout = useGetLayout()
   const {
     createDroppedNode,
     clearSelectedChildNode,
     clearFlow,
     importFlowFromJson,
+    updateLayoutOrientation,
+    updateLayoutDensity,
   } = useAppActions()
+
+  useEffect(() => {
+    reactFlowInstance.fitView()
+  }, [layout, reactFlowInstance])
 
   const [, drop] = useDrop(
     () => ({
@@ -120,11 +131,35 @@ const FlowCanvas = () => {
           onPaneClick={() => clearSelectedChildNode()}
           fitView
         >
-          <Controls>
+          <Controls style={{ bottom: "50px" }}>
+            <ControlButton
+              title="horizontal layout"
+              onClick={() => updateLayoutOrientation("horizontal")}
+            >
+              <ArrowsHorizontal />
+            </ControlButton>
+            <ControlButton
+              title="vertical layout"
+              onClick={() => updateLayoutOrientation("vertical")}
+            >
+              <ArrowsVertical />
+            </ControlButton>
+            <ControlButton title="change density" onClick={updateLayoutDensity}>
+              <Maximize />
+            </ControlButton>
+          </Controls>
+
+          <Controls
+            position="bottom-left"
+            showFitView={false}
+            showInteractive={false}
+            showZoom={false}
+          >
             <ControlButton title="clear" onClick={clearFlow}>
               <TrashCan />
             </ControlButton>
           </Controls>
+
           {/* <MiniMap /> */}
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
         </ReactFlow>
