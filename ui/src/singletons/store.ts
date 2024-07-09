@@ -18,10 +18,9 @@ import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 import { useShallow } from "zustand/react/shallow"
 import { AttributeTypes } from "../api/eipSchema"
-import { EIP_NODE_KEY, EipFlowNode, Layout} from "../api/flow"
+import { EIP_NODE_KEY, EipFlowNode, Layout } from "../api/flow"
 import { ChildNodeId, EipId, areChildIdsEqual } from "../api/id"
 import { newFlowLayout } from "../components/layout/layouting"
-
 
 export const ROOT_PARENT = "root"
 
@@ -215,13 +214,14 @@ const useStore = create<AppStore>()(
             const nodes = newFlowLayout(state.nodes, state.edges, newLayout)
             return {
               nodes: nodes,
-              layout: newLayout
+              layout: newLayout,
             }
           }),
 
         updateLayoutDensity: () =>
           set((state) => {
-            const newDensity = state.layout.density === "compact" ? "comfortable" : "compact"
+            const newDensity =
+              state.layout.density === "compact" ? "comfortable" : "compact"
             const newLayout: Layout = {
               ...state.layout,
               density: newDensity,
@@ -229,7 +229,7 @@ const useStore = create<AppStore>()(
             const nodes = newFlowLayout(state.nodes, state.edges, newLayout)
             return {
               nodes: nodes,
-              layout: newLayout
+              layout: newLayout,
             }
           }),
       },

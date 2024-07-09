@@ -7,7 +7,11 @@ import ReactFlow, {
   useReactFlow,
 } from "reactflow"
 
-import { useAppActions, useFlowStore, useGetLayout } from "../../singletons/store"
+import {
+  useAppActions,
+  useFlowStore,
+  useGetLayout,
+} from "../../singletons/store"
 import "reactflow/dist/base.css"
 import {
   TrashCan,

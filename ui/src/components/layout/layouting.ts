@@ -2,7 +2,6 @@ import dagre from "@dagrejs/dagre"
 import { Edge, Position } from "reactflow"
 import { EipFlowNode, Layout } from "../../api/flow"
 
-
 const DEFAULT_NODE_WIDTH = 128
 const DEFAULT_NODE_HEIGHT = 128
 
