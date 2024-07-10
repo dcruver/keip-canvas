@@ -26,44 +26,64 @@ class DefaultNodeTransformerTest extends Specification {
 
     EipNode testNode = createNodeStub("default-test-id")
 
-    def "multi-input node in graph fails validation"() {
+    def "multi-input/multi-output passthru node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
         given:
-        def pre1 = createNodeStub("pre1")
-        def pre2 = createNodeStub("pre2")
-
-        graph.predecessors(testNode) >> [pre1, pre2]
-        graph.successors(testNode) >> []
+        graph.predecessors(testNode) >> predecessors
+        graph.successors(testNode) >> successors
 
         when:
         transformer.apply(testNode, graph)
 
         then:
+        testNode.connectionType() >> ConnectionType.PASSTHRU
         thrown(IllegalArgumentException)
+
+        where:
+        predecessors                                 | successors
+        [createNodeStub("n1"), createNodeStub("n2")] | []
+        []                                           | [createNodeStub("n1"), createNodeStub("n2")]
     }
 
-    def "multi-output node in graph fails validation"() {
+    def "multi-input/single-output sink node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
         given:
-        def post1 = createNodeStub("post1")
-        def post2 = createNodeStub("post2")
-
-        graph.predecessors(testNode) >> []
-        graph.successors(testNode) >> [post1, post2]
+        graph.predecessors(testNode) >> predecessors
+        graph.successors(testNode) >> successors
 
         when:
         transformer.apply(testNode, graph)
 
         then:
+        testNode.connectionType() >> ConnectionType.SINK
         thrown(IllegalArgumentException)
+
+        where:
+        predecessors                                 | successors
+        [createNodeStub("n1"), createNodeStub("n2")] | []
+        []                                           | [createNodeStub("n1")]
     }
 
-
-    def "'tee' node with 3 successors fails validation"() {
+    def "multi-output/single-input source node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
         given:
-        def postNode = createNodeStub("post1")
-        def discardNode = createNodeStub("post2")
-        def extraNode = createNodeStub("post3")
+        graph.predecessors(testNode) >> predecessors
+        graph.successors(testNode) >> successors
 
-        graph.successors(testNode) >> [postNode, discardNode, extraNode]
+        when:
+        transformer.apply(testNode, graph)
+
+        then:
+        testNode.connectionType() >> ConnectionType.SOURCE
+        thrown(IllegalArgumentException)
+
+        where:
+        predecessors           | successors
+        [createNodeStub("n1")] | []
+        []                     | [createNodeStub("n1"), createNodeStub("n2")]
+    }
+
+    def "'tee' node with too many predecessors or successors fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
+        given:
+        graph.predecessors(testNode) >> predecessors
+        graph.successors(testNode) >> successors
 
         when:
         transformer.apply(testNode, graph)
@@ -72,6 +92,12 @@ class DefaultNodeTransformerTest extends Specification {
         testNode.connectionType() >> ConnectionType.TEE
 
         thrown(IllegalArgumentException)
+
+        where:
+        predecessors                                 | successors
+        [createNodeStub("n1"), createNodeStub("n1")] | []
+        []                                           | [createNodeStub("n1"), createNodeStub("n2"),
+                                                        createNodeStub("n3")]
     }
 
     def "create intermediate channel between two non-channel nodes"() {
