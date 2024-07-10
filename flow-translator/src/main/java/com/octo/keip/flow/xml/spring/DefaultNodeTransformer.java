@@ -47,7 +47,7 @@ public class DefaultNodeTransformer implements NodeTransformer {
     private XmlElement updateAttributes(XmlElement element) {
       Map<String, Object> updatedAttrs = new LinkedHashMap<>();
       updatedAttrs.put(ID, this.node.id());
-      updatedAttrs.putAll(getChannelAttributes());
+      updatedAttrs.putAll(createChannelAttributes());
       updatedAttrs.putAll(element.attributes());
       return new XmlElement(
           element.prefix(), element.localName(), updatedAttrs, element.children());
@@ -82,7 +82,7 @@ public class DefaultNodeTransformer implements NodeTransformer {
      * Adds attributes for targeting the intermediate channels connecting each node with its
      * immediate predecessors and successors.
      */
-    Map<String, Object> getChannelAttributes() {
+    Map<String, Object> createChannelAttributes() {
       if (Role.CHANNEL.equals(this.node.role())) {
         return Collections.emptyMap();
       }

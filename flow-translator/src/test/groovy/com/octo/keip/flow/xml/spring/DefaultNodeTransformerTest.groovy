@@ -156,7 +156,7 @@ class DefaultNodeTransformerTest extends Specification {
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
-        def attributes = transformation.getChannelAttributes()
+        def attributes = transformation.createChannelAttributes()
 
         then:
         testNode.connectionType() >> connectionType
@@ -174,7 +174,7 @@ class DefaultNodeTransformerTest extends Specification {
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
-        def attributes = transformation.getChannelAttributes()
+        def attributes = transformation.createChannelAttributes()
 
         then:
         testNode.role() >> Role.CHANNEL
@@ -195,7 +195,7 @@ class DefaultNodeTransformerTest extends Specification {
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
-        def attributes = transformation.getChannelAttributes()
+        def attributes = transformation.createChannelAttributes()
 
         then:
         testNode.connectionType() >> ConnectionType.PASSTHRU
@@ -213,7 +213,7 @@ class DefaultNodeTransformerTest extends Specification {
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
-        def attributes = transformation.getChannelAttributes()
+        def attributes = transformation.createChannelAttributes()
 
         then:
         testNode.connectionType() >> ConnectionType.SINK
@@ -230,7 +230,7 @@ class DefaultNodeTransformerTest extends Specification {
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
-        def attributes = transformation.getChannelAttributes()
+        def attributes = transformation.createChannelAttributes()
 
         then:
         testNode.connectionType() >> ConnectionType.SOURCE
@@ -252,7 +252,7 @@ class DefaultNodeTransformerTest extends Specification {
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
-        def attributes = transformation.getChannelAttributes()
+        def attributes = transformation.createChannelAttributes()
 
         then:
         testNode.connectionType() >> ConnectionType.TEE
@@ -278,7 +278,7 @@ class DefaultNodeTransformerTest extends Specification {
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
-        def attributes = transformation.getChannelAttributes()
+        def attributes = transformation.createChannelAttributes()
 
         then:
         testNode.connectionType() >> ConnectionType.TEE
@@ -306,7 +306,7 @@ class DefaultNodeTransformerTest extends Specification {
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
-        transformation.getChannelAttributes()
+        transformation.createChannelAttributes()
 
         then:
         testNode.connectionType() >> ConnectionType.TEE
@@ -324,7 +324,7 @@ class DefaultNodeTransformerTest extends Specification {
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
-        def attributes = transformation.getChannelAttributes()
+        def attributes = transformation.createChannelAttributes()
 
         then: "edge name should be generated as: 'inputNodeId-outputNodeId'"
         testNode.connectionType() >> ConnectionType.SINK
@@ -342,7 +342,7 @@ class DefaultNodeTransformerTest extends Specification {
 
         when:
         def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
-        def attributes = transformation.getChannelAttributes()
+        def attributes = transformation.createChannelAttributes()
 
         then:
         preNode.role() >> Role.CHANNEL
