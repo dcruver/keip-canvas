@@ -12,7 +12,6 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -35,7 +34,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-// TODO: Provide option to indicate if output XML passed XSD validation
+// TODO: Provide an option in the output indicating if the transformation encountered any errors.
 public abstract class GraphTransformer {
 
   private final XMLEventFactory eventFactory = WstxEventFactory.newFactory();
@@ -43,16 +42,19 @@ public abstract class GraphTransformer {
 
   private static final String XSI_PREFIX = "xsi";
 
+  // maps an eipNamespace to a NamespaceSpec
   private final Map<String, NamespaceSpec> registeredNamespaces;
-
-  protected GraphTransformer() {
-    this(Collections.emptyList());
-  }
 
   protected GraphTransformer(Collection<NamespaceSpec> namespaceSpecs) {
     this.registeredNamespaces = new HashMap<>();
     this.registeredNamespaces.put(defaultNamespace().eipNamespace(), defaultNamespace());
     namespaceSpecs.forEach(s -> this.registeredNamespaces.put(s.eipNamespace(), s));
+  }
+
+  public final void registerNamespace(
+      String eipNamespace, String xmlNamespace, String schemaLocation) {
+    this.registeredNamespaces.put(
+        eipNamespace, new NamespaceSpec(eipNamespace, xmlNamespace, schemaLocation));
   }
 
   // TODO: Could potentially move Writer to ctor
@@ -85,12 +87,6 @@ public abstract class GraphTransformer {
     }
   }
 
-  public final void registerNamespace(
-      String eipNamespace, String xmlNamespace, String schemaLocation) {
-    this.registeredNamespaces.put(
-        eipNamespace, new NamespaceSpec(eipNamespace, xmlNamespace, schemaLocation));
-  }
-
   protected abstract NamespaceSpec defaultNamespace();
 
   protected abstract QName rootElement();
@@ -105,13 +101,25 @@ public abstract class GraphTransformer {
 
   /**
    * Does a first pass through the graph to collect all the included namespaces up-front, in order
-   * to define them on the root element. This approach forces us to do an extra traversal of the
-   * graph, so it might prove too inefficient.
+   * to define them on the root element. If a node with an unregistered EIP namespace is
+   * encountered, an exception is immediately thrown.
+   *
+   * <p>This approach forces us to do an extra traversal of the graph, so it might prove too
+   * inefficient.
    */
   private List<String> collectEipNamespaces(EipGraph graph) {
-    // TODO: What's the behavior if the namespace key is not in the map (unknown eip namespace)?
-    // Validate.
-    return graph.traverse().map(n -> n.eipId().namespace()).distinct().toList();
+    return graph
+        .traverse()
+        .map(
+            n -> {
+              String ns = n.eipId().namespace();
+              if (!this.registeredNamespaces.containsKey(ns)) {
+                throw new IllegalArgumentException(String.format("Unregistered namespace: %s", ns));
+              }
+              return ns;
+            })
+        .distinct()
+        .toList();
   }
 
   private Iterator<Attribute> getRootAttributes(List<String> eipNamespaces) {
@@ -123,7 +131,7 @@ public abstract class GraphTransformer {
     // TODO: Figure out how to use line breaks as the separator
     String locString =
         Stream.concat(defaultNamespaceLocation, collectedLocations)
-            .collect(Collectors.joining(" "));
+            .collect(Collectors.joining("\n"));
 
     return List.of(
             eventFactory.createAttribute(
@@ -151,6 +159,7 @@ public abstract class GraphTransformer {
         .forEach(
             node -> {
               NodeTransformer transformer = getTransformer(node.eipId());
+              // TODO: Wrap transformation call with a try-catch
               List<XmlElement> elements = transformer.apply(node, graph);
               elements.forEach(e -> writeElement(e, writer));
             });

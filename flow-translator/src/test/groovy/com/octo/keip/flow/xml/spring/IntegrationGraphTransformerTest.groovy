@@ -16,8 +16,8 @@ import java.util.stream.Stream
 
 class IntegrationGraphTransformerTest extends Specification {
 
-    private static final NAMESPACES = [new NamespaceSpec("integration", "http://www.springframework.org/schema/integration", "https://www.springframework.org/schema/integration/spring-integration.xsd"),
-                                       new NamespaceSpec("jms", "http://www.springframework.org/schema/integration/jms", "https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd")
+    private static final List<NamespaceSpec> NAMESPACES = [new NamespaceSpec("integration", "http://www.springframework.org/schema/integration", "https://www.springframework.org/schema/integration/spring-integration.xsd"),
+                                                           new NamespaceSpec("jms", "http://www.springframework.org/schema/integration/jms", "https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd")
     ]
 
     EipGraph graph = Stub()
@@ -32,7 +32,7 @@ class IntegrationGraphTransformerTest extends Specification {
         compareXml(xml, readTestXml("empty.xml"))
     }
 
-    def "Transform single node graph."() {
+    def "Transform single node graph"() {
         given:
         EipNode node = Stub {
             id() >> "test-id"
@@ -52,7 +52,30 @@ class IntegrationGraphTransformerTest extends Specification {
         compareXml(xml, readTestXml("single-node.xml"))
     }
 
-    def "Transform multi-node graph."() {
+    def "test registering namespaces after creating the transformer"() {
+        given:
+        EipNode node = Stub {
+            id() >> "test-id"
+            eipId() >> new EipId("integration", "transformer")
+            role() >> Role.TRANSFORMER
+            connectionType() >> ConnectionType.PASSTHRU
+            attributes() >> ["ref": "test-bean"]
+            children() >> [new EipChild("poller", ["fixed-delay": 1000], null)]
+        }
+
+        graph.traverse() >> { _ -> Stream.of(node) }
+
+        when:
+        def testTransformer = new IntegrationGraphTransformer()
+        NAMESPACES
+                .each { testTransformer.registerNamespace(it.eipNamespace(), it.xmlNamespace(), it.schemaLocation()) }
+        def xml = testTransformer.prettyPrintXml(graph)
+
+        then: "only referenced namespaces should be included (instead of all registered namespaces)"
+        compareXml(xml, readTestXml("single-node.xml"))
+    }
+
+    def "Transform multi-node graph"() {
         given: "inbound adapter -> transformer -> outbound adapter"
         EipNode inbound = Stub {
             id() >> "messageGenerator"
@@ -96,11 +119,27 @@ class IntegrationGraphTransformerTest extends Specification {
         when:
         def xml = graphTransformer.prettyPrintXml(graph)
 
-        then: "only referenced namespaces should be included (instead of all registered namespaces)"
+        then:
         compareXml(xml, readTestXml("multi-node.xml"))
     }
 
-    // TODO: Test unknown eipNamespace
+    def "Transforming node with a unregistered EIP namespace throws an exception"() {
+        given:
+        EipNode node = Stub {
+            id() >> "test-id"
+            eipId() >> new EipId("unknown", "simple")
+            role() >> Role.TRANSFORMER
+            connectionType() >> ConnectionType.PASSTHRU
+        }
+
+        graph.traverse() >> { _ -> Stream.of(node) }
+
+        when:
+        graphTransformer.prettyPrintXml(graph)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
 
     void compareXml(Object actual, Object expected) {
         def diff = DiffBuilder.compare(expected)

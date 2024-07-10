@@ -6,7 +6,6 @@ import static com.octo.keip.flow.xml.spring.AttributeNames.ID;
 import static com.octo.keip.flow.xml.spring.AttributeNames.INPUT_CHANNEL;
 import static com.octo.keip.flow.xml.spring.AttributeNames.OUTPUT_CHANNEL;
 
-import com.octo.keip.flow.model.ConnectionType;
 import com.octo.keip.flow.model.EdgeProps;
 import com.octo.keip.flow.model.EdgeProps.EdgeType;
 import com.octo.keip.flow.model.EipGraph;
@@ -20,21 +19,19 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 // TODO: Add some explanatory docs here.
+/**
+ * This transformer handles components with at most a single input and/or single output (e.g.
+ * Endpoints, Transformers), along with an optional discard channel (e.g. filters).
+ */
 public class DefaultNodeTransformer implements NodeTransformer {
 
   static final EipId DIRECT_CHANNEL = new EipId("integration", "channel");
 
   @Override
   public List<XmlElement> apply(EipNode node, EipGraph graph) {
-    if (!validate(node, graph.predecessors(node), graph.successors(node))) {
-      throw new IllegalArgumentException(
-          "The default node to xml transformer only handles single input/output components");
-    }
-
     XmlElement element = BaseNodeTransformation.toXmlElement(node);
     DefaultTransformation transformation = new DefaultTransformation(node, graph);
     element = transformation.updateAttributes(element);
@@ -50,7 +47,7 @@ public class DefaultNodeTransformer implements NodeTransformer {
     private XmlElement updateAttributes(XmlElement element) {
       Map<String, Object> updatedAttrs = new LinkedHashMap<>();
       updatedAttrs.put(ID, this.node.id());
-      addChannelAttributes(updatedAttrs);
+      updatedAttrs.putAll(getChannelAttributes());
       updatedAttrs.putAll(element.attributes());
       return new XmlElement(
           element.prefix(), element.localName(), updatedAttrs, element.children());
@@ -85,35 +82,74 @@ public class DefaultNodeTransformer implements NodeTransformer {
      * Adds attributes for targeting the intermediate channels connecting each node with its
      * immediate predecessors and successors.
      */
-    void addChannelAttributes(Map<String, Object> attributes) {
+    Map<String, Object> getChannelAttributes() {
       if (Role.CHANNEL.equals(this.node.role())) {
-        return;
+        return Collections.emptyMap();
       }
-      Optional<EipNode> predecessor = this.graph.predecessors(this.node).stream().findFirst();
-      Optional<EipNode> successor = this.graph.successors(this.node).stream().findFirst();
 
-      switch (this.node.connectionType()) {
-        case PASSTHRU -> {
-          predecessor.ifPresent(p -> attributes.put(INPUT_CHANNEL, getChannelId(p, this.node)));
-          successor.ifPresent(s -> attributes.put(OUTPUT_CHANNEL, getChannelId(this.node, s)));
-        }
-        case SINK ->
-            predecessor.ifPresent(p -> attributes.put(CHANNEL, getChannelId(p, this.node)));
-        case SOURCE ->
-            successor.ifPresent(s -> attributes.put(CHANNEL, getChannelId(this.node, s)));
-        case TEE -> {
-          // Assumes at most two successors - an output-channel and an optional discard-channel
-          predecessor.ifPresent(p -> attributes.put(INPUT_CHANNEL, getChannelId(p, this.node)));
-          attributes.putAll(getTeeOutgoingChannelAttrs());
-        }
-        default ->
-            throw new IllegalStateException(
-                "Unexpected connectionType: " + this.node.connectionType());
-      }
+      Set<EipNode> predecessors = this.graph.predecessors(this.node);
+      Set<EipNode> successors = this.graph.successors(this.node);
+
+      Map<String, Object> attributes = new LinkedHashMap<>();
+      return switch (this.node.connectionType()) {
+        case PASSTHRU -> handlePassthru(attributes, predecessors, successors);
+        case SINK -> handleSink(attributes, predecessors, successors);
+        case SOURCE -> handleSource(attributes, predecessors, successors);
+        case TEE -> handleTee(attributes, predecessors, successors);
+      };
     }
 
-    private Map<String, Object> getTeeOutgoingChannelAttrs() {
-      LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+    private Map<String, Object> handlePassthru(
+        Map<String, Object> attributes, Set<EipNode> predecessors, Set<EipNode> successors) {
+      if (predecessors.size() > 1 || successors.size() > 1) {
+        throw new IllegalArgumentException(
+            "'Passthru' nodes can have at most one incoming and one outgoing edge");
+      }
+      predecessors.stream()
+          .findFirst()
+          .ifPresent(p -> attributes.put(INPUT_CHANNEL, getChannelId(p, this.node)));
+      successors.stream()
+          .findFirst()
+          .ifPresent(s -> attributes.put(OUTPUT_CHANNEL, getChannelId(this.node, s)));
+      return attributes;
+    }
+
+    private Map<String, Object> handleSink(
+        Map<String, Object> attributes, Set<EipNode> predecessors, Set<EipNode> successors) {
+      if (predecessors.size() > 1 || !successors.isEmpty()) {
+        throw new IllegalArgumentException("'Sink' nodes can have at most one incoming edge");
+      }
+      predecessors.stream()
+          .findFirst()
+          .ifPresent(p -> attributes.put(CHANNEL, getChannelId(p, this.node)));
+      return attributes;
+    }
+
+    private Map<String, Object> handleSource(
+        Map<String, Object> attributes, Set<EipNode> predecessors, Set<EipNode> successors) {
+      if (!predecessors.isEmpty() || successors.size() > 1) {
+        throw new IllegalArgumentException("'Source' nodes can have at most one outgoing edge");
+      }
+      successors.stream()
+          .findFirst()
+          .ifPresent(s -> attributes.put(CHANNEL, getChannelId(this.node, s)));
+      return attributes;
+    }
+
+    // Assumes at most two successors - an output-channel and an optional discard-channel
+    private Map<String, Object> handleTee(
+        Map<String, Object> attributes, Set<EipNode> predecessors, Set<EipNode> successors) {
+      RuntimeException invalidError =
+          new IllegalArgumentException(
+              "'Tee' nodes can have at most one incoming edge, and two outgoing edges (one output and one discard edge)");
+      if (predecessors.size() > 1 || successors.size() > 2) {
+        throw invalidError;
+      }
+
+      predecessors.stream()
+          .findFirst()
+          .ifPresent(p -> attributes.put(INPUT_CHANNEL, getChannelId(p, this.node)));
+
       for (EipNode successor : this.graph.successors(this.node)) {
         EdgeType type =
             this.graph
@@ -121,12 +157,19 @@ public class DefaultNodeTransformer implements NodeTransformer {
                 .map(EdgeProps::type)
                 .orElse(EdgeType.DEFAULT);
         if (type.equals(EdgeType.DISCARD)) {
-          map.put(DISCARD_CHANNEL, getChannelId(this.node, successor));
+          if (attributes.containsKey(DISCARD_CHANNEL)) { // only one discard channel is allowed
+            throw invalidError;
+          }
+          attributes.put(DISCARD_CHANNEL, getChannelId(this.node, successor));
         } else {
-          map.put(OUTPUT_CHANNEL, getChannelId(this.node, successor));
+          if (attributes.containsKey(OUTPUT_CHANNEL)) { // only one output channel is allowed
+            throw invalidError;
+          }
+          attributes.put(OUTPUT_CHANNEL, getChannelId(this.node, successor));
         }
       }
-      return map;
+
+      return attributes;
     }
 
     // TODO: Might be used by other transformers. Consider extracting.
@@ -136,24 +179,11 @@ public class DefaultNodeTransformer implements NodeTransformer {
       } else if (Role.CHANNEL.equals(target.role())) {
         return target.id();
       } else {
-        // TODO: Consider defaulting to "sourceId-targetId" if no edge prop is found.
         return this.graph
             .getEdgeProps(source, target)
             .map(EdgeProps::id)
             .orElse(source.id() + "-" + target.id());
       }
     }
-  }
-
-  // This transformer handles components with at most a single input and a single output, with an
-  // optional discard channel.
-  private boolean validate(EipNode node, Set<EipNode> predecessors, Set<EipNode> successors) {
-    boolean atMostOnePredecessor = predecessors.size() <= 1;
-    boolean atMostOneSuccessor = successors.size() <= 1;
-
-    if (ConnectionType.TEE.equals(node.connectionType())) {
-      return atMostOnePredecessor && successors.size() <= 2;
-    }
-    return atMostOnePredecessor && atMostOneSuccessor;
   }
 }
