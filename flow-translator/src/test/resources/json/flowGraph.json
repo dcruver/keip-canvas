@@ -1,0 +1,126 @@
+{
+  "nodes": [
+    {
+      "id": "vX7zM31DRi",
+      "eipId": {
+        "namespace": "integration",
+        "name": "inbound-channel-adapter"
+      },
+      "label": "Timer Message In",
+      "description": "Fixed message sourced at a fixed rate",
+      "role": "endpoint",
+      "connectionType": "source",
+      "attributes": {
+        "expression": "'Test Message'"
+      },
+      "children": [
+        {
+          "name": "poller",
+          "attributes": {
+            "fixed-rate": "5000"
+          }
+        }
+      ]
+    },
+    {
+      "id": "6saqqVcG0G",
+      "eipId": {
+        "namespace": "integration",
+        "name": "transformer"
+      },
+      "label": "Append Timestamp",
+      "role": "transformer",
+      "connectionType": "passthru",
+      "attributes": {
+        "expression": "payload + ' sent at ' + T(java.time.Instant).ofEpochMilli(headers['timestamp'])"
+      }
+    },
+    {
+      "id": "s5WQWIKq5Y",
+      "eipId": {
+        "namespace": "jms",
+        "name": "outbound-channel-adapter"
+      },
+      "label": "Send To Broker",
+      "description": "Sends the message to a JMS message broker",
+      "role": "endpoint",
+      "connectionType": "sink",
+      "attributes": {
+        "destination-name": "test-echo",
+        "pub-sub-domain": "false"
+      },
+      "children": []
+    },
+    {
+      "id": "R7vZBcIEY8",
+      "eipId": {
+        "namespace": "integration",
+        "name": "transformer"
+      },
+      "label": "Append Echo String",
+      "role": "transformer",
+      "connectionType": "passthru",
+      "attributes": {
+        "expression": "'Message echoed from address(test-echo): ' + payload"
+      },
+      "children": []
+    },
+    {
+      "id": "XC1NpnW_V0",
+      "eipId": {
+        "namespace": "jms",
+        "name": "message-driven-channel-adapter"
+      },
+      "label": "test-echo Listener",
+      "description": "Receives the message that was sent by the outbound adapter",
+      "role": "endpoint",
+      "connectionType": "source",
+      "attributes": {
+        "destination-name": "test-echo",
+        "pub-sub-domain": "false"
+      }
+    },
+    {
+      "id": "nOSRl8ygMY",
+      "eipId": {
+        "namespace": "integration",
+        "name": "logging-channel-adapter"
+      },
+      "label": "Logger",
+      "description": "Logs the message for debugging purposes",
+      "role": "endpoint",
+      "connectionType": "sink",
+      "attributes": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": "vX7zM31DRi",
+      "sourceHandle": null,
+      "target": "6saqqVcG0G",
+      "targetHandle": null,
+      "id": "reactflow__edge-vX7zM31DRi-6saqqVcG0G"
+    },
+    {
+      "source": "XC1NpnW_V0",
+      "sourceHandle": null,
+      "target": "R7vZBcIEY8",
+      "targetHandle": null,
+      "id": "reactflow__edge-XC1NpnW_V0-R7vZBcIEY8"
+    },
+    {
+      "source": "R7vZBcIEY8",
+      "sourceHandle": null,
+      "target": "nOSRl8ygMY",
+      "targetHandle": null,
+      "id": "reactflow__edge-R7vZBcIEY8-nOSRl8ygMY"
+    },
+    {
+      "source": "6saqqVcG0G",
+      "sourceHandle": null,
+      "target": "s5WQWIKq5Y",
+      "targetHandle": null,
+      "id": "reactflow__edge-6saqqVcG0G-s5WQWIKq5Y"
+    }
+  ]
+}

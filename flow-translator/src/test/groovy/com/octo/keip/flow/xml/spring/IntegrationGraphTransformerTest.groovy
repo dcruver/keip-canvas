@@ -1,5 +1,6 @@
 package com.octo.keip.flow.xml.spring
 
+
 import com.octo.keip.flow.model.ConnectionType
 import com.octo.keip.flow.model.EdgeProps
 import com.octo.keip.flow.model.EipChild
@@ -8,11 +9,13 @@ import com.octo.keip.flow.model.EipId
 import com.octo.keip.flow.model.EipNode
 import com.octo.keip.flow.model.Role
 import com.octo.keip.flow.xml.NamespaceSpec
-import org.xmlunit.builder.DiffBuilder
 import spock.lang.Specification
 
-import java.nio.file.Path
+import javax.xml.transform.ErrorListener
 import java.util.stream.Stream
+
+import static com.octo.keip.flow.xml.XmlComparisonUtil.compareXml
+import static com.octo.keip.flow.xml.XmlComparisonUtil.readTestXml
 
 class IntegrationGraphTransformerTest extends Specification {
 
@@ -22,14 +25,18 @@ class IntegrationGraphTransformerTest extends Specification {
 
     EipGraph graph = Stub()
 
-    def graphTransformer = new IntegrationGraphTransformer(NAMESPACES)
+    ErrorListener errorListener = Mock()
+
+    StringWriter xmlOutput = new StringWriter()
+
+    def graphTransformer = new IntegrationGraphTransformer(NAMESPACES, errorListener)
 
     def "Transform empty graph. Check root element"() {
         given:
-        def xml = graphTransformer.prettyPrintXml(graph)
+        graphTransformer.toXml(graph, xmlOutput)
 
         expect:
-        compareXml(xml, readTestXml("empty.xml"))
+        compareXml(xmlOutput.toString(), readTestXml("empty.xml"))
     }
 
     def "Transform single node graph"() {
@@ -46,33 +53,10 @@ class IntegrationGraphTransformerTest extends Specification {
         graph.traverse() >> { _ -> Stream.of(node) }
 
         when:
-        def xml = graphTransformer.prettyPrintXml(graph)
+        graphTransformer.toXml(graph, xmlOutput)
 
         then: "only referenced namespaces should be included (instead of all registered namespaces)"
-        compareXml(xml, readTestXml("single-node.xml"))
-    }
-
-    def "test registering namespaces after creating the transformer"() {
-        given:
-        EipNode node = Stub {
-            id() >> "test-id"
-            eipId() >> new EipId("integration", "transformer")
-            role() >> Role.TRANSFORMER
-            connectionType() >> ConnectionType.PASSTHRU
-            attributes() >> ["ref": "test-bean"]
-            children() >> [new EipChild("poller", ["fixed-delay": 1000], null)]
-        }
-
-        graph.traverse() >> { _ -> Stream.of(node) }
-
-        when:
-        def testTransformer = new IntegrationGraphTransformer()
-        NAMESPACES
-                .each { testTransformer.registerNamespace(it.eipNamespace(), it.xmlNamespace(), it.schemaLocation()) }
-        def xml = testTransformer.prettyPrintXml(graph)
-
-        then: "only referenced namespaces should be included (instead of all registered namespaces)"
-        compareXml(xml, readTestXml("single-node.xml"))
+        compareXml(xmlOutput.toString(), readTestXml("single-node.xml"))
     }
 
     def "Transform multi-node graph"() {
@@ -117,10 +101,10 @@ class IntegrationGraphTransformerTest extends Specification {
         graph.traverse() >> { _ -> Stream.of(inbound, transformer, outbound) }
 
         when:
-        def xml = graphTransformer.prettyPrintXml(graph)
+        graphTransformer.toXml(graph, xmlOutput)
 
         then:
-        compareXml(xml, readTestXml("multi-node.xml"))
+        compareXml(xmlOutput.toString(), readTestXml("multi-node.xml"))
     }
 
     def "Transforming node with a unregistered EIP namespace throws an exception"() {
@@ -135,27 +119,10 @@ class IntegrationGraphTransformerTest extends Specification {
         graph.traverse() >> { _ -> Stream.of(node) }
 
         when:
-        graphTransformer.prettyPrintXml(graph)
+        graphTransformer.toXml(graph, xmlOutput)
 
         then:
-        thrown(IllegalArgumentException)
-    }
-
-    void compareXml(Object actual, Object expected) {
-        def diff = DiffBuilder.compare(expected)
-                              .withTest(actual)
-                              .checkForIdentical()
-                              .ignoreWhitespace()
-                              .normalizeWhitespace()
-                              .build()
-
-        assert !diff.hasDifferences()
-    }
-
-    InputStream readTestXml(String filename) {
-        Path path = Path.of("xml").resolve(filename)
-        return IntegrationGraphTransformerTest.class.getClassLoader()
-                                              .getResourceAsStream(path.toString())
+        1 * errorListener.fatalError(_)
     }
 
     Optional<EdgeProps> createEdgeProps(String id) {

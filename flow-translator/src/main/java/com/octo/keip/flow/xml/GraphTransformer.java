@@ -4,12 +4,6 @@ import com.ctc.wstx.stax.WstxEventFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
 import com.octo.keip.flow.model.EipGraph;
 import com.octo.keip.flow.model.EipId;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,14 +21,11 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
+import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
-// TODO: Provide an option in the output indicating if the transformation encountered any errors.
+// TODO: Provide a return value in the transform method indicating if the transformation encountered
+// any errors. Take a lenient approach rather than exploding at the first error. (document)
 public abstract class GraphTransformer {
 
   private final XMLEventFactory eventFactory = WstxEventFactory.newFactory();
@@ -42,48 +33,53 @@ public abstract class GraphTransformer {
 
   private static final String XSI_PREFIX = "xsi";
 
+  private final NodeTransformerFactory nodeTransformerFactory;
+
   // maps an eipNamespace to a NamespaceSpec
   private final Map<String, NamespaceSpec> registeredNamespaces;
 
-  protected GraphTransformer(Collection<NamespaceSpec> namespaceSpecs) {
+  protected ErrorListener errorListener;
+
+  protected GraphTransformer(
+      NodeTransformerFactory nodeTransformerFactory,
+      Collection<NamespaceSpec> namespaceSpecs,
+      ErrorListener errorListener) {
+    this.nodeTransformerFactory = nodeTransformerFactory;
+    this.errorListener = errorListener;
     this.registeredNamespaces = new HashMap<>();
     this.registeredNamespaces.put(defaultNamespace().eipNamespace(), defaultNamespace());
     namespaceSpecs.forEach(s -> this.registeredNamespaces.put(s.eipNamespace(), s));
   }
 
-  public final void registerNamespace(
-      String eipNamespace, String xmlNamespace, String schemaLocation) {
-    this.registeredNamespaces.put(
-        eipNamespace, new NamespaceSpec(eipNamespace, xmlNamespace, schemaLocation));
+  public final void setErrorListener(ErrorListener errorListener) {
+    this.errorListener = errorListener;
+  }
+
+  public final void registerNodeTransformer(EipId id, NodeTransformer transformer) {
+    this.nodeTransformerFactory.register(id, transformer);
   }
 
   // TODO: Could potentially move Writer to ctor
-  public final void toXml(EipGraph graph, Writer output) throws XMLStreamException {
-    XMLEventWriter writer = outputFactory.createXMLEventWriter(output);
-    writer.setDefaultNamespace(defaultNamespace().xmlNamespace());
+  public final void toXml(EipGraph graph, Writer output) throws TransformerException {
+    try {
+      XMLEventWriter writer = outputFactory.createXMLEventWriter(output);
+      writer.setDefaultNamespace(defaultNamespace().xmlNamespace());
 
-    writer.add(eventFactory.createStartDocument());
+      writer.add(eventFactory.createStartDocument());
 
-    StartElement root = createRootElement(graph);
-    writer.add(root);
+      StartElement root = createRootElement(graph);
+      writer.add(root);
 
-    writeNodes(graph, writer);
+      writeNodes(graph, writer);
 
-    writer.add(eventFactory.createEndElement(root.getName(), null));
+      writer.add(eventFactory.createEndElement(root.getName(), null));
 
-    writer.add(eventFactory.createEndDocument());
+      writer.add(eventFactory.createEndDocument());
 
-    writer.flush();
-    writer.close();
-  }
-
-  public final String prettyPrintXml(EipGraph graph) throws TransformerException {
-    try (var baos = new ByteArrayOutputStream();
-        var writer = new BufferedWriter(new OutputStreamWriter(baos))) {
-      toXml(graph, writer);
-      return formatXml(baos);
-    } catch (IOException | XMLStreamException e) {
-      throw new TransformerException(e);
+      writer.flush();
+      writer.close();
+    } catch (XMLStreamException | RuntimeException e) {
+      this.errorListener.fatalError(new TransformerException(e));
     }
   }
 
@@ -91,7 +87,9 @@ public abstract class GraphTransformer {
 
   protected abstract QName rootElement();
 
-  protected abstract NodeTransformer getTransformer(EipId id);
+  private NodeTransformer getNodeTransformer(EipId id) {
+    return this.nodeTransformerFactory.getTransformer(id);
+  }
 
   private StartElement createRootElement(EipGraph graph) {
     List<String> eipNamespaces = collectEipNamespaces(graph);
@@ -158,8 +156,9 @@ public abstract class GraphTransformer {
         .traverse()
         .forEach(
             node -> {
-              NodeTransformer transformer = getTransformer(node.eipId());
+              NodeTransformer transformer = getNodeTransformer(node.eipId());
               // TODO: Wrap transformation call with a try-catch
+              // Transformation should when a single node fails.
               List<XmlElement> elements = transformer.apply(node, graph);
               elements.forEach(e -> writeElement(e, writer));
             });
@@ -201,20 +200,5 @@ public abstract class GraphTransformer {
     return attributes.entrySet().stream()
         .map(e -> this.eventFactory.createAttribute(e.getKey(), e.getValue().toString()))
         .iterator();
-  }
-
-  private static String formatXml(ByteArrayOutputStream baos) throws TransformerException {
-    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-    Transformer transformer = transformerFactory.newTransformer();
-
-    // pretty print by indention
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    // add standalone="yes", add line break before the root element
-    transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-
-    var source = new StreamSource(new ByteArrayInputStream(baos.toByteArray()));
-    var result = new StringWriter();
-    transformer.transform(source, new StreamResult(result));
-    return result.toString();
   }
 }
