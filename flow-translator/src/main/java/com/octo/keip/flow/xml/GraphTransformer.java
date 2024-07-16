@@ -4,6 +4,7 @@ import com.ctc.wstx.stax.WstxEventFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
 import com.octo.keip.flow.model.EipGraph;
 import com.octo.keip.flow.model.EipId;
+import com.octo.keip.flow.model.EipNode;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,8 +25,6 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
 
-// TODO: Provide a return value in the transform method indicating if the transformation encountered
-// any errors. Take a lenient approach rather than exploding at the first error. (document)
 public abstract class GraphTransformer {
 
   private final XMLEventFactory eventFactory = WstxEventFactory.newFactory();
@@ -151,17 +150,19 @@ public abstract class GraphTransformer {
     return Stream.concat(Stream.of(defaultNamespace, xsiNamespace), collectedNamespaces).iterator();
   }
 
-  private void writeNodes(EipGraph graph, XMLEventWriter writer) {
-    graph
-        .traverse()
-        .forEach(
-            node -> {
-              NodeTransformer transformer = getNodeTransformer(node.eipId());
-              // TODO: Wrap transformation call with a try-catch
-              // Transformation should when a single node fails.
-              List<XmlElement> elements = transformer.apply(node, graph);
-              elements.forEach(e -> writeElement(e, writer));
-            });
+  private void writeNodes(EipGraph graph, XMLEventWriter writer) throws TransformerException {
+    // Using a for-each loop rather than stream operations due to the checked exception.
+    // If this approach proves inefficient, an alternative is to define our own ErrorListener
+    // interface that throws runtime exceptions.
+    for (EipNode node : graph.traverse().toList()) {
+      try {
+        NodeTransformer transformer = getNodeTransformer(node.eipId());
+        List<XmlElement> elements = transformer.apply(node, graph);
+        elements.forEach(e -> writeElement(e, writer));
+      } catch (RuntimeException e) {
+        this.errorListener.error(new TransformerException(e));
+      }
+    }
   }
 
   private void writeElement(XmlElement element, XMLEventWriter writer) {

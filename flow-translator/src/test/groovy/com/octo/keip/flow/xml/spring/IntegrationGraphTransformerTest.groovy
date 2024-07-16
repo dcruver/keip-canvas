@@ -9,6 +9,10 @@ import com.octo.keip.flow.model.EipId
 import com.octo.keip.flow.model.EipNode
 import com.octo.keip.flow.model.Role
 import com.octo.keip.flow.xml.NamespaceSpec
+import com.octo.keip.flow.xml.NodeTransformer
+import org.w3c.dom.Node
+import org.xmlunit.builder.Input
+import org.xmlunit.xpath.JAXPXPathEngine
 import spock.lang.Specification
 
 import javax.xml.transform.ErrorListener
@@ -27,7 +31,7 @@ class IntegrationGraphTransformerTest extends Specification {
 
     ErrorListener errorListener = Mock()
 
-    StringWriter xmlOutput = new StringWriter()
+    def xmlOutput = new StringWriter()
 
     def graphTransformer = new IntegrationGraphTransformer(NAMESPACES, errorListener)
 
@@ -97,7 +101,6 @@ class IntegrationGraphTransformerTest extends Specification {
         graph.predecessors(outbound) >> [transformer]
         graph.successors(outbound) >> []
 
-
         graph.traverse() >> { _ -> Stream.of(inbound, transformer, outbound) }
 
         when:
@@ -125,7 +128,93 @@ class IntegrationGraphTransformerTest extends Specification {
         1 * errorListener.fatalError(_)
     }
 
+    def "Registering custom node transformers resolves correctly"() {
+        given: "inbound adapter -> outbound adapter"
+        EipNode inbound = Stub {
+            id() >> "inbound"
+            eipId() >> new EipId("integration", "inbound-adapter")
+            role() >> Role.ENDPOINT
+            connectionType() >> ConnectionType.SOURCE
+        }
+
+        def outboundEipId = new EipId("integration", "outbound-adapter")
+        EipNode outbound = Stub {
+            id() >> "outbound"
+            eipId() >> outboundEipId
+            role() >> Role.ENDPOINT
+            connectionType() >> ConnectionType.SINK
+        }
+
+        graph.predecessors(inbound) >> []
+        graph.successors(inbound) >> [outbound]
+        graph.getEdgeProps(inbound, outbound) >> createEdgeProps("chan1")
+
+        graph.predecessors(outbound) >> [inbound]
+        graph.successors(outbound) >> []
+
+        graph.traverse() >> { _ -> Stream.of(inbound, outbound) }
+
+        NodeTransformer mockTransformer = Mock()
+
+        when:
+        graphTransformer.registerNodeTransformer(outboundEipId, mockTransformer)
+        graphTransformer.toXml(graph, xmlOutput)
+
+        then:
+        1 * mockTransformer.apply(outbound, graph)
+    }
+
+    def "NodeTransformer throws exception -> pass exception to error listener and move on to next node"() {
+        given: "inbound adapter -> outbound adapter"
+        def inboundEipId = new EipId("integration", "inbound-adapter")
+        EipNode inbound = Stub {
+            id() >> "inbound"
+            eipId() >> inboundEipId
+            role() >> Role.ENDPOINT
+            connectionType() >> ConnectionType.SOURCE
+        }
+
+        EipNode outbound = Stub {
+            id() >> "outbound"
+            eipId() >> new EipId("integration", "outbound-adapter")
+            role() >> Role.ENDPOINT
+            connectionType() >> ConnectionType.SINK
+        }
+
+        graph.predecessors(inbound) >> []
+        graph.successors(inbound) >> [outbound]
+        graph.getEdgeProps(inbound, outbound) >> createEdgeProps("chan1")
+
+        graph.predecessors(outbound) >> [inbound]
+        graph.successors(outbound) >> []
+
+        graph.traverse() >> { _ -> Stream.of(inbound, outbound) }
+
+        NodeTransformer mockTransformer = Mock()
+
+        when:
+        graphTransformer.registerNodeTransformer(inboundEipId, mockTransformer)
+        graphTransformer.toXml(graph, xmlOutput)
+
+        then:
+        1 * mockTransformer.apply(inbound,
+                graph) >> { throw new RuntimeException("inbound transformer error") }
+        1 * errorListener.error(_)
+
+        def rootElem = getRootElement(xmlOutput.toString())
+        rootElem.getLocalName() == "beans"
+        def outboundElem = rootElem.getFirstChild()
+        outboundElem.getLocalName() == "outbound-adapter"
+        outboundElem.getNextSibling() == null
+    }
+
     Optional<EdgeProps> createEdgeProps(String id) {
         return Optional.of(new EdgeProps(id))
+    }
+
+    Node getRootElement(String xml) {
+        def matches = new JAXPXPathEngine().selectNodes("/*",
+                Input.fromString(xml).build())
+        return matches.toList()[0]
     }
 }
