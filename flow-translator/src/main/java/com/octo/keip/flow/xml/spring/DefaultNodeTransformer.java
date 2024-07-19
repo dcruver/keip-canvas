@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-// TODO: Add some explanatory docs here.
 /**
  * This transformer handles components with at most a single input and/or single output (e.g.
  * Endpoints, Transformers), along with an optional discard channel (e.g. filters).

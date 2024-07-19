@@ -8,12 +8,12 @@ import java.util.Objects;
 // Represents a specific instantiation of an EIP component in the graph (e.g. a message filter or
 // router). Ids must be unique across the flow graph.
 
+// TODO: Should FlowType and Role be stored elsewhere (e.g. a registry) and looked up with eipId
 public record EipNode(
     String id,
     EipId eipId,
     String label,
     String description,
-    // TODO: Should FlowType and Role be stored elsewhere and looked up with eipId
     Role role,
     ConnectionType connectionType,
     Map<String, Object> attributes,

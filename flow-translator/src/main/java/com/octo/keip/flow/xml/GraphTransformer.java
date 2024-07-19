@@ -58,7 +58,6 @@ public abstract class GraphTransformer {
     this.nodeTransformerFactory.register(id, transformer);
   }
 
-  // TODO: Could potentially move Writer to ctor
   public final void toXml(EipGraph graph, Writer output) throws TransformerException {
     try {
       XMLEventWriter writer = outputFactory.createXMLEventWriter(output);
@@ -125,7 +124,6 @@ public abstract class GraphTransformer {
     Stream<String> collectedLocations =
         eipNamespaces.stream().flatMap(ns -> Stream.of(getXmlNamespace(ns), getSchemaLocation(ns)));
 
-    // TODO: Figure out how to use line breaks as the separator
     String locString =
         Stream.concat(defaultNamespaceLocation, collectedLocations)
             .collect(Collectors.joining("\n"));
