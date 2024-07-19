@@ -18,7 +18,7 @@ class FlowDeserializationTest extends Specification {
         when:
         JsonDeserializer.toFlow(getFlowJson("flowGraph-invalid.json"))
         then:
-        thrown(InvalidFormatException)
+        thrown(RuntimeException)
     }
 
     static BufferedReader getFlowJson(String filename) {

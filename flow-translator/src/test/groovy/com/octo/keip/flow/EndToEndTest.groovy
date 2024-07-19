@@ -1,8 +1,11 @@
 package com.octo.keip.flow
 
+import com.octo.keip.flow.model.EipId
 import com.octo.keip.flow.xml.NamespaceSpec
+import com.octo.keip.flow.xml.NodeTransformer
 import spock.lang.Specification
 
+import javax.xml.transform.ErrorListener
 import java.nio.file.Path
 
 import static com.octo.keip.flow.xml.XmlComparisonUtil.compareXml
@@ -24,6 +27,26 @@ class EndToEndTest extends Specification {
 
         then:
         compareXml(output.toString(), readTestXml("end-to-end-spring-integration.xml"))
+    }
+
+    def "Verify error listener is set and called on node transformation error"() {
+        given:
+        def flowTransformer = new SpringIntegrationFlowTransformer(NAMESPACES)
+        ErrorListener errorListener = Mock()
+        NodeTransformer exceptionalTransformer = Stub() {
+            apply(_, _) >> { throw new RuntimeException("faulty transformer") }
+        }
+
+        def adapterId = new EipId("integration", "inbound-channel-adapter")
+        flowTransformer.registerNodeTransformer(adapterId, exceptionalTransformer)
+        flowTransformer.setErrorListener(errorListener)
+
+        when:
+        def output = new StringWriter()
+        flowTransformer.toXml(getFlowJson(), output)
+
+        then:
+        1 * errorListener.error(_)
     }
 
     static BufferedReader getFlowJson() {

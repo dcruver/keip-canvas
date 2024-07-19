@@ -13,7 +13,11 @@ public final class JsonDeserializer {
           .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
           .build();
 
-  public static Flow toFlow(Reader flowJson) throws IOException {
-    return mapper.readValue(flowJson, Flow.class);
+  public static Flow toFlow(Reader flowJson) {
+    try {
+      return mapper.readValue(flowJson, Flow.class);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

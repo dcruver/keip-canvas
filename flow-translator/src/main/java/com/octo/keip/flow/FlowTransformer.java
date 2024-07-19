@@ -1,5 +1,7 @@
 package com.octo.keip.flow;
 
+import com.octo.keip.flow.model.EipId;
+import com.octo.keip.flow.xml.NodeTransformer;
 import java.io.Reader;
 import java.io.Writer;
 import javax.xml.transform.ErrorListener;
@@ -22,4 +24,6 @@ public interface FlowTransformer {
    * @param listener the error listener
    */
   void setErrorListener(ErrorListener listener);
+
+  void registerNodeTransformer(EipId id, NodeTransformer transformer);
 }

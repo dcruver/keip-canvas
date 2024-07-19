@@ -67,8 +67,7 @@ class BaseNodeTransformationTest extends Specification {
         def childAttrs1 = ["attr1": "one"]
         def child1 = new EipChild("child1", childAttrs1, null)
 
-        def childAttrs2 = ["attr2": "two"]
-        def child2 = new EipChild("child2", childAttrs2, null)
+        def child2 = new EipChild("child2", null, null)
 
         def name = "top"
         def node = createNodeStub("1", name)
@@ -92,7 +91,7 @@ class BaseNodeTransformationTest extends Specification {
         def aChild2 = element.children()[1]
         aChild2.prefix() == TEST_NS
         aChild2.localName() == child2.name()
-        aChild2.attributes() == childAttrs2
+        aChild2.attributes().isEmpty()
         aChild2.children().isEmpty()
     }
 
