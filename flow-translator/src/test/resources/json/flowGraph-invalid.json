@@ -1,0 +1,14 @@
+{
+  "nodes": [
+    {
+      "id": "6saqqVcG0G",
+      "eipId": {
+        "namespace": "integration",
+        "name": "transformer"
+      },
+      "label": "Append Timestamp",
+      "role": "transformer",
+      "connectionType": "unknown"
+    }
+  ]
+}
