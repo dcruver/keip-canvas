@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 public final class JsonDeserializer {
-  private static final JsonMapper mapper =
+  static final JsonMapper mapper =
       JsonMapper.builder()
           .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
           .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)

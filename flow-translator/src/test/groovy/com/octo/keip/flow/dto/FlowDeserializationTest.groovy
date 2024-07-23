@@ -1,30 +1,21 @@
 package com.octo.keip.flow.dto
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException
-import spock.lang.Specification
 
-import java.nio.file.Path
+import spock.lang.Specification
 
 class FlowDeserializationTest extends Specification {
 
     def "Test Flow deserialization success"() {
         when:
-        Flow flow = JsonDeserializer.toFlow(getFlowJson("flowGraph.json"))
+        Flow flow = JsonDeserializer.toFlow(FlowTestIO.readJson("flowGraph.json"))
         then:
         flow.nodes().get(0).id() == "vX7zM31DRi"
     }
 
     def "Test Flow deserialization throws exception on invalid json input"() {
         when:
-        JsonDeserializer.toFlow(getFlowJson("flowGraph-invalid.json"))
+        JsonDeserializer.toFlow(FlowTestIO.readJson("flowGraph-invalid.json"))
         then:
         thrown(RuntimeException)
-    }
-
-    static BufferedReader getFlowJson(String filename) {
-        Path path = Path.of("json").resolve(filename)
-        return FlowDeserializationTest.class.getClassLoader()
-                                      .getResource(path.toString())
-                                      .newReader()
     }
 }

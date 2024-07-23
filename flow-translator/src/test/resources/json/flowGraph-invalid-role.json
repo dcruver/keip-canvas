@@ -7,8 +7,8 @@
         "name": "transformer"
       },
       "label": "Append Timestamp",
-      "role": "transformer",
-      "connectionType": "unknown"
+      "role": "tf",
+      "connectionType": "passthru"
     }
   ]
 }
