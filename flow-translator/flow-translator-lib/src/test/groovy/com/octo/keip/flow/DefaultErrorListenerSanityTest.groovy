@@ -1,4 +1,6 @@
-import com.octo.keip.flow.DefaultErrorListener
+package com.octo.keip.flow
+
+
 import spock.lang.Specification
 
 import javax.xml.transform.TransformerException

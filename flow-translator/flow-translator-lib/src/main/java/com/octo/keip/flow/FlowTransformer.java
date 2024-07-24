@@ -1,8 +1,8 @@
 package com.octo.keip.flow;
 
+import com.octo.keip.flow.dto.Flow;
 import com.octo.keip.flow.model.EipId;
 import com.octo.keip.flow.xml.NodeTransformer;
-import java.io.Reader;
 import java.io.Writer;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
@@ -11,12 +11,12 @@ import javax.xml.transform.TransformerException;
 public interface FlowTransformer {
 
   /**
-   * @param flowJson The JSON flow input to transform.
+   * @param flow The flow input to transform.
    * @param outputXml The result of the transformation.
    * @throws TransformerException thrown only if an unrecoverable error occurs, otherwise errors are
    *     delegated to the error listener.
    */
-  void toXml(Reader flowJson, Writer outputXml) throws TransformerException;
+  void toXml(Flow flow, Writer outputXml) throws TransformerException;
 
   /**
    * Set the error listener to be used by the transformer.

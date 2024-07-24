@@ -1,6 +1,9 @@
-package com.octo.keip.flow.dto;
+package com.octo.keip.flow;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.networknt.schema.AbsoluteIri;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
@@ -12,6 +15,7 @@ import com.networknt.schema.ValidationMessage;
 import com.networknt.schema.resource.ClasspathSchemaLoader;
 import com.networknt.schema.resource.DisallowSchemaLoader;
 import com.networknt.schema.resource.SchemaMapper;
+import com.octo.keip.flow.dto.Flow;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Set;
@@ -19,6 +23,12 @@ import java.util.stream.Collectors;
 
 /** Validates an EIP flow against the defined JSON schema. */
 public final class FlowJsonValidator {
+
+  private static final JsonMapper MAPPER =
+      JsonMapper.builder()
+          .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+          .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+          .build();
 
   private static final String SCHEMAS_PREFIX =
       "https://github.com/OctoConsulting/keip-canvas/schemas/";
@@ -40,7 +50,8 @@ public final class FlowJsonValidator {
   }
 
   /**
-   * Validates a {@link Flow} JSON.
+   * Validates a {@link Flow} JSON. By default, the validation will fail fast (return when if it
+   * encounters its first error).
    *
    * @param flow the flow JSON
    * @return a collection of validation error messages. For a successful validation, an empty
@@ -52,10 +63,11 @@ public final class FlowJsonValidator {
   }
 
   /**
-   * Validates a {@link Flow} JSON. By default, the validation will
+   * Validates a {@link Flow} JSON.
    *
    * @param flow the flow JSON
-   * @param failFast
+   * @param failFast if true, validation stops when the first error is encountered. Otherwise, the
+   *     validation continues even in the presence of errors.
    * @return a collection of validation error messages. For a successful validation, an empty
    *     collection is returned.
    */
@@ -67,7 +79,7 @@ public final class FlowJsonValidator {
 
   private JsonNode toJsonNode(Reader r) {
     try {
-      return JsonDeserializer.mapper.readTree(r);
+      return MAPPER.readTree(r);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

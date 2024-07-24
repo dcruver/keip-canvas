@@ -1,6 +1,6 @@
 package com.octo.keip.flow;
 
-import com.octo.keip.flow.dto.JsonDeserializer;
+import com.octo.keip.flow.dto.Flow;
 import com.octo.keip.flow.graph.GuavaGraph;
 import com.octo.keip.flow.model.EipGraph;
 import com.octo.keip.flow.model.EipId;
@@ -8,7 +8,6 @@ import com.octo.keip.flow.xml.GraphTransformer;
 import com.octo.keip.flow.xml.NamespaceSpec;
 import com.octo.keip.flow.xml.NodeTransformer;
 import com.octo.keip.flow.xml.spring.IntegrationGraphTransformer;
-import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
 import javax.xml.transform.ErrorListener;
@@ -24,8 +23,8 @@ public final class SpringIntegrationFlowTransformer implements FlowTransformer {
   }
 
   @Override
-  public void toXml(Reader flowJson, Writer outputXml) throws TransformerException {
-    EipGraph graph = GuavaGraph.from(JsonDeserializer.toFlow(flowJson));
+  public void toXml(Flow flow, Writer outputXml) throws TransformerException {
+    EipGraph graph = GuavaGraph.from(flow);
     graphTransformer.toXml(graph, outputXml);
   }
 
