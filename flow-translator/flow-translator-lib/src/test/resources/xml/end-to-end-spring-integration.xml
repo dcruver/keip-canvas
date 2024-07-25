@@ -10,32 +10,32 @@
            http://www.springframework.org/schema/integration/jms
            https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
 ">
-    <integration:inbound-channel-adapter id="vX7zM31DRi" channel="reactflow__edge-vX7zM31DRi-6saqqVcG0G"
+    <integration:inbound-channel-adapter id="vX7zM31DRi" channel="edge-vX7zM31DRi-6saqqVcG0G"
                                          expression="'Test Message'">
         <integration:poller fixed-rate="5000"/>
     </integration:inbound-channel-adapter>
 
-    <integration:channel id="reactflow__edge-vX7zM31DRi-6saqqVcG0G"/>
+    <integration:channel id="edge-vX7zM31DRi-6saqqVcG0G"/>
 
-    <integration:transformer id="6saqqVcG0G" input-channel="reactflow__edge-vX7zM31DRi-6saqqVcG0G"
-                             output-channel="reactflow__edge-6saqqVcG0G-s5WQWIKq5Y"
+    <integration:transformer id="6saqqVcG0G" input-channel="edge-vX7zM31DRi-6saqqVcG0G"
+                             output-channel="edge-6saqqVcG0G-s5WQWIKq5Y"
                              expression="payload + ' sent at ' + T(java.time.Instant).ofEpochMilli(headers['timestamp'])"/>
 
-    <integration:channel id="reactflow__edge-6saqqVcG0G-s5WQWIKq5Y"/>
+    <integration:channel id="edge-6saqqVcG0G-s5WQWIKq5Y"/>
 
-    <jms:outbound-channel-adapter id="s5WQWIKq5Y" channel="reactflow__edge-6saqqVcG0G-s5WQWIKq5Y"
+    <jms:outbound-channel-adapter id="s5WQWIKq5Y" channel="edge-6saqqVcG0G-s5WQWIKq5Y"
                                   destination-name="test-echo" pub-sub-domain="false"/>
 
-    <jms:message-driven-channel-adapter id="XC1NpnW_V0" channel="reactflow__edge-XC1NpnW_V0-R7vZBcIEY8"
+    <jms:message-driven-channel-adapter id="XC1NpnW_V0" channel="edge-XC1NpnW_V0-R7vZBcIEY8"
                                         destination-name="test-echo" pub-sub-domain="false"/>
 
-    <integration:channel id="reactflow__edge-XC1NpnW_V0-R7vZBcIEY8"/>
+    <integration:channel id="edge-XC1NpnW_V0-R7vZBcIEY8"/>
 
-    <integration:transformer id="R7vZBcIEY8" input-channel="reactflow__edge-XC1NpnW_V0-R7vZBcIEY8"
-                             output-channel="reactflow__edge-R7vZBcIEY8-nOSRl8ygMY"
+    <integration:transformer id="R7vZBcIEY8" input-channel="edge-XC1NpnW_V0-R7vZBcIEY8"
+                             output-channel="edge-R7vZBcIEY8-nOSRl8ygMY"
                              expression="'Message echoed from address(test-echo): ' + payload"/>
 
-    <integration:channel id="reactflow__edge-R7vZBcIEY8-nOSRl8ygMY"/>
+    <integration:channel id="edge-R7vZBcIEY8-nOSRl8ygMY"/>
 
-    <integration:logging-channel-adapter id="nOSRl8ygMY" channel="reactflow__edge-R7vZBcIEY8-nOSRl8ygMY"/>
+    <integration:logging-channel-adapter id="nOSRl8ygMY" channel="edge-R7vZBcIEY8-nOSRl8ygMY"/>
 </beans>
