@@ -1,6 +1,5 @@
 package com.octo.keip.flow.xml.spring
 
-
 import com.octo.keip.flow.model.ConnectionType
 import com.octo.keip.flow.model.EdgeProps
 import com.octo.keip.flow.model.EipChild
@@ -15,7 +14,7 @@ import org.xmlunit.builder.Input
 import org.xmlunit.xpath.JAXPXPathEngine
 import spock.lang.Specification
 
-import javax.xml.transform.ErrorListener
+import javax.xml.transform.TransformerException
 import java.util.stream.Stream
 
 import static com.octo.keip.flow.xml.XmlComparisonUtil.compareXml
@@ -29,17 +28,16 @@ class IntegrationGraphTransformerTest extends Specification {
 
     EipGraph graph = Stub()
 
-    ErrorListener errorListener = Mock()
-
     def xmlOutput = new StringWriter()
 
-    def graphTransformer = new IntegrationGraphTransformer(NAMESPACES, errorListener)
+    def graphTransformer = new IntegrationGraphTransformer(NAMESPACES)
 
     def "Transform empty graph. Check root element"() {
         given:
-        graphTransformer.toXml(graph, xmlOutput)
+        def errors = graphTransformer.toXml(graph, xmlOutput)
 
         expect:
+        errors.isEmpty()
         compareXml(xmlOutput.toString(), readTestXml("empty.xml"))
     }
 
@@ -57,9 +55,10 @@ class IntegrationGraphTransformerTest extends Specification {
         graph.traverse() >> { _ -> Stream.of(node) }
 
         when:
-        graphTransformer.toXml(graph, xmlOutput)
+        def errors = graphTransformer.toXml(graph, xmlOutput)
 
         then: "only referenced namespaces should be included (instead of all registered namespaces)"
+        errors.isEmpty()
         compareXml(xmlOutput.toString(), readTestXml("single-node.xml"))
     }
 
@@ -104,9 +103,10 @@ class IntegrationGraphTransformerTest extends Specification {
         graph.traverse() >> { _ -> Stream.of(inbound, transformer, outbound) }
 
         when:
-        graphTransformer.toXml(graph, xmlOutput)
+        def errors = graphTransformer.toXml(graph, xmlOutput)
 
         then:
+        errors.isEmpty()
         compareXml(xmlOutput.toString(), readTestXml("multi-node.xml"))
     }
 
@@ -125,7 +125,7 @@ class IntegrationGraphTransformerTest extends Specification {
         graphTransformer.toXml(graph, xmlOutput)
 
         then:
-        1 * errorListener.fatalError(_)
+        thrown(TransformerException)
     }
 
     def "Registering custom node transformers resolves correctly"() {
@@ -158,13 +158,14 @@ class IntegrationGraphTransformerTest extends Specification {
 
         when:
         graphTransformer.registerNodeTransformer(outboundEipId, mockTransformer)
-        graphTransformer.toXml(graph, xmlOutput)
+        def errors = graphTransformer.toXml(graph, xmlOutput)
 
         then:
-        1 * mockTransformer.apply(outbound, graph)
+        errors.isEmpty()
+        1 * mockTransformer.apply(outbound, graph) >> []
     }
 
-    def "NodeTransformer throws exception -> pass exception to error listener and move on to next node"() {
+    def "NodeTransformer throws exception -> add exception to error list and move on to next node"() {
         given: "inbound adapter -> outbound adapter"
         def inboundEipId = new EipId("integration", "inbound-adapter")
         EipNode inbound = Stub {
@@ -194,12 +195,14 @@ class IntegrationGraphTransformerTest extends Specification {
 
         when:
         graphTransformer.registerNodeTransformer(inboundEipId, mockTransformer)
-        graphTransformer.toXml(graph, xmlOutput)
+        def errors = graphTransformer.toXml(graph, xmlOutput)
 
         then:
         1 * mockTransformer.apply(inbound,
                 graph) >> { throw new RuntimeException("inbound transformer error") }
-        1 * errorListener.error(_)
+
+        errors.size() == 1
+        errors[0].source() == "inbound"
 
         def rootElem = getRootElement(xmlOutput.toString())
         rootElem.getLocalName() == "beans"

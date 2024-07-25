@@ -1,7 +1,5 @@
 package com.octo.keip.flow.model;
 
-import com.octo.keip.flow.dto.FlowEdge;
-
 public record EdgeProps(String id, EdgeType type) {
   public enum EdgeType {
     DEFAULT,

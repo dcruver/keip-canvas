@@ -5,7 +5,6 @@ import com.octo.keip.flow.xml.NamespaceSpec;
 import com.octo.keip.flow.xml.NodeTransformerFactory;
 import java.util.Collection;
 import javax.xml.namespace.QName;
-import javax.xml.transform.ErrorListener;
 
 public final class IntegrationGraphTransformer extends GraphTransformer {
 
@@ -15,9 +14,8 @@ public final class IntegrationGraphTransformer extends GraphTransformer {
   private static final String DEFAULT_NS_SCHEMA_LOCATION =
       "https://www.springframework.org/schema/beans/spring-beans.xsd";
 
-  public IntegrationGraphTransformer(
-      Collection<NamespaceSpec> namespaceSpecs, ErrorListener errorListener) {
-    super(new NodeTransformerFactory(new DefaultNodeTransformer()), namespaceSpecs, errorListener);
+  public IntegrationGraphTransformer(Collection<NamespaceSpec> namespaceSpecs) {
+    super(new NodeTransformerFactory(new DefaultNodeTransformer()), namespaceSpecs);
   }
 
   @Override

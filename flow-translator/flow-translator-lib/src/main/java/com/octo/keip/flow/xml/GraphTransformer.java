@@ -2,10 +2,12 @@ package com.octo.keip.flow.xml;
 
 import com.ctc.wstx.stax.WstxEventFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
+import com.octo.keip.flow.error.TransformationError;
 import com.octo.keip.flow.model.EipGraph;
 import com.octo.keip.flow.model.EipId;
 import com.octo.keip.flow.model.EipNode;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,7 +24,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
 
 public abstract class GraphTransformer {
@@ -37,28 +38,21 @@ public abstract class GraphTransformer {
   // maps an eipNamespace to a NamespaceSpec
   private final Map<String, NamespaceSpec> registeredNamespaces;
 
-  protected ErrorListener errorListener;
-
   protected GraphTransformer(
-      NodeTransformerFactory nodeTransformerFactory,
-      Collection<NamespaceSpec> namespaceSpecs,
-      ErrorListener errorListener) {
+      NodeTransformerFactory nodeTransformerFactory, Collection<NamespaceSpec> namespaceSpecs) {
     this.nodeTransformerFactory = nodeTransformerFactory;
-    this.errorListener = errorListener;
     this.registeredNamespaces = new HashMap<>();
     this.registeredNamespaces.put(defaultNamespace().eipNamespace(), defaultNamespace());
     namespaceSpecs.forEach(s -> this.registeredNamespaces.put(s.eipNamespace(), s));
-  }
-
-  public final void setErrorListener(ErrorListener errorListener) {
-    this.errorListener = errorListener;
   }
 
   public final void registerNodeTransformer(EipId id, NodeTransformer transformer) {
     this.nodeTransformerFactory.register(id, transformer);
   }
 
-  public final void toXml(EipGraph graph, Writer output) throws TransformerException {
+  public final List<TransformationError> toXml(EipGraph graph, Writer output)
+      throws TransformerException {
+    List<TransformationError> errors = new ArrayList<>();
     try {
       XMLEventWriter writer = outputFactory.createXMLEventWriter(output);
       writer.setDefaultNamespace(defaultNamespace().xmlNamespace());
@@ -68,7 +62,7 @@ public abstract class GraphTransformer {
       StartElement root = createRootElement(graph);
       writer.add(root);
 
-      writeNodes(graph, writer);
+      writeNodes(graph, writer, errors);
 
       writer.add(eventFactory.createEndElement(root.getName(), null));
 
@@ -77,8 +71,9 @@ public abstract class GraphTransformer {
       writer.flush();
       writer.close();
     } catch (XMLStreamException | RuntimeException e) {
-      this.errorListener.fatalError(new TransformerException(e));
+      throw new TransformerException(e);
     }
+    return errors;
   }
 
   protected abstract NamespaceSpec defaultNamespace();
@@ -148,7 +143,7 @@ public abstract class GraphTransformer {
     return Stream.concat(Stream.of(defaultNamespace, xsiNamespace), collectedNamespaces).iterator();
   }
 
-  private void writeNodes(EipGraph graph, XMLEventWriter writer) throws TransformerException {
+  private void writeNodes(EipGraph graph, XMLEventWriter writer, List<TransformationError> errors) {
     // Using a for-each loop rather than stream operations due to the checked exception.
     // If this approach proves inefficient, an alternative is to define our own ErrorListener
     // interface that throws runtime exceptions.
@@ -158,7 +153,8 @@ public abstract class GraphTransformer {
         List<XmlElement> elements = transformer.apply(node, graph);
         elements.forEach(e -> writeElement(e, writer));
       } catch (RuntimeException e) {
-        this.errorListener.error(new TransformerException(e));
+        TransformationError error = new TransformationError(node.id(), new TransformerException(e));
+        errors.add(error);
       }
     }
   }

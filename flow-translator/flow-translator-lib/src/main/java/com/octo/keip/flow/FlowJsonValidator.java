@@ -15,7 +15,7 @@ import com.networknt.schema.ValidationMessage;
 import com.networknt.schema.resource.ClasspathSchemaLoader;
 import com.networknt.schema.resource.DisallowSchemaLoader;
 import com.networknt.schema.resource.SchemaMapper;
-import com.octo.keip.flow.dto.Flow;
+import com.octo.keip.flow.model.Flow;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Set;

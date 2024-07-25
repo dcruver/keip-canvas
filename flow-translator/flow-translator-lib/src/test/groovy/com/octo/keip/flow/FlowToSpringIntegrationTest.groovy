@@ -3,8 +3,8 @@ package com.octo.keip.flow
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
-import com.octo.keip.flow.dto.Flow
 import com.octo.keip.flow.model.EipId
+import com.octo.keip.flow.model.Flow
 import com.octo.keip.flow.xml.NamespaceSpec
 import com.octo.keip.flow.xml.NodeTransformer
 import spock.lang.Specification
@@ -41,7 +41,7 @@ class FlowToSpringIntegrationTest extends Specification {
         compareXml(output.toString(), readTestXml("end-to-end-spring-integration.xml"))
     }
 
-    def "Verify error listener is set and called on node transformation error"() {
+    def "Verify transformation error list is populated on node transformation error"() {
         given:
         def flow = MAPPER.readValue(getFlowJson(), Flow.class)
 
@@ -53,14 +53,13 @@ class FlowToSpringIntegrationTest extends Specification {
 
         def adapterId = new EipId("integration", "inbound-channel-adapter")
         flowTransformer.registerNodeTransformer(adapterId, exceptionalTransformer)
-        flowTransformer.setErrorListener(errorListener)
 
         when:
         def output = new StringWriter()
-        flowTransformer.toXml(flow, output)
+        def errors = flowTransformer.toXml(flow, output)
 
         then:
-        1 * errorListener.error(_)
+        errors.size() == 1
     }
 
     static BufferedReader getFlowJson() {

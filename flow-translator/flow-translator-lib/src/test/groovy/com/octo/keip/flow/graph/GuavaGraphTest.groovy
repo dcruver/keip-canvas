@@ -1,7 +1,7 @@
 package com.octo.keip.flow.graph
 
-import com.octo.keip.flow.dto.Flow
-import com.octo.keip.flow.dto.FlowEdge
+import com.octo.keip.flow.model.Flow
+import com.octo.keip.flow.model.FlowEdge
 import com.octo.keip.flow.model.ConnectionType
 import com.octo.keip.flow.model.EdgeProps
 import com.octo.keip.flow.model.EipId

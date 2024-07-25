@@ -1,4 +1,4 @@
-package com.octo.keip.flow.dto;
+package com.octo.keip.flow.model;
 
 import com.octo.keip.flow.model.EdgeProps.EdgeType;
 
