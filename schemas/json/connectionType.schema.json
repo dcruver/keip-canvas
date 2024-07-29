@@ -6,6 +6,7 @@
   "type": "string",
   "enum": [
     "passthru",
+    "request_reply",
     "sink",
     "source",
     "tee"
