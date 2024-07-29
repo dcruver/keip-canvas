@@ -4,40 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.octo.keip</groupId>
-    <artifactId>schemas</artifactId>
+    <groupId>com.octo.keip.schemas</groupId>
+    <artifactId>schema-parent</artifactId>
     <version>0.1.0</version>
+
+    <packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/schemas</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>json</directory>
-                                    <includes>
-                                        <include>*.schema.json</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+    <modules>
+        <module>model</module>
+        <module>validation</module>
+    </modules>
 </project>

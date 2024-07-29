@@ -1,0 +1,102 @@
+{
+  "http": [
+    {
+      "role": "endpoint",
+      "connectionType": "sink",
+      "name": "outbound-channel-adapter",
+      "attributes": [
+        {
+          "name": "url",
+          "type": "string",
+          "description": "URL to which the requests should be sent.",
+          "required": false
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "auto-startup",
+          "type": "boolean",
+          "description": "Boolean value indicating whether this endpoint should start automatically.",
+          "required": false
+        }
+      ],
+      "childGroup": {
+        "indicator": "choice",
+        "children": [
+          {
+            "occurrence": {
+              "min": 0
+            },
+            "name": "poller",
+            "attributes": [
+              {
+                "name": "fixed-rate",
+                "type": "number",
+                "description": "Fixed rate trigger (in milliseconds).",
+                "required": false
+              },
+              {
+                "name": "time-unit",
+                "type": "string",
+                "required": false,
+                "restriction": {
+                  "type": "enum",
+                  "values": [
+                    "MILLISECONDS",
+                    "SECONDS"
+                  ]
+                }
+              }
+            ],
+            "childGroup": {
+              "indicator": "sequence",
+              "children": [
+                {
+                  "occurrence": {
+                    "min": 0,
+                    "max": -1
+                  },
+                  "name": "transactional",
+                  "description": "Run each poll task in a transaction.",
+                  "attributes": [
+                    {
+                      "name": "read-only",
+                      "type": "string",
+                      "description": "Is this transaction read-only?",
+                      "default": "false",
+                      "required": false
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "file": [
+    {
+      "role": "endpoint",
+      "connectionType": "passthru",
+      "name": "file-to-string-transformer",
+      "attributes": [
+        {
+          "name": "input-channel",
+          "type": "string",
+          "description": "The input channel of the transformer.",
+          "required": false
+        },
+        {
+          "name": "output-channel",
+          "type": "string",
+          "description": "The channel to which the transformer will send the transformed message.",
+          "required": false
+        }
+      ]
+    }
+  ]
+}
