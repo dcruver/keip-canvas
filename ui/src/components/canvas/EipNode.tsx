@@ -1,7 +1,7 @@
 import { Button, Stack, Tile } from "@carbon/react"
-import { Handle, NodeProps, Position } from "reactflow"
 import { ServiceId } from "@carbon/react/icons"
-import { FlowType, Role } from "../../api/eipSchema"
+import { Handle, NodeProps, Position } from "reactflow"
+import { ConnectionType, Role } from "../../api/eipSchema"
 import { EipNodeData, Layout } from "../../api/flow"
 import { ChildNodeId, EipId } from "../../api/id"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
@@ -9,8 +9,8 @@ import getIconUrl from "../../singletons/eipIconCatalog"
 import {
   useAppActions,
   useGetChildren,
-  useIsChildSelected,
   useGetLayout,
+  useIsChildSelected,
 } from "../../singletons/store"
 import { toTitleCase } from "../../utils/titleTransform"
 import "./nodes.scss"
@@ -23,45 +23,64 @@ interface ChildrenIconsProps {
 
 const defaultNamespace = "integration"
 
-// TODO: Limit handles to the appropriate number of connections
-const renderHandles = (
-  flowType: FlowType,
-  layoutType: Layout["orientation"]
-) => {
-  if (layoutType === "horizontal") {
-    switch (flowType) {
-      case "source":
-        return <Handle type="source" position={Position.Right}></Handle>
-      case "sink":
-        return <Handle type="target" position={Position.Left}></Handle>
-      case "passthru":
-        return (
-          <>
-            <Handle type="source" position={Position.Right}></Handle>
-            <Handle type="target" position={Position.Left}></Handle>
-          </>
-        )
-      default:
-        console.error("unhandled FlowType")
-    }
-  } else {
-    switch (flowType) {
-      case "source":
-        return <Handle type="source" position={Position.Bottom}></Handle>
-      case "sink":
-        return <Handle type="target" position={Position.Top}></Handle>
-      case "passthru":
-        return (
-          <>
-            <Handle type="source" position={Position.Bottom}></Handle>
-            <Handle type="target" position={Position.Top}></Handle>
-          </>
-        )
-      default:
-        console.error("unhandled FlowType")
-    }
+const renderHorizontalHandles = (connectionType: ConnectionType) => {
+  switch (connectionType) {
+    case "source":
+      return <Handle id="output" type="source" position={Position.Right} />
+    case "sink":
+      return <Handle id="input" type="target" position={Position.Left} />
+    case "passthru":
+    case "request_reply":
+      return (
+        <>
+          <Handle id="output" type="source" position={Position.Right} />
+          <Handle id="input" type="target" position={Position.Left} />
+        </>
+      )
+    case "tee":
+      return (
+        <>
+          <Handle id="output" type="source" position={Position.Right} />
+          <Handle id="discard" type="source" position={Position.Bottom} />
+          <Handle id="input" type="target" position={Position.Left} />
+        </>
+      )
   }
 }
+
+const renderVerticalHandles = (connectionType: ConnectionType) => {
+  switch (connectionType) {
+    case "source":
+      return <Handle id="output" type="source" position={Position.Bottom} />
+    case "sink":
+      return <Handle id="input" type="target" position={Position.Top} />
+    case "passthru":
+    case "request_reply":
+      return (
+        <>
+          <Handle id="output" type="source" position={Position.Bottom} />
+          <Handle id="input" type="target" position={Position.Top} />
+        </>
+      )
+    case "tee":
+      return (
+        <>
+          <Handle id="output" type="source" position={Position.Bottom} />
+          <Handle id="discard" type="source" position={Position.Right} />
+          <Handle id="input" type="target" position={Position.Top} />
+        </>
+      )
+  }
+}
+
+// TODO: Limit handles to the appropriate number of connections
+const renderHandles = (
+  connectionType: ConnectionType,
+  layoutType: Layout["orientation"]
+) =>
+  layoutType === "horizontal"
+    ? renderHorizontalHandles(connectionType)
+    : renderVerticalHandles(connectionType)
 
 const getNamespacedTitle = (eipId: EipId) => {
   if (eipId.namespace === defaultNamespace) {
@@ -124,7 +143,7 @@ export const EipNode = (props: NodeProps<EipNodeData>) => {
   const componentDefinition = lookupEipComponent(data.eipId)!
   const layout = useGetLayout()
   const handles = renderHandles(
-    componentDefinition.flowType,
+    componentDefinition.connectionType,
     layout.orientation
   )
 

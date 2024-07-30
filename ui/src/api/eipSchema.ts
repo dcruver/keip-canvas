@@ -16,9 +16,14 @@ export interface Attribute {
   restriction?: Restriction
 }
 
-export type FlowType = "source" | "sink" | "passthru"
+export type ConnectionType =
+  | "passthru"
+  | "request_reply"
+  | "sink"
+  | "source"
+  | "tee"
 
-export type Role = "endpoint" | "channel"
+export type Role = "channel" | "endpoint" | "router" | "transformer"
 
 interface Occurrence {
   min?: number
@@ -44,7 +49,7 @@ export interface EipChildElement extends EipElement {
 
 export interface EipComponent extends EipElement {
   role: Role
-  flowType: FlowType
+  connectionType: ConnectionType
 }
 
 export type EipSchema = Record<string, EipComponent[]>
