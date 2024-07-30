@@ -7,33 +7,41 @@ public final class EipComponent extends EipElement {
 
   private final Role role;
 
-  // TODO: Is flowType needed for channels? Does it make more sense to split Endpoints and Channels
-  // into different subclasses.
-  private final FlowType flowType;
+  private final ConnectionType connectionType;
 
   private EipComponent(Builder builder) {
     super(builder);
     this.role = builder.role;
-    this.flowType = builder.flowType;
+    this.connectionType = builder.connectionType;
   }
 
   public Role getRole() {
     return role;
   }
 
-  public FlowType getFlowType() {
-    return flowType;
+  public ConnectionType getConnectionType() {
+    return connectionType;
   }
 
   public static class Builder extends EipElement.Builder<Builder> {
 
-    private final Role role;
-    private final FlowType flowType;
+    private Role role;
+    private ConnectionType connectionType;
 
-    public Builder(String name, Role role, FlowType flowType) {
+    public Builder(String name, Role role, ConnectionType connectionType) {
       this.name = Objects.requireNonNull(name);
       this.role = Objects.requireNonNull(role);
-      this.flowType = Objects.requireNonNull(flowType);
+      this.connectionType = Objects.requireNonNull(connectionType);
+    }
+
+    public Builder role(Role role) {
+      this.role = role;
+      return self();
+    }
+
+    public Builder connectionType(ConnectionType connectionType) {
+      this.connectionType = connectionType;
+      return self();
     }
 
     @Override

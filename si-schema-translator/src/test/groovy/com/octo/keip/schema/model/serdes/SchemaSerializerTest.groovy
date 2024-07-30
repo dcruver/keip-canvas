@@ -7,38 +7,29 @@ import com.octo.keip.schema.model.eip.ChildGroup
 import com.octo.keip.schema.model.eip.EipChildElement
 import com.octo.keip.schema.model.eip.EipComponent
 import com.octo.keip.schema.model.eip.EipSchema
-import com.octo.keip.schema.model.eip.FlowType
+import com.octo.keip.schema.model.eip.ConnectionType
 import com.octo.keip.schema.model.eip.Indicator
 import com.octo.keip.schema.model.eip.Occurrence
 import com.octo.keip.schema.model.eip.Restriction
 import com.octo.keip.schema.model.eip.Role
+import com.octo.keip.schemas.validation.EipSchemaValidator
 import spock.lang.Specification
 import spock.lang.TempDir
 
 import java.nio.file.Path
 
+import static com.octo.keip.schemas.validation.EipSchema.COMPONENT_DEFINITION
+
 class SchemaSerializerTest extends Specification {
 
-    static final EXPECTED_SCHEMA_JSON = importEipSchemaJson()
+    static final String EXPECTED_SCHEMA_JSON = importEipSchemaJson()
 
     @TempDir
     File testDir
 
     def "Serialize EipSchema to JSON String"() {
         given:
-        def attr = new Attribute.Builder("test-attr", AttributeType.STRING)
-                .description("test attr description")
-                .defaultValue("default val")
-                .required(false)
-                .restriction(new Restriction.MultiValuedRestriction(Restriction.RestrictionType.ENUM, List.of("first", "second")))
-                .build()
-        def child = new EipChildElement.Builder("test-child").description("test child description").build()
-        def eipComponent = new EipComponent.Builder("test-top", Role.ENDPOINT, FlowType.SOURCE)
-                .description("test top level description")
-                .addAttribute(attr)
-                .childGroup(new ChildGroup(Indicator.SEQUENCE, List.of(child)))
-                .build()
-        def eipSchema = EipSchema.from(Map.of("test-ns", List.of(eipComponent)))
+        def eipSchema = buildTestSchema()
         def outputFile = new File(testDir, "schema.json")
 
         when:
@@ -46,6 +37,21 @@ class SchemaSerializerTest extends Specification {
 
         then:
         JsonParser.parseString(outputFile.text) == JsonParser.parseString(EXPECTED_SCHEMA_JSON)
+    }
+
+    def "Validate serialized output against the EipComponentDefinition schema"() {
+        given:
+        def eipSchema = buildTestSchema()
+        def outputFile = new File(testDir, "schema.json")
+
+        def validator = EipSchemaValidator.getInstance(COMPONENT_DEFINITION)
+
+        when:
+        SchemaSerializer.writeSchemaToJsonFile(eipSchema, outputFile)
+        def errors = validator.validate(outputFile.newReader(), false)
+
+        then:
+        errors.isEmpty()
     }
 
     def "Test custom occurrence deserializer"(Occurrence input, String expectedJson) {
@@ -67,6 +73,24 @@ class SchemaSerializerTest extends Specification {
     private static String importEipSchemaJson() throws URISyntaxException, IOException {
         Path path = Path.of("schemas", "json", "serialization-sanity-check.json")
         return SchemaSerializerTest.getClassLoader().getResource(path.toString()).text
+    }
+
+    private static EipSchema buildTestSchema() {
+        def attr = new Attribute.Builder("test-attr", AttributeType.STRING)
+                .description("test attr description")
+                .defaultValue("default val")
+                .required(false)
+                .restriction(new Restriction.MultiValuedRestriction(
+                        Restriction.RestrictionType.ENUM, List.of("first", "second")))
+                .build()
+        def child = new EipChildElement.Builder("test-child")
+                .description("test child description").build()
+        def eipComponent = new EipComponent.Builder("test-top", Role.ENDPOINT, ConnectionType.SOURCE)
+                .description("test top level description")
+                .addAttribute(attr)
+                .childGroup(new ChildGroup(Indicator.SEQUENCE, List.of(child)))
+                .build()
+        return EipSchema.from(Map.of("test-ns", List.of(eipComponent)))
     }
 
 }

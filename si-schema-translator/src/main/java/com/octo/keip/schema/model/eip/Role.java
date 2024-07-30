@@ -3,8 +3,12 @@ package com.octo.keip.schema.model.eip;
 import com.google.gson.annotations.SerializedName;
 
 public enum Role {
+  @SerializedName("channel")
+  CHANNEL,
   @SerializedName("endpoint")
   ENDPOINT,
-  @SerializedName("channel")
-  CHANNEL;
+  @SerializedName("router")
+  ROUTER,
+  @SerializedName("transformer")
+  TRANSFORMER,
 }

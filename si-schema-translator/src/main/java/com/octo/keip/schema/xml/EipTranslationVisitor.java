@@ -3,9 +3,9 @@ package com.octo.keip.schema.xml;
 import com.octo.keip.schema.model.eip.Attribute;
 import com.octo.keip.schema.model.eip.ChildComposite;
 import com.octo.keip.schema.model.eip.ChildGroup;
+import com.octo.keip.schema.model.eip.ConnectionType;
 import com.octo.keip.schema.model.eip.EipChildElement;
 import com.octo.keip.schema.model.eip.EipComponent;
-import com.octo.keip.schema.model.eip.FlowType;
 import com.octo.keip.schema.model.eip.Indicator;
 import com.octo.keip.schema.model.eip.Occurrence;
 import com.octo.keip.schema.model.eip.Role;
@@ -13,6 +13,8 @@ import com.octo.keip.schema.xml.attribute.AnnotationTranslator;
 import com.octo.keip.schema.xml.attribute.AttributeTranslator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
 import org.apache.ws.commons.schema.XmlSchemaAll;
 import org.apache.ws.commons.schema.XmlSchemaAny;
@@ -100,6 +102,8 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
   public void onExitElement(
       XmlSchemaElement xmlSchemaElement, XmlSchemaTypeInfo xmlSchemaTypeInfo, boolean visited) {
     if (xmlSchemaElement.isTopLevel()) {
+      eipComponentBuilder.connectionType(
+          getConnectionType(xmlSchemaElement, eipComponentBuilder.build()));
       return;
     }
     exitNode();
@@ -189,7 +193,7 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
           "The top level element should only be entered once. Was the visitor reset?");
     }
     return new EipComponent.Builder(
-            xmlSchemaElement.getName(), getRole(xmlSchemaElement), getFlowType(xmlSchemaElement))
+            xmlSchemaElement.getName(), getRole(xmlSchemaElement), ConnectionType.PASSTHRU)
         .description(annotationTranslator.getDescription(xmlSchemaElement));
   }
 
@@ -228,24 +232,45 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
     }
   }
 
+  // TODO: Refine how roles are determined
   private Role getRole(XmlSchemaElement element) {
+    String elementName = element.getName().toLowerCase();
     if (getExtensionBaseName(element).equals("channelType")) {
       return Role.CHANNEL;
+    } else if (elementName.contains("router") || elementName.contains("filter")) {
+      return Role.ROUTER;
+    } else if (elementName.contains("transformer")) {
+      return Role.TRANSFORMER;
     }
     return Role.ENDPOINT;
   }
 
-  FlowType getFlowType(XmlSchemaElement element) {
+  // TODO: Refine how connection types are determined
+  ConnectionType getConnectionType(XmlSchemaElement element, EipComponent eipComponent) {
     String elementName = element.getName().toLowerCase();
     String extensionBaseName = getExtensionBaseName(element).toLowerCase();
-    if (elementName.contains("inbound")
+
+    Set<String> attrNames =
+        eipComponent.getAttributes().stream().map(Attribute::name).collect(Collectors.toSet());
+
+    if (attrNames.contains("request-channel") && attrNames.contains("reply-channel")) {
+      return ConnectionType.REQUEST_REPLY;
+    } else if (attrNames.contains("input-channel")
+        && attrNames.contains("output-channel")
+        && attrNames.contains("discard-channel")) {
+      return ConnectionType.TEE;
+    } else if (elementName.contains("gateway")) {
+      return ConnectionType.REQUEST_REPLY;
+    } else if (elementName.contains("filter")) {
+      return ConnectionType.TEE;
+    } else if (elementName.contains("inbound")
         || elementName.contains("message-driven")
         || extensionBaseName.contains("inbound")) {
-      return FlowType.SOURCE;
+      return ConnectionType.SOURCE;
     } else if (elementName.contains("outbound") || extensionBaseName.contains("outbound")) {
-      return FlowType.SINK;
+      return ConnectionType.SINK;
     } else {
-      return FlowType.PASSTHRU;
+      return ConnectionType.PASSTHRU;
     }
   }
 

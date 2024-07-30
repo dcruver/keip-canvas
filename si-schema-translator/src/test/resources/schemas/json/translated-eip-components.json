@@ -3,7 +3,7 @@
     "name": "inbound-channel-adapter",
     "description": "Defines a Polling Channel Adapter",
     "role": "endpoint",
-    "flowType": "source",
+    "connectionType": "source",
     "attributes": [
       {
         "name": "id",
@@ -162,8 +162,8 @@
   },
   {
     "name": "sample-filter",
-    "role": "endpoint",
-    "flowType": "passthru",
+    "role": "router",
+    "connectionType": "tee",
     "attributes": [
       {
         "name": "throw-exception-on-rejection",

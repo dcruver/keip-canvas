@@ -78,7 +78,7 @@ An example (abbreviated) output JSON:
   "integration": [
     {
       "role": "endpoint",
-      "flowType": "passthru",
+      "connectionType": "passthru",
       "name": "filter",
       "description": "Defines a Consumer Endpoint for the 'org.springframework.integration.filter.MessageFilter' that is used to decide whether a Message should be passed along or dropped based on some criteria",
       "attributes": [

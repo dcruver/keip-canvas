@@ -32,7 +32,7 @@ class EipComparisonUtils {
     static void assertEipComponentsEqual(EipComponent expected, EipComponent actual) {
         assert expected.getName() == actual.getName()
         assert expected.getRole() == actual.getRole()
-        assert expected.getFlowType() == actual.getFlowType()
+        assert expected.getConnectionType() == actual.getConnectionType()
         assert expected.getDescription() == actual.getDescription()
         assertCollectionsEqualNoOrder(
                 expected.getAttributes(),

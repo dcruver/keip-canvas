@@ -3,7 +3,7 @@
     {
       "name": "test-top",
       "role": "endpoint",
-      "flowType": "source",
+      "connectionType": "source",
       "description": "test top level description",
       "attributes": [
         {

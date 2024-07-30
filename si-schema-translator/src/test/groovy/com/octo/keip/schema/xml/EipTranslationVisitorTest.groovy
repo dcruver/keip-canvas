@@ -3,8 +3,8 @@ package com.octo.keip.schema.xml
 import com.octo.keip.schema.model.eip.Attribute
 import com.octo.keip.schema.model.eip.AttributeType
 import com.octo.keip.schema.model.eip.ChildGroup
+import com.octo.keip.schema.model.eip.ConnectionType
 import com.octo.keip.schema.model.eip.EipChildElement
-import com.octo.keip.schema.model.eip.FlowType
 import com.octo.keip.schema.model.eip.Indicator
 import com.octo.keip.schema.model.eip.Occurrence
 import com.octo.keip.schema.model.eip.Role
@@ -24,7 +24,8 @@ class EipTranslationVisitorTest extends Specification {
 
     def visitor = new EipTranslationVisitor()
 
-    XmlSchemaWalker walker = setupWalker(xmlSchemaCollection, Path.of("visitor", "eip-visitor-sample.xml"))
+    XmlSchemaWalker walker =
+            setupWalker(xmlSchemaCollection, Path.of("visitor", "eip-visitor-sample.xml"))
 
     def "Top level element is set as the main EipComponent"() {
         when:
@@ -36,9 +37,14 @@ class EipTranslationVisitorTest extends Specification {
         eipComponent.getName() == "top-level-component"
         eipComponent.getDescription() == "Top Level EIP Component"
         eipComponent.getRole() == Role.ENDPOINT
-        eipComponent.getFlowType() == FlowType.PASSTHRU
+        eipComponent.getConnectionType() == ConnectionType.PASSTHRU
 
-        def expectedAttrs = [new Attribute.Builder("top-attr-1", AttributeType.NUMBER).defaultValue("1").build(), new Attribute.Builder("top-attr-2", AttributeType.STRING).required(true).build()] as HashSet
+        def expectedAttrs = [new Attribute.Builder("top-attr-1", AttributeType.NUMBER)
+                                     .defaultValue("1")
+                                     .build(),
+                             new Attribute.Builder("top-attr-2", AttributeType.STRING)
+                                     .required(true)
+                                     .build()] as HashSet
         eipComponent.attributes == expectedAttrs
     }
 
@@ -78,7 +84,9 @@ class EipTranslationVisitorTest extends Specification {
         childElement.occurrence() == new Occurrence(2, 4)
         childElement.getDescription() == "baseType example docs"
 
-        def expectedAttrs = [new Attribute.Builder("child-attr-1", AttributeType.BOOLEAN).description("Enable thing").build()] as HashSet
+        def expectedAttrs = [new Attribute.Builder("child-attr-1", AttributeType.BOOLEAN)
+                                     .description("Enable thing")
+                                     .build()] as HashSet
         childElement.attributes == expectedAttrs
     }
 
@@ -105,7 +113,9 @@ class EipTranslationVisitorTest extends Specification {
         childElement2.occurrence() == Occurrence.DEFAULT
         childElement2.getDescription() == "override base docs"
 
-        def expectedAttrs = [new Attribute.Builder("child-attr-1", AttributeType.BOOLEAN).description("Enable thing").build()] as HashSet
+        def expectedAttrs = [new Attribute.Builder("child-attr-1", AttributeType.BOOLEAN)
+                                     .description("Enable thing")
+                                     .build()] as HashSet
         childElement1.attributes == expectedAttrs
         childElement2.attributes == expectedAttrs
     }
@@ -179,10 +189,11 @@ class EipTranslationVisitorTest extends Specification {
         group.children().size() == 2
     }
 
-    def "EIP Component check flow type is set correctly"(String elementName, FlowType expectedType) {
+    def "EIP Component check connection type is set correctly"(String elementName, ConnectionType expectedType) {
         given:
         def schemaCollection = new XmlSchemaCollection()
-        def localWalker = setupWalker(schemaCollection, Path.of("visitor", "flow-and-role-test-input.xml"))
+        def localWalker =
+                setupWalker(schemaCollection, Path.of("visitor", "connection-type-test-input.xml"))
 
         when:
         localWalker.walk(getTopLevelComponent(schemaCollection, elementName))
@@ -190,22 +201,27 @@ class EipTranslationVisitorTest extends Specification {
 
         then:
         eipComponent.getName() == elementName
-        eipComponent.getFlowType() == expectedType
+        eipComponent.getConnectionType() == expectedType
 
         where:
         elementName              | expectedType
-        "InboundElement"         | FlowType.SOURCE
-        "source"                 | FlowType.SOURCE
-        "example-message-driven" | FlowType.SOURCE
-        "example-Outbound"       | FlowType.SINK
-        "sink"                   | FlowType.SINK
-        "handler"                | FlowType.PASSTHRU
+        "requestReplyElement"    | ConnectionType.REQUEST_REPLY
+        "outboundGateway"        | ConnectionType.REQUEST_REPLY
+        "tee-type-element"       | ConnectionType.TEE
+        "validating-Filter"      | ConnectionType.TEE
+        "InboundElement"         | ConnectionType.SOURCE
+        "source"                 | ConnectionType.SOURCE
+        "example-message-driven" | ConnectionType.SOURCE
+        "example-Outbound"       | ConnectionType.SINK
+        "sink"                   | ConnectionType.SINK
+        "handler"                | ConnectionType.PASSTHRU
     }
 
     def "Eip Component check role is set correctly"(String elementName, Role expectedRole) {
         given:
         def schemaCollection = new XmlSchemaCollection()
-        def localWalker = setupWalker(schemaCollection, Path.of("visitor", "flow-and-role-test-input.xml"))
+        def localWalker = setupWalker(
+                schemaCollection, Path.of("visitor", "role-test-input.xml"))
 
         when:
         localWalker.walk(getTopLevelComponent(schemaCollection, elementName))
@@ -216,9 +232,12 @@ class EipTranslationVisitorTest extends Specification {
         eipComponent.getRole() == expectedRole
 
         where:
-        elementName | expectedRole
-        "handler"   | Role.ENDPOINT
-        "connector" | Role.CHANNEL
+        elementName          | expectedRole
+        "connector"          | Role.CHANNEL
+        "validating-Filter"  | Role.ROUTER
+        "dynamicRouter"      | Role.ROUTER
+        "messageTransformer" | Role.TRANSFORMER
+        "handler"            | Role.ENDPOINT
     }
 
     private XmlSchemaWalker setupWalker(XmlSchemaCollection schemaCollection, Path xmlFilePath) {

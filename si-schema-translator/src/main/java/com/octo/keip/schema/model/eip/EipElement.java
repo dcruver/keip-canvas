@@ -1,5 +1,6 @@
 package com.octo.keip.schema.model.eip;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,7 +27,10 @@ public abstract class EipElement {
   }
 
   public Set<Attribute> getAttributes() {
-    return attributes;
+    if (attributes == null) {
+      return Collections.emptySet();
+    }
+    return Collections.unmodifiableSet(attributes);
   }
 
   public ChildComposite getChildGroup() {

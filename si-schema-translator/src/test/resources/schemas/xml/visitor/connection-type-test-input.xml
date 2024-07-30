@@ -4,11 +4,35 @@
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             elementFormDefault="qualified">
 
+    <xsd:element name="requestReplyElement">
+        <xsd:complexType>
+            <xsd:attribute name="request-channel" type="xsd:string"/>
+            <xsd:attribute name="reply-channel" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="outboundGateway" type="xsd:string"/>
+
+    <xsd:element name="tee-type-element">
+        <xsd:complexType>
+            <xsd:attribute name="input-channel" type="xsd:string"/>
+            <xsd:attribute name="output-channel" type="xsd:string"/>
+            <xsd:attribute name="discard-channel" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="validating-Filter" type="xsd:string">
+        <xsd:complexType>
+            <xsd:attribute name="request-channel" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="InboundElement">
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element name="child1" type="xsd:string"/>
             </xsd:sequence>
+            <xsd:attribute name="output-channel" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -25,6 +49,7 @@
             <xsd:sequence>
                 <xsd:element name="child1" type="xsd:string"/>
             </xsd:sequence>
+            <xsd:attribute name="input-channel" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -41,6 +66,7 @@
             <xsd:sequence>
                 <xsd:element name="child1" type="xsd:string"/>
             </xsd:sequence>
+            <xsd:attribute name="reply-channel" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -49,14 +75,7 @@
             <xsd:sequence>
                 <xsd:element name="child1" type="xsd:string"/>
             </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-
-    <xsd:element name="connector">
-        <xsd:complexType>
-            <xsd:complexContent>
-                <xsd:extension base="channelType"/>
-            </xsd:complexContent>
+            <xsd:attribute name="discard-channel" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -65,10 +84,6 @@
     </xsd:complexType>
 
     <xsd:complexType name="OutboundType">
-        <xsd:attribute name="attr1" type="xsd:string"/>
-    </xsd:complexType>
-
-    <xsd:complexType name="channelType">
         <xsd:attribute name="attr1" type="xsd:string"/>
     </xsd:complexType>
 

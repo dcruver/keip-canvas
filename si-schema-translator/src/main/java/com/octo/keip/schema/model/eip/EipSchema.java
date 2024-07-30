@@ -4,6 +4,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+// TODO: Rename to match EipComponentDefinition schema
+// TODO: Look into generating this class from the JSON schema.
+// Should match schema at:
+// <project-root>/keip-canvas/schemas/model/json/eipComponentDef.schema.json
 public class EipSchema {
 
   private final Map<String, List<EipComponent>> eipComponentMap;

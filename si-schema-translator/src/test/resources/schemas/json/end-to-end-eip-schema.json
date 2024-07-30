@@ -3,7 +3,7 @@
     {
       "name": "adapter",
       "role": "endpoint",
-      "flowType": "passthru",
+      "connectionType": "passthru",
       "attributes": [
         {
           "name": "timeout",
@@ -23,8 +23,8 @@
   "ns2": [
     {
       "name": "filter",
-      "role": "endpoint",
-      "flowType": "passthru",
+      "role": "router",
+      "connectionType": "tee",
       "attributes": [
         {
           "name": "delay",
