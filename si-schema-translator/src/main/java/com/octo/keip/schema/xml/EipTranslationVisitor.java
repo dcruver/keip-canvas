@@ -13,6 +13,7 @@ import com.octo.keip.schema.xml.attribute.AnnotationTranslator;
 import com.octo.keip.schema.xml.attribute.AttributeTranslator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
@@ -198,26 +199,41 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
   }
 
   private EipChildElement retrieveVisitedElement(XmlSchemaElement xmlSchemaElement) {
-    // Check if element is a direct ref
-    EipChildElement element = visitedElements.get(xmlSchemaElement.getQName());
+    if (xmlSchemaElement.getSchemaTypeName() == null) {
+      // Check if element is a direct ref
+      EipChildElement element = visitedElements.get(xmlSchemaElement.getQName());
 
-    if (element == null) {
+      // TODO:
+      // For back references (cycles) to be handled properly, direct references need to use the same
+      // element (no copying). However, it seems that some references actually have differing
+      // descriptions and occurrence.
+      // For now, comparing those two fields to determine if we should copy or not, but look for a
+      // better solution.
+      String refDescription = annotationTranslator.getDescription(xmlSchemaElement);
+      if (Objects.equals(element.getDescription(), refDescription)
+          && element.occurrence().equals(getOccurrence(xmlSchemaElement))) {
+        return element;
+      }
+      return new EipChildElement.Builder(element)
+          .description(refDescription)
+          .occurrence(getOccurrence(xmlSchemaElement))
+          .build();
+    } else {
       // check if element is a type ref
-      element = visitedBaseTypes.get(xmlSchemaElement.getSchemaTypeName());
+      EipChildElement element = visitedBaseTypes.get(xmlSchemaElement.getSchemaTypeName());
+
       // Even if SchemaType is the same as a visited element, name/occurrence/description could be
       // different. Create a new child element and copy over the similar properties.
-      element =
-          new EipChildElement.Builder(element)
-              .name(xmlSchemaElement.getName())
-              .description(annotationTranslator.getDescription(xmlSchemaElement))
-              .occurrence(getOccurrence(xmlSchemaElement))
-              .build();
+      return new EipChildElement.Builder(element)
+          .name(xmlSchemaElement.getName())
+          .description(annotationTranslator.getDescription(xmlSchemaElement))
+          .occurrence(getOccurrence(xmlSchemaElement))
+          .build();
     }
-    return element;
   }
 
   /**
-   * The schema walker only visits an element's attributes once, even if the element is references
+   * The schema walker only visits an element's attributes once, even if the element is referenced
    * multiple times by the schema. Therefore, newly visited elements and base types need to be
    * cached.
    */

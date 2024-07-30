@@ -240,6 +240,35 @@ class EipTranslationVisitorTest extends Specification {
         "handler"            | Role.ENDPOINT
     }
 
+    def "Visit multiple nodes with the same child names but different types"() {
+        given:
+        def schemaCollection = new XmlSchemaCollection()
+        def localWalker = setupWalker(
+                schemaCollection, Path.of("visitor", "element-name-overlap.xml"))
+        when:
+        localWalker.walk(getTopLevelComponent(schemaCollection, "type-router"))
+        def typeRouter = visitor.getEipComponent()
+        visitor.reset()
+        localWalker.walk(getTopLevelComponent(schemaCollection, "basic-router"))
+        def basicRouter = visitor.getEipComponent()
+        visitor.reset()
+        localWalker.walk(getTopLevelComponent(schemaCollection, "value-router"))
+        def valueRouter = visitor.getEipComponent()
+
+        then:
+        def typeRouterChild = typeRouter.getChildGroup().children()[0] as EipChildElement
+        typeRouterChild.getName() == "mapping"
+        typeRouterChild.getAttributes()[0].name() == "type"
+
+        def basicRouterChild = basicRouter.getChildGroup().children()[0] as EipChildElement
+        basicRouterChild.getName() == "mapping"
+        basicRouterChild.getAttributes()[0].name() == "value"
+
+        def valueRouterChild = valueRouter.getChildGroup().children()[0] as EipChildElement
+        valueRouterChild.getName() == "mapping"
+        valueRouterChild.getAttributes()[0].name() == "value"
+    }
+
     private XmlSchemaWalker setupWalker(XmlSchemaCollection schemaCollection, Path xmlFilePath) {
         schemaCollection.read(TestIOUtils.getXmlSchemaFileReader(xmlFilePath))
         def walker = new XmlSchemaWalker(xmlSchemaCollection)
