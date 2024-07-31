@@ -38,7 +38,7 @@ module.exports = {
         "varsIgnorePattern": "^_",
         "ignoreRestSiblings": true
       }
-    ]
+    ],
   },
   settings: {
     react: {

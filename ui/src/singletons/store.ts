@@ -21,8 +21,8 @@ import {
   applyNodeChanges,
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
-import { AttributeTypes } from "../api/eipSchema"
 import { EIP_NODE_KEY, EipFlowNode, Layout } from "../api/flow"
+import { AttributeType } from "../api/generated/eipComponentDef"
 import { ChildNodeId, EipId, areChildIdsEqual } from "../api/id"
 import { newFlowLayout } from "../components/layout/layouting"
 
@@ -36,7 +36,7 @@ interface ReactFlowActions {
   onConnect: OnConnect
 }
 
-type AttributeMapping = Record<string, AttributeTypes>
+type AttributeMapping = Record<string, AttributeType>
 
 interface EipNodeConfig {
   attributes: AttributeMapping
@@ -55,7 +55,7 @@ interface AppActions {
     id: string,
     parentId: string,
     attrName: string,
-    value: AttributeTypes
+    value: AttributeType
   ) => void
 
   updateEnabledChildren: (nodeId: string, children: string[]) => void

@@ -4,12 +4,13 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
     "check-format": "prettier --check ./src",
-    "format": "prettier --write ./src"
+    "codegen": "node genApiFromSchema.js",
+    "dev": "vite",
+    "format": "prettier --write ./src",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
   },
   "engines": {
     "node": ">=20.0.0",
@@ -32,6 +33,7 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@apidevtools/json-schema-ref-parser": "^11.6.4",
     "@types/carbon__colors": "^10.31.3",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
@@ -43,6 +45,7 @@
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.9",
+    "json-schema-to-typescript": "^15.0.0",
     "prettier": "^3.3.3",
     "sass": "^1.71.1",
     "typescript": "^5.3.3",
