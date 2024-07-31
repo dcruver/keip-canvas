@@ -46,14 +46,17 @@ export const newFlowLayout = (
 
   const newNodes = nodes.map((node) => {
     const positionedNode = graph.node(node.id)
+    const updatedPosition = {
+      x: positionedNode.x - getWidth(node) / 2,
+      y: positionedNode.y - getHeight(node) / 2,
+    }
+
     return {
       ...node,
       targetPosition: isHorizontal ? Position.Left : Position.Top,
       sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
-      position: {
-        x: positionedNode.x - getWidth(node) / 2,
-        y: positionedNode.y - getHeight(node) / 2,
-      },
+      position: updatedPosition,
+      positionAbsolute: updatedPosition,
     }
   })
 
