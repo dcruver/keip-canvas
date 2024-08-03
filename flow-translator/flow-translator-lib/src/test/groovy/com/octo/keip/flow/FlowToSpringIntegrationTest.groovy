@@ -51,7 +51,6 @@ class FlowToSpringIntegrationTest extends Specification {
         def errors = flowTransformer.toXml(flow, output)
 
         then:
-        println output
         errors.isEmpty()
         compareXml(output.toString(), readTestXml("end-to-end-filter-spring-integration.xml"))
     }
