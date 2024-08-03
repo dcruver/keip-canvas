@@ -12,6 +12,7 @@
   },
   "$defs": {
     "Restriction": {
+      "description": "Configures a constraint on the possible values of an attribute. Currently, only string enum constraints are supported.",
       "type": "object",
       "properties": {
         "type": {
@@ -32,6 +33,7 @@
       ]
     },
     "Attribute": {
+      "description": "Defines an EIP attribute",
       "type": "object",
       "properties": {
         "name": {
@@ -64,19 +66,25 @@
       ]
     },
     "Occurrence": {
+      "description": "Determines the cardinality of each element in a group",
       "type": "object",
       "properties": {
         "min": {
+          "description": "The minimum number of instances of this element in the group",
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "default": 1
         },
         "max": {
+          "description": "The maximum number of instances of this element in the group. Setting this to a value of '-1' enables adding an unbounded number of elements",
           "type": "integer",
-          "minimum": -1
+          "minimum": -1,
+          "default": 1
         }
       }
     },
     "EipElement": {
+      "description": "The base schema for all EIP Elements (e.g. EipComponent, EipChildElement)",
       "type": "object",
       "properties": {
         "name": {
@@ -100,8 +108,10 @@
       ]
     },
     "EipChildGroup": {
+      "description": "A container for child elements used to indicate their order or mutual exclusivity",
       "type": "object",
       "properties": {
+        "description": "The type of child grouping. Used along with each child element's 'Occurrence' to constrain a child's order and cardinality",
         "indicator": {
           "type": "string",
           "enum": [
@@ -126,6 +136,7 @@
       ]
     },
     "EipChildElement": {
+      "description": "A child EIP element. Each child element is a descendant of a top-level EipComponent and can recursively contain more child elements",
       "type": "object",
       "allOf": [
         {
@@ -139,6 +150,7 @@
       }
     },
     "EipComponent": {
+      "description": "A top-level EIP component",
       "type": "object",
       "allOf": [
         {

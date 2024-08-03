@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/OctoConsulting/keip-canvas/schemas/v0.1.0/eipNode.schema.json",
   "title": "EipNode",
-  "description": "An instance of an EIP component as a node in the flow diagram",
+  "description": "An instance of an 'EipComponent' as a node in the flow diagram",
   "type": "object",
   "required": [
     "id",
@@ -42,6 +42,7 @@
   "additionalProperties": false,
   "$defs": {
     "EipId": {
+      "description": "A combination of fields uniquely identifying a component in an 'EipComponentDefinition'",
       "type": "object",
       "properties": {
         "namespace": {
@@ -57,12 +58,14 @@
       ]
     },
     "Attributes": {
+      "description": "A map of EIP attributes belonging to the node",
       "type": "object",
       "additionalProperties": {
         "$ref": "attributeType.schema.json"
       }
     },
     "ChildNode": {
+      "description": "An instance of an 'EipChildElement'. Can recursively contain more child nodes as well as attributes of its own.",
       "type": "object",
       "properties": {
         "name": {
