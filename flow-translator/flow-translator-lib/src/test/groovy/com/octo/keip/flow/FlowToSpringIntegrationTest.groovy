@@ -9,7 +9,6 @@ import com.octo.keip.flow.xml.NamespaceSpec
 import com.octo.keip.flow.xml.NodeTransformer
 import spock.lang.Specification
 
-import javax.xml.transform.ErrorListener
 import java.nio.file.Path
 
 import static com.octo.keip.flow.xml.XmlComparisonUtil.compareXml
@@ -18,7 +17,8 @@ import static com.octo.keip.flow.xml.XmlComparisonUtil.readTestXml
 // TODO: Validate against spring integration XSDs
 class FlowToSpringIntegrationTest extends Specification {
     private static final List<NamespaceSpec> NAMESPACES = [new NamespaceSpec("integration", "http://www.springframework.org/schema/integration", "https://www.springframework.org/schema/integration/spring-integration.xsd"),
-                                                           new NamespaceSpec("jms", "http://www.springframework.org/schema/integration/jms", "https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd")
+                                                           new NamespaceSpec("jms", "http://www.springframework.org/schema/integration/jms", "https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd"),
+                                                           new NamespaceSpec("http", "http://www.springframework.org/schema/integration/http", "https://www.springframework.org/schema/integration/http/spring-integration-http.xsd")
     ]
 
     private static final JsonMapper MAPPER =
@@ -29,23 +29,37 @@ class FlowToSpringIntegrationTest extends Specification {
 
     def flowTransformer = new SpringIntegrationFlowTransformer(NAMESPACES)
 
-    def "End-to-end flow to spring-integration xml"() {
+    def "End-to-end basic flow to spring-integration xml"() {
         given:
-        def flow = MAPPER.readValue(getFlowJson(), Flow.class)
+        def flow = MAPPER.readValue(getFlowJson("flowGraph.json"), Flow.class)
 
         when:
         def output = new StringWriter()
-        flowTransformer.toXml(flow, output)
+        def errors = flowTransformer.toXml(flow, output)
 
         then:
-        compareXml(output.toString(), readTestXml("end-to-end-spring-integration.xml"))
+        errors.isEmpty()
+        compareXml(output.toString(), readTestXml("end-to-end-basic-spring-integration.xml"))
+    }
+
+    def "End-to-end flow with a 'tee' connectionType component to spring-integration xml"() {
+        given:
+        def flow = MAPPER.readValue(getFlowJson("flowGraphWithFilter.json"), Flow.class)
+
+        when:
+        def output = new StringWriter()
+        def errors = flowTransformer.toXml(flow, output)
+
+        then:
+        println output
+        errors.isEmpty()
+        compareXml(output.toString(), readTestXml("end-to-end-filter-spring-integration.xml"))
     }
 
     def "Verify transformation error list is populated on node transformation error"() {
         given:
-        def flow = MAPPER.readValue(getFlowJson(), Flow.class)
+        def flow = MAPPER.readValue(getFlowJson("flowGraph.json"), Flow.class)
 
-        ErrorListener errorListener = Mock()
         NodeTransformer exceptionalTransformer = Stub() {
             apply(_, _) >> { throw new RuntimeException("faulty transformer") }
         }
@@ -62,8 +76,8 @@ class FlowToSpringIntegrationTest extends Specification {
         errors.size() == 1
     }
 
-    static BufferedReader getFlowJson() {
-        Path path = Path.of("json").resolve("flowGraph.json")
+    static BufferedReader getFlowJson(String filename) {
+        Path path = Path.of("json").resolve(filename)
         return FlowToSpringIntegrationTest.class
                                           .getClassLoader()
                                           .getResource(path.toString())

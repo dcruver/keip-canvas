@@ -373,7 +373,7 @@ class DefaultNodeTransformerTest extends Specification {
         EipNode middle = Stub() {
             id() >> "middle"
             eipId() >> new EipId(TEST_NS, "middle-comp")
-            role() >> Role.TRANSFORMER
+            role() >> Role.ROUTER
             connectionType() >> ConnectionType.PASSTHRU
             attributes() >> attrs
             children() >> [childNode]

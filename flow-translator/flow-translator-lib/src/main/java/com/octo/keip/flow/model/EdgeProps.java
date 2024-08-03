@@ -11,6 +11,6 @@ public record EdgeProps(String id, EdgeType type) {
   }
 
   public static EdgeProps from(FlowEdge edge) {
-    return new EdgeProps(edge.id(), edge.sourceHandle());
+    return new EdgeProps(edge.id(), edge.type());
   }
 }
