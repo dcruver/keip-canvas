@@ -29,9 +29,9 @@ class FlowToSpringIntegrationTest extends Specification {
 
     def flowTransformer = new SpringIntegrationFlowTransformer(NAMESPACES)
 
-    def "End-to-end basic flow to spring-integration xml"() {
+    def "End-to-end basic flow to spring-integration xml"(String flowFile, String xmlFile) {
         given:
-        def flow = MAPPER.readValue(getFlowJson("flowGraph.json"), Flow.class)
+        def flow = MAPPER.readValue(getFlowJson(flowFile), Flow.class)
 
         when:
         def output = new StringWriter()
@@ -39,25 +39,17 @@ class FlowToSpringIntegrationTest extends Specification {
 
         then:
         errors.isEmpty()
-        compareXml(output.toString(), readTestXml("end-to-end-basic-spring-integration.xml"))
-    }
+        compareXml(output.toString(), readTestXml(xmlFile))
 
-    def "End-to-end flow with a 'tee' connectionType component to spring-integration xml"() {
-        given:
-        def flow = MAPPER.readValue(getFlowJson("flowGraphWithFilter.json"), Flow.class)
-
-        when:
-        def output = new StringWriter()
-        def errors = flowTransformer.toXml(flow, output)
-
-        then:
-        errors.isEmpty()
-        compareXml(output.toString(), readTestXml("end-to-end-filter-spring-integration.xml"))
+        where:
+        flowFile          | xmlFile
+        "flowGraph1.json" | Path.of("end-to-end", "spring-integration-1.xml").toString()
+        "flowGraph2.json" | Path.of("end-to-end", "spring-integration-2.xml").toString()
     }
 
     def "Verify transformation error list is populated on node transformation error"() {
         given:
-        def flow = MAPPER.readValue(getFlowJson("flowGraph.json"), Flow.class)
+        def flow = MAPPER.readValue(getFlowJson("flowGraph1.json"), Flow.class)
 
         NodeTransformer exceptionalTransformer = Stub() {
             apply(_, _) >> { throw new RuntimeException("faulty transformer") }

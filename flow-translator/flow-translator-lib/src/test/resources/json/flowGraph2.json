@@ -36,7 +36,7 @@
         "name": "logging-channel-adapter"
       },
       "label": "Logger",
-      "description": "Logs the message for debugging purposes",
+      "description": "Logs the discarded message",
       "role": "endpoint",
       "connectionType": "sink",
       "attributes": {}
@@ -45,17 +45,29 @@
       "id": "34vHRfjQPU",
       "eipId": {
         "namespace": "http",
-        "name": "outbound-channel-adapter"
+        "name": "outbound-gateway"
       },
       "label": "Send to web server",
       "description": "Sends the message to an HTTP server",
       "role": "endpoint",
-      "connectionType": "sink",
+      "connectionType": "request_reply",
       "attributes": {
         "url": "http://localhost/example",
         "http-method": "POST"
       },
       "children": []
+    },
+    {
+      "id": "I91fywAfMc",
+      "eipId": {
+        "namespace": "integration",
+        "name": "logging-channel-adapter"
+      },
+      "label": "Logger",
+      "description": "Logs the http reply",
+      "role": "endpoint",
+      "connectionType": "sink",
+      "attributes": {}
     }
   ],
   "edges": [
@@ -75,6 +87,11 @@
       "target": "34vHRfjQPU",
       "type": "default",
       "id": "edge-qi1dPaIdpm-34vHRfjQPU"
+    },
+    {
+      "source": "34vHRfjQPU",
+      "target": "I91fywAfMc",
+      "id": "edge-34vHRfjQPU-I91fywAfMc"
     }
   ]
 }

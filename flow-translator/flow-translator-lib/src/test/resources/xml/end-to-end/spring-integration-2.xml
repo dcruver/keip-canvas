@@ -29,7 +29,14 @@
 
     <integration:logging-channel-adapter id="nOSRl8ygMY" channel="edge-qi1dPaIdpm-nOSRl8ygMY"/>
 
-    <http:outbound-channel-adapter id="34vHRfjQPU" channel="edge-qi1dPaIdpm-34vHRfjQPU" url="http://localhost/example"
+    <http:outbound-gateway id="34vHRfjQPU"
+                                   request-channel="edge-qi1dPaIdpm-34vHRfjQPU"
+                                   reply-channel="edge-34vHRfjQPU-I91fywAfMc"
+                                   url="http://localhost/example"
                                    http-method="POST"/>
+
+    <integration:channel id="edge-34vHRfjQPU-I91fywAfMc"/>
+
+    <integration:logging-channel-adapter id="I91fywAfMc" channel="edge-34vHRfjQPU-I91fywAfMc"/>
 
 </beans>

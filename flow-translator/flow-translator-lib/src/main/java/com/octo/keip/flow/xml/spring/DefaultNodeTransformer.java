@@ -5,6 +5,8 @@ import static com.octo.keip.flow.xml.spring.AttributeNames.DISCARD_CHANNEL;
 import static com.octo.keip.flow.xml.spring.AttributeNames.ID;
 import static com.octo.keip.flow.xml.spring.AttributeNames.INPUT_CHANNEL;
 import static com.octo.keip.flow.xml.spring.AttributeNames.OUTPUT_CHANNEL;
+import static com.octo.keip.flow.xml.spring.AttributeNames.REPLY_CHANNEL;
+import static com.octo.keip.flow.xml.spring.AttributeNames.REQUEST_CHANNEL;
 
 import com.octo.keip.flow.model.EdgeProps;
 import com.octo.keip.flow.model.EdgeProps.EdgeType;
@@ -92,6 +94,7 @@ public class DefaultNodeTransformer implements NodeTransformer {
       Map<String, Object> attributes = new LinkedHashMap<>();
       return switch (this.node.connectionType()) {
         case PASSTHRU -> handlePassthru(attributes, predecessors, successors);
+        case REQUEST_REPLY -> handleRequestReply(attributes, predecessors, successors);
         case SINK -> handleSink(attributes, predecessors, successors);
         case SOURCE -> handleSource(attributes, predecessors, successors);
         case TEE -> handleTee(attributes, predecessors, successors);
@@ -110,6 +113,21 @@ public class DefaultNodeTransformer implements NodeTransformer {
       successors.stream()
           .findFirst()
           .ifPresent(s -> attributes.put(OUTPUT_CHANNEL, getChannelId(this.node, s)));
+      return attributes;
+    }
+
+    private Map<String, Object> handleRequestReply(
+        Map<String, Object> attributes, Set<EipNode> predecessors, Set<EipNode> successors) {
+      if (predecessors.size() > 1 || successors.size() > 1) {
+        throw new IllegalArgumentException(
+            "'RequestReply' nodes can have at most one incoming and one outgoing edge");
+      }
+      predecessors.stream()
+          .findFirst()
+          .ifPresent(p -> attributes.put(REQUEST_CHANNEL, getChannelId(p, this.node)));
+      successors.stream()
+          .findFirst()
+          .ifPresent(s -> attributes.put(REPLY_CHANNEL, getChannelId(this.node, s)));
       return attributes;
     }
 

@@ -14,6 +14,8 @@ import static com.octo.keip.flow.xml.spring.AttributeNames.DISCARD_CHANNEL
 import static com.octo.keip.flow.xml.spring.AttributeNames.ID
 import static com.octo.keip.flow.xml.spring.AttributeNames.INPUT_CHANNEL
 import static com.octo.keip.flow.xml.spring.AttributeNames.OUTPUT_CHANNEL
+import static com.octo.keip.flow.xml.spring.AttributeNames.REPLY_CHANNEL
+import static com.octo.keip.flow.xml.spring.AttributeNames.REQUEST_CHANNEL
 import static com.octo.keip.flow.xml.spring.DefaultNodeTransformer.DIRECT_CHANNEL
 
 class DefaultNodeTransformerTest extends Specification {
@@ -26,7 +28,7 @@ class DefaultNodeTransformerTest extends Specification {
 
     EipNode testNode = createNodeStub("default-test-id")
 
-    def "multi-input/multi-output passthru node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
+    def "multi-input/multi-output 'passthru' node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
         given:
         graph.predecessors(testNode) >> predecessors
         graph.successors(testNode) >> successors
@@ -44,7 +46,25 @@ class DefaultNodeTransformerTest extends Specification {
         []                                           | [createNodeStub("n1"), createNodeStub("n2")]
     }
 
-    def "multi-input/single-output sink node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
+    def "multi-input/multi-output 'request_reply' node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
+        given:
+        graph.predecessors(testNode) >> predecessors
+        graph.successors(testNode) >> successors
+
+        when:
+        transformer.apply(testNode, graph)
+
+        then:
+        testNode.connectionType() >> ConnectionType.REQUEST_REPLY
+        thrown(IllegalArgumentException)
+
+        where:
+        predecessors                                 | successors
+        [createNodeStub("n1"), createNodeStub("n2")] | []
+        []                                           | [createNodeStub("n1"), createNodeStub("n2")]
+    }
+
+    def "multi-input/single-output 'sink' node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
         given:
         graph.predecessors(testNode) >> predecessors
         graph.successors(testNode) >> successors
@@ -62,7 +82,7 @@ class DefaultNodeTransformerTest extends Specification {
         []                                           | [createNodeStub("n1")]
     }
 
-    def "multi-output/single-input source node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
+    def "multi-output/single-input 'source' node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
         given:
         graph.predecessors(testNode) >> predecessors
         graph.successors(testNode) >> successors
@@ -203,6 +223,29 @@ class DefaultNodeTransformerTest extends Specification {
         attributes.size() == 2
         attributes[INPUT_CHANNEL] == "in"
         attributes[OUTPUT_CHANNEL] == "out"
+    }
+
+    def "addChannelAttributes with 'request_reply' node -> input and output channel attributes added"() {
+        given:
+        def preNode = createNodeStub("pre1")
+        def postNode = createNodeStub("post1")
+
+        graph.predecessors(testNode) >> [preNode]
+        graph.successors(testNode) >> [postNode]
+
+        graph.getEdgeProps(preNode, testNode) >> createEdgeProps("in")
+        graph.getEdgeProps(testNode, postNode) >> createEdgeProps("out")
+
+        when:
+        def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
+        def attributes = transformation.createChannelAttributes()
+
+        then:
+        testNode.connectionType() >> ConnectionType.REQUEST_REPLY
+
+        attributes.size() == 2
+        attributes[REQUEST_CHANNEL] == "in"
+        attributes[REPLY_CHANNEL] == "out"
     }
 
     def "addChannelAttributes with 'sink' node -> channel attribute is added"() {
