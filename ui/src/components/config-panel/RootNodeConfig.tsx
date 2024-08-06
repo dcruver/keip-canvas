@@ -27,7 +27,7 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
       debounce(
         (ev: ChangeEvent<HTMLTextAreaElement>) =>
           updateNodeDescription(node.id, ev.target.value),
-        1000
+        300
       ),
     [node.id, updateNodeDescription]
   )

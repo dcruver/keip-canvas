@@ -21,10 +21,18 @@ import {
   applyNodeChanges,
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
+import { useStoreWithEqualityFn } from "zustand/traditional"
 import { EIP_NODE_KEY, EipFlowNode, Layout } from "../api/flow"
 import { AttributeType } from "../api/generated/eipComponentDef"
+import {
+  ChildNode as EipChildNode,
+  EipFlow,
+  EipNode,
+  FlowEdge,
+} from "../api/generated/eipFlow"
 import { ChildNodeId, EipId, areChildIdsEqual } from "../api/id"
 import { newFlowLayout } from "../components/layout/layouting"
+import { lookupEipComponent } from "./eipDefinitions"
 
 export const ROOT_PARENT = "root"
 
@@ -390,6 +398,39 @@ export const useUndoRedo = () =>
   }))
 
 export const useAppActions = () => useStore((state) => state.appActions)
+
+export const useEipFlow = () =>
+  useStoreWithEqualityFn(useStore, (state) => diagramToEipFlow(state), isDeepEqual)
+
+// TODO: Extract flow conversion to a separate file
+const diagramToEipFlow = (state: AppStore): EipFlow => {
+  const nodes: EipNode[] = state.nodes.map((node) => {
+    const eipComponent = lookupEipComponent(node.data.eipId)!
+    const children: EipChildNode[] = Object.entries(
+      state.eipNodeConfigs[node.id]?.children
+    ).map(([name, attrs]) => ({ name: name, attributes: { ...attrs } }))
+
+    return {
+      id: node.id,
+      eipId: node.data.eipId,
+      label: node.data.label,
+      description: state.eipNodeConfigs[node.id]?.description,
+      role: eipComponent.role,
+      connectionType: eipComponent.connectionType,
+      attributes: { ...state.eipNodeConfigs[node.id]?.attributes },
+      children: children,
+    }
+  })
+
+  const edges: FlowEdge[] = state.edges.map((edge) => ({
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    type: edge.sourceHandle === "discard" ? "discard" : "default",
+  }))
+
+  return { nodes, edges }
+}
 
 // Warning: the following exports are not intended for use in React components
 export const getNodesView: () => Readonly<EipFlowNode[]> = () =>
