@@ -119,9 +119,10 @@ public abstract class GraphTransformer {
     Stream<String> collectedLocations =
         eipNamespaces.stream().flatMap(ns -> Stream.of(getXmlNamespace(ns), getSchemaLocation(ns)));
 
+    // TODO: Figure out how to safely use a newline inside an attribute
     String locString =
         Stream.concat(defaultNamespaceLocation, collectedLocations)
-            .collect(Collectors.joining("\n"));
+            .collect(Collectors.joining(" "));
 
     return List.of(
             eventFactory.createAttribute(
