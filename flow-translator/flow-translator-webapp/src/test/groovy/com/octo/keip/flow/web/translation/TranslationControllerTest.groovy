@@ -38,11 +38,28 @@ class TranslationControllerTest extends Specification {
     def "valid flow json to XML -> returns ok response with body"() {
         given:
         def translationResult = new TranslationResponse(OUTPUT_XML, null)
-        translationService.toXml(_ as Flow) >> translationResult
+        translationService.toXml(_ as Flow, false) >> translationResult
 
         expect:
         MvcResult mvcResult = mvc.perform(post("/")
                 .contentType(APPLICATION_JSON_VALUE)
+                .content(readFlowJson("sample-flow.json")))
+                                 .andExpect(status().isOk())
+                                 .andExpect(content().contentType(APPLICATION_JSON_VALUE))
+                                 .andReturn()
+
+        verifyTranslationResult(mvcResult, translationResult)
+    }
+
+    def "valid flow json to pretty-printed XML -> returns ok response with body"() {
+        given:
+        def translationResult = new TranslationResponse(OUTPUT_XML, null)
+        translationService.toXml(_ as Flow, true) >> translationResult
+
+        expect:
+        MvcResult mvcResult = mvc.perform(post("/")
+                .contentType(APPLICATION_JSON_VALUE)
+                .queryParam("prettyPrint", "true")
                 .content(readFlowJson("sample-flow.json")))
                                  .andExpect(status().isOk())
                                  .andExpect(content().contentType(APPLICATION_JSON_VALUE))
@@ -56,7 +73,7 @@ class TranslationControllerTest extends Specification {
         def errDetails = new TranslationErrorDetail("node1", "unknown node")
         def err = ApiError.of(new TransformerException("unsupported node type"), [errDetails])
         def translationResult = new TranslationResponse(OUTPUT_XML, err)
-        translationService.toXml(_ as Flow) >> translationResult
+        translationService.toXml(_ as Flow, _ as Boolean) >> translationResult
 
         expect:
         MvcResult mvcResult = mvc.perform(post("/")
@@ -71,7 +88,7 @@ class TranslationControllerTest extends Specification {
 
     def "flow json to XML with fatal transformation errors -> returns error response with no body"(Exception ex, int httpStatusCode) {
         given:
-        translationService.toXml(_ as Flow) >> { throw ex }
+        translationService.toXml(_ as Flow, _ as Boolean) >> { throw ex }
 
         expect:
         MvcResult mvcResult = mvc.perform(post("/")
@@ -92,7 +109,7 @@ class TranslationControllerTest extends Specification {
     def "malformed flow json -> deserialization error -> returns error response with no body"() {
         given:
         def translationResult = new TranslationResponse(OUTPUT_XML, null)
-        translationService.toXml(_ as Flow) >> translationResult
+        translationService.toXml(_ as Flow, _ as Boolean) >> translationResult
 
         expect:
         MvcResult mvcResult = mvc.perform(post("/")

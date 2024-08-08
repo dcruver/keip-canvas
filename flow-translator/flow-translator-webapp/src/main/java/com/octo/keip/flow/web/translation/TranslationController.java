@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 // TODO: Add json validation endpoint
@@ -24,8 +25,9 @@ class TranslationController {
 
   @Operation(summary = "Translate an EIP flow json to a Spring Integration XML")
   @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-  ResponseEntity<TranslationResponse> flowToXml(@RequestBody Flow eipFlow) {
-    TranslationResponse response = this.flowTranslationService.toXml(eipFlow);
+  ResponseEntity<TranslationResponse> flowToXml(
+      @RequestBody Flow eipFlow, @RequestParam(defaultValue = "false") boolean prettyPrint) {
+    TranslationResponse response = this.flowTranslationService.toXml(eipFlow, prettyPrint);
     if (response.error() == null) {
       return ResponseEntity.ok(response);
     } else {

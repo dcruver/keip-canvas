@@ -6,6 +6,7 @@ import com.octo.keip.flow.model.Flow
 import spock.lang.Specification
 
 import javax.xml.transform.TransformerException
+import java.nio.file.Path
 
 class TranslationServiceTest extends Specification {
 
@@ -60,10 +61,33 @@ class TranslationServiceTest extends Specification {
         flowTransformer.toXml(_ as Flow, _ as Writer) >> { throw new TransformerException("oops") }
 
         when:
-        def response = translationSvc.toXml(new Flow([], []))
+        translationSvc.toXml(new Flow([], []))
 
         then:
         thrown(RuntimeException)
     }
 
+    def "transformation with pretty print -> transformed data is formatted, no errors"() {
+        given:
+        flowTransformer.toXml(_ as Flow, _ as Writer) >> {
+            args ->
+                {
+                    Writer w = args[1]
+                    w.write(readXml("sample-integration-route.xml"))
+                    return []
+                }
+        }
+
+        when:
+        def response = translationSvc.toXml(new Flow([], []), true)
+
+        then:
+        response == new TranslationResponse(readXml("formatted-sample.xml"), null)
+    }
+
+    static String readXml(String filename) {
+        Path path = Path.of("xml").resolve(filename)
+        return TranslationServiceTest.class.getClassLoader()
+                                     .getResource(path.toString()).text
+    }
 }
