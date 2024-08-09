@@ -150,6 +150,10 @@
     overflow-y: auto;
   }
 
+  .eip-item-list {
+    padding: 0;
+  }
+
   .cds--accordion__title {
     @include type.type-style("heading-compact-01");
   }
@@ -160,6 +164,7 @@
   }
 
   .cds--accordion__content {
+    padding-inline-start: 0;
     padding-inline-end: 0;
   }
 }
