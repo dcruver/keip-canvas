@@ -1,4 +1,12 @@
-import { Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@carbon/react"
+import {
+  Layer,
+  Stack,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from "@carbon/react"
 
 import { ReactNode } from "react"
 
@@ -39,9 +47,11 @@ const getTabPanels = ({
 const ConfigurationInputTabs = (props: ConfigurationTabProps) => (
   <Stack gap={4}>
     <Tabs>
-      <TabList aria-label="Attributes/children toggle" contained fullWidth>
-        {getTabs(props.hasAttributes, props.hasChildren)}
-      </TabList>
+      <Layer level={2}>
+        <TabList aria-label="Attributes/children toggle" contained fullWidth>
+          {getTabs(props.hasAttributes, props.hasChildren)}
+        </TabList>
+      </Layer>
       <TabPanels>{getTabPanels(props)}</TabPanels>
     </Tabs>
   </Stack>
