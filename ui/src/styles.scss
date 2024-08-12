@@ -113,6 +113,8 @@
   //        Start XML Editor Panel       //
   .xml-editor-container {
     flex: 1;
+    overflow: auto;
+
     @include type.type-style("code-02");
   }
 

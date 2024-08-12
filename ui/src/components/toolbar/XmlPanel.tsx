@@ -47,14 +47,15 @@ const XmlPanel = () => {
 
   return (
     <>
+    <div className="xml-editor-container">
       <Editor
-        className="xml-editor-container"
         value={content}
         onValueChange={(code) => code}
         readOnly
         highlight={(code) => hljs.highlight(code, { language: "xml" }).value}
         padding={16}
       />
+      </div>
 
       {/* TODO: Remove */}
       <div style={{ display: "flex", gap: "16px" }}>
