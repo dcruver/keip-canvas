@@ -121,10 +121,18 @@
 
   .xml-editor-loading-wrapper {
     position: sticky;
-    top: 1rem;
-    left: calc(100% - 2rem);
+    top: 0;
+    left: 100%;
     height: 0;
     width: 0;
+    overflow: visible;
+    z-index: 10;
+  }
+
+  .xml-editor-loading-wrapper > div {
+    position: absolute;
+    top: 1rem;
+    right: 0.5rem;
   }
 
   //        End XML Editor Panel       //

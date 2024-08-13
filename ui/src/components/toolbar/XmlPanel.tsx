@@ -1,4 +1,4 @@
-import { InlineLoading } from "@carbon/react"
+import { CopyButton, InlineLoading } from "@carbon/react"
 import hljs from "highlight.js/lib/core"
 import xml from "highlight.js/lib/languages/xml"
 import { useEffect, useState } from "react"
@@ -25,11 +25,13 @@ type InlineLoadingProps = React.ComponentProps<typeof InlineLoading>
 const getLoadingStatus = (
   isLoading: boolean,
   isError: boolean
-): InlineLoadingProps["status"] => {
+): { status: InlineLoadingProps["status"]; description: string } => {
   if (isLoading) {
-    return "active"
+    return { status: "active", description: "loading" }
   }
-  return isError ? "error" : "finished"
+  return isError
+    ? { status: "error", description: "error" }
+    : { status: "finished", description: "synced" }
 }
 
 // TODO: Add client-side caching (might make sense to use a data fetching library)
@@ -75,11 +77,23 @@ const XmlPanel = () => {
       .finally(() => setLoading(false))
   }, [eipFlow])
 
+  const loadingStatus = getLoadingStatus(isLoading, isError)
+
   return (
     <>
       <div className="xml-editor-container">
         <div className="xml-editor-loading-wrapper">
-          <InlineLoading status={getLoadingStatus(isLoading, isError)} />
+          <div>
+            <InlineLoading
+              style={{ paddingLeft: "0.75rem" }}
+              status={loadingStatus.status}
+              iconDescription={loadingStatus.description}
+            />
+            <CopyButton
+              align="left"
+              onClick={() => void navigator.clipboard.writeText(content)}
+            />
+          </div>
         </div>
         <Editor
           value={content}
@@ -89,14 +103,6 @@ const XmlPanel = () => {
           padding={16}
         />
       </div>
-
-      {/* TODO: Add a copy button */}
-      {/* <div style={{ display: "flex", gap: "16px" }}>
-        <CopyButton
-          align="top"
-          onClick={() => void navigator.clipboard.writeText(content)}
-        />
-      </div> */}
     </>
   )
 }
