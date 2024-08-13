@@ -114,8 +114,17 @@
   .xml-editor-container {
     flex: 1;
     overflow: auto;
+    position: relative;
 
     @include type.type-style("code-02");
+  }
+
+  .xml-editor-loading-wrapper {
+    position: sticky;
+    top: 1rem;
+    left: calc(100% - 2rem);
+    height: 0;
+    width: 0;
   }
 
   //        End XML Editor Panel       //

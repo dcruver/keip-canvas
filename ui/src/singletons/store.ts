@@ -1,3 +1,4 @@
+import equal from "fast-deep-equal"
 import { nanoid } from "nanoid/non-secure"
 import {
   Connection,
@@ -17,6 +18,7 @@ import {
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 import { useShallow } from "zustand/react/shallow"
+import { useStoreWithEqualityFn } from "zustand/traditional"
 import { EIP_NODE_KEY, EipFlowNode, Layout } from "../api/flow"
 import { AttributeType } from "../api/generated/eipComponentDef"
 import {
@@ -360,26 +362,16 @@ export const useFlowStore = () =>
 
 export const useAppActions = () => useStore((state) => state.appActions)
 
-// Warning: the following exports are not intended for use in React components
-export const getNodesView: () => Readonly<EipFlowNode[]> = () =>
-  useStore.getState().nodes
-export const getEdgesView: () => Readonly<Edge[]> = () =>
-  useStore.getState().edges
-export const getLayout: () => Readonly<Layout> = () =>
-  useStore.getState().layout
-export const getEipFlow: () => Readonly<EipFlow> = () =>
-  diagramToEipFlow(useStore.getState())
+export const useEipFlow = () =>
+  useStoreWithEqualityFn(useStore, (state) => diagramToEipFlow(state), equal)
 
 // TODO: Extract flow conversion to a separate file
 const diagramToEipFlow = (state: AppStore): EipFlow => {
   const nodes: EipNode[] = state.nodes.map((node) => {
     const eipComponent = lookupEipComponent(node.data.eipId)!
-    const children = [] as EipChildNode[]
-    for (const [name, attrs] of Object.entries(
+    const children: EipChildNode[] = Object.entries(
       state.eipNodeConfigs[node.id]?.children
-    )) {
-      children.push({ name: name, attributes: attrs })
-    }
+    ).map(([name, attrs]) => ({ name: name, attributes: { ...attrs } }))
 
     return {
       id: node.id,
@@ -388,7 +380,7 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
       description: state.eipNodeConfigs[node.id]?.description,
       role: eipComponent.role,
       connectionType: eipComponent.connectionType,
-      attributes: state.eipNodeConfigs[node.id]?.attributes,
+      attributes: { ...state.eipNodeConfigs[node.id]?.attributes },
       children: children,
     }
   })
@@ -402,3 +394,11 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
 
   return { nodes, edges }
 }
+
+// Warning: the following exports are not intended for use in React components
+export const getNodesView: () => Readonly<EipFlowNode[]> = () =>
+  useStore.getState().nodes
+export const getEdgesView: () => Readonly<Edge[]> = () =>
+  useStore.getState().edges
+export const getLayout: () => Readonly<Layout> = () =>
+  useStore.getState().layout
