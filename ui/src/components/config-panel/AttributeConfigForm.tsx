@@ -127,7 +127,7 @@ const AttributeTextInput = ({
       debounce(
         (ev: ChangeEvent<HTMLInputElement>) =>
           updateEipAttribute(id, parentId, attr.name, ev.target.value),
-        1000
+        300
       ),
     [id, parentId, attr.name, updateEipAttribute]
   )

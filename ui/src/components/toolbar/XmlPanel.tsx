@@ -34,6 +34,7 @@ const getLoadingStatus = (
 
 // TODO: Add client-side caching (might make sense to use a data fetching library)
 // TODO: Reduce debounce on attribute inputs to make updates a bit more snappy
+// TODO: Should the fetch call be debounced?
 const fetchXmlTranslation = async (flow: EipFlow) => {
   const queryStr = new URLSearchParams({ prettyPrint: "true" }).toString()
   const response = await fetch("http://localhost:8080?" + queryStr, {
