@@ -19,6 +19,7 @@
   margin-inline: 0;
   max-inline-size: 100vw;
   grid-template-rows: 3rem minmax(0, 1fr) minmax(2rem, auto);
+  grid-template-columns: fit-content(20vw) minmax(50vw, 1fr) auto;
 }
 
 .header-main {
@@ -141,7 +142,7 @@
 .node-chooser-panel {
   position: static;
   inline-size: 100%;
-  max-inline-size: 100%;
+  max-inline-size: 18rem;
   max-height: 100%;
 
   a.cds--side-nav__link {
@@ -205,9 +206,13 @@
 .node-config-panel {
   background-color: themes.$background;
   overflow-y: auto;
+
   // TODO: fine-tune the width
   width: 25vw;
   max-width: 25rem;
+  height: 100%;
+
+  position: static;
   z-index: 100;
 
   .form-input-label {
@@ -218,11 +223,22 @@
     padding: 0;
   }
 
-  .side-panel-padded-container {
+  .cfg-panel__container__padding-add {
     padding: 1rem;
   }
 
-  .side-panel-unpadded-container {
+  .cfg-panel__container__padding-remove {
     padding: 0;
+  }
+
+  // the following two blocks are a workaround for the accordion content
+  // taking up empty space when the accordion item is collapsed, needlessly
+  // causing the scroll bar to appear.
+  .cds--accordion__wrapper {
+    display: none;
+  }
+
+  .cds--accordion__item--active .cds--accordion__wrapper {
+    display: block;
   }
 }

@@ -35,7 +35,10 @@ const getTabPanels = ({
   const tabPanels = [] as ReactNode[]
   hasAttributes &&
     tabPanels.push(
-      <TabPanel key="attributes" className="side-panel-unpadded-container">
+      <TabPanel
+        key="attributes"
+        className="cfg-panel__container__padding-remove"
+      >
         {attributesForm}
       </TabPanel>
     )

@@ -95,6 +95,7 @@ const namespacesToDisplay = (
   )
 }
 
+// TODO: Make node chooser panel collapsable
 const NodeChooserPanel = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [expandedNamespace, setExpandedNamespace] = useState("")

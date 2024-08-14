@@ -20,7 +20,7 @@ const ChildNodeConfig = ({
   hasChildren,
 }: ChildAttributePanelProps) => (
   <Stack gap={6}>
-    <Stack gap={6} className="side-panel-padded-container">
+    <Stack gap={6} className="cfg-panel__container__padding-add">
       <h4>{toTitleCase(parentName)}</h4>
       <h5>{toTitleCase(childId.name)}</h5>
     </Stack>

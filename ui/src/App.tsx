@@ -28,20 +28,22 @@ const App = () => (
         </Header>
       </Column>
 
-      <Column sm={1} md={2} lg={3} xlg={3} max={2}>
+      <Column>
         <NodeChooserPanel />
       </Column>
 
-      <Column sm={3} md={6} lg={13} xlg={13} max={14}>
+      <Column>
         <FlowCanvas />
+      </Column>
+
+      <Column>
+        <EipConfigSidePanel />
       </Column>
 
       <Column span="100%">
         <ToolbarMenu />
       </Column>
     </Grid>
-
-    <EipConfigSidePanel />
   </>
 )
 
