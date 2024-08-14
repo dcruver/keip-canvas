@@ -205,6 +205,7 @@ const AttributeInput = (props: AttributeInputFactoryProps) => {
   }
 }
 
+// TODO: fix overflow scroll bar appearing when attributes accordion is collapsed
 const AttributeConfigForm = (props: AttributeFormProps) => {
   const required = props.attrs
     .filter((attr) => attr.required)
