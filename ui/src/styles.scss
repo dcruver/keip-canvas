@@ -19,6 +19,7 @@
   margin-inline: 0;
   max-inline-size: 100vw;
   grid-template-rows: 3rem minmax(0, 1fr) minmax(2rem, auto);
+  grid-template-columns: fit-content(20vw) minmax(50vw, 1fr) auto;
 }
 
 .header-main {
@@ -141,7 +142,7 @@
 .node-chooser-panel {
   position: static;
   inline-size: 100%;
-  max-inline-size: 100%;
+  max-inline-size: 18rem;
   max-height: 100%;
 
   a.cds--side-nav__link {
@@ -208,6 +209,9 @@
   // TODO: fine-tune the width
   width: 25vw;
   max-width: 25rem;
+  height: 100%;
+
+  position: static;
   z-index: 100;
 
   .form-input-label {
