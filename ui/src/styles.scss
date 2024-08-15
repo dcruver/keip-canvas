@@ -206,6 +206,7 @@
 .node-config-panel {
   background-color: themes.$background;
   overflow-y: auto;
+
   // TODO: fine-tune the width
   width: 25vw;
   max-width: 25rem;
@@ -222,11 +223,22 @@
     padding: 0;
   }
 
-  .side-panel-padded-container {
+  .cfg-panel__container__padding-add {
     padding: 1rem;
   }
 
-  .side-panel-unpadded-container {
+  .cfg-panel__container__padding-remove {
     padding: 0;
+  }
+
+  // the following two blocks are a workaround for the accordion content
+  // taking up empty space when the accordion item is collapsed, needlessly
+  // causing the scroll bar to appear.
+  .cds--accordion__wrapper {
+    display: none;
+  }
+
+  .cds--accordion__item--active .cds--accordion__wrapper {
+    display: block;
   }
 }

@@ -33,7 +33,7 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
   )
 
   return (
-    <Stack gap={6} className="side-panel-padded-container">
+    <Stack gap={6} className="cfg-panel__container__padding-add">
       <TextInput
         id="nodeId"
         labelText="NodeId"

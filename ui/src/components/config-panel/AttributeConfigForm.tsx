@@ -205,7 +205,6 @@ const AttributeInput = (props: AttributeInputFactoryProps) => {
   }
 }
 
-// TODO: fix overflow scroll bar appearing when attributes accordion is collapsed
 const AttributeConfigForm = (props: AttributeFormProps) => {
   const required = props.attrs
     .filter((attr) => attr.required)
@@ -214,7 +213,7 @@ const AttributeConfigForm = (props: AttributeFormProps) => {
     .filter((attr) => !attr.required)
     .sort((a, b) => a.name.localeCompare(b.name))
 
-  const addPadding = "side-panel-padded-container"
+  const addPadding = "cfg-panel__container__padding-add"
 
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
