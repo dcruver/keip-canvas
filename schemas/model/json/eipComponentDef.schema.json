@@ -111,8 +111,8 @@
       "description": "A container for child elements used to indicate their order or mutual exclusivity",
       "type": "object",
       "properties": {
-        "description": "The type of child grouping. Used along with each child element's 'Occurrence' to constrain a child's order and cardinality",
         "indicator": {
+          "description": "The type of child grouping. When combined with each child element's 'Occurrence', constrains the child's order and cardinality",
           "type": "string",
           "enum": [
             "all",
