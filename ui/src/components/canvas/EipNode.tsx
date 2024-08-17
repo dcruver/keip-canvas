@@ -1,33 +1,20 @@
-import { Button, Stack, Tile } from "@carbon/react"
-import { ServiceId } from "@carbon/react/icons"
+import { Tile } from "@carbon/react"
+
 import { Handle, NodeProps, Position } from "reactflow"
 import { EipNodeData, Layout } from "../../api/flow"
 import { ConnectionType, EipRole } from "../../api/generated/eipComponentDef"
-import { EipId } from "../../api/generated/eipFlow"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
 import getIconUrl from "../../singletons/eipIconCatalog"
-import {
-  clearSelectedChildNode,
-  updateSelectedChildNode,
-} from "../../singletons/store/appActions"
+import { clearSelectedChildNode } from "../../singletons/store/appActions"
 import {
   useGetEnabledChildren,
   useGetLayout,
-  useGetSelectedChildNode,
 } from "../../singletons/store/getterHooks"
 import { getEipId } from "../../singletons/store/storeViews"
-import { toTitleCase } from "../../utils/titleTransform"
+import { getNamespacedTitle } from "../../utils/titleTransform"
+import { ChildrenNavigationPopover } from "./ChildrenNavigationPopover"
 import "./nodes.scss"
 
-interface ChildrenIconsProps {
-  childIds: string[]
-}
-
-interface ChildIconButtonProps {
-  id: string
-}
-
-const DEFAULT_NAMESPACE = "integration"
 const DEFAULT_NODE_LABEL = "New Node"
 
 const renderHorizontalHandles = (connectionType: ConnectionType) => {
@@ -91,13 +78,6 @@ const renderHandles = (
     ? renderHorizontalHandles(connectionType)
     : renderVerticalHandles(connectionType)
 
-const getNamespacedTitle = (eipId: EipId) => {
-  if (eipId.namespace === DEFAULT_NAMESPACE) {
-    return toTitleCase(eipId.name)
-  }
-  return toTitleCase(eipId.namespace) + " " + toTitleCase(eipId.name)
-}
-
 const getClassNames = (props: NodeProps<EipNodeData>, role: EipRole) => {
   const roleClsName =
     role === "channel" ? "eip-channel-node" : "eip-endpoint-node"
@@ -105,50 +85,12 @@ const getClassNames = (props: NodeProps<EipNodeData>, role: EipRole) => {
   return ["eip-node", roleClsName, selectedClsName].join(" ")
 }
 
-const ChildIconButton = (props: ChildIconButtonProps) => {
-  const currSelection = useGetSelectedChildNode()
-  const isSelected = currSelection === props.id
-
-  const clsNames = ["child-icon-button"]
-  isSelected && clsNames.push("child-icon-button-focused")
-
-  const eipId = getEipId(props.id)
-
-  return eipId ? (
-    <Button
-      className={clsNames.join(" ")}
-      hasIconOnly
-      renderIcon={ServiceId}
-      iconDescription={eipId.name}
-      size="sm"
-      tooltipPosition="bottom"
-      kind="primary"
-      onClick={(ev) => {
-        ev.stopPropagation()
-        updateSelectedChildNode(props.id)
-      }}
-    />
-  ) : null
-}
-
-// TODO: Account for a large number of children to be displayed
-// TODO: Create a mapping of children to icons (with a fallback option)
-const ChildrenIcons = ({ childIds }: ChildrenIconsProps) => {
-  return (
-    <Stack className="eip-node-children" orientation="horizontal" gap={2}>
-      {childIds.map((id) => (
-        <ChildIconButton key={id} id={id} />
-      ))}
-    </Stack>
-  )
-}
-
 // TODO: Consider separating into Endpoint and Channel custom node types
 export const EipNode = (props: NodeProps<EipNodeData>) => {
   // TODO: clearSelectedChildNode is used in too many different components. See if that can be reduced (or elimnated).
   const layout = useGetLayout()
-  const childrenState = useGetEnabledChildren(props.id)
-  const hasChildren = childrenState.length > 0
+  const children = useGetEnabledChildren(props.id)
+  const hasChildren = children.length > 0
 
   const eipId = getEipId(props.id)
   const componentDefinition = eipId && lookupEipComponent(eipId)
@@ -176,7 +118,7 @@ export const EipNode = (props: NodeProps<EipNodeData>) => {
       >
         <strong>{data.label || DEFAULT_NODE_LABEL}</strong>
       </div>
-      {hasChildren && <ChildrenIcons childIds={childrenState} />}
+      {hasChildren && <ChildrenNavigationPopover />}
       {handles}
     </Tile>
   )

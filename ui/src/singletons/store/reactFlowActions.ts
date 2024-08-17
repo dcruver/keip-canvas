@@ -16,7 +16,7 @@ import {
 } from "../eipDefinitions"
 import { AppStore } from "./api"
 import { useAppStore } from "./appStore"
-import { getEipId } from "./storeViews"
+import { childrenDepthTraversal, getEipId } from "./storeViews"
 
 export const onNodesChange = (changes: NodeChange[]) =>
   useAppStore.setState((state) => {
@@ -66,15 +66,9 @@ const removeDeletedNodeConfigs = (state: AppStore, changes: NodeChange[]) => {
 }
 
 const removeNestedConfigs = (root: string, configs: AppStore["eipConfigs"]) => {
-  const stack = []
-  stack.push(root)
-
-  while (stack.length > 0) {
-    const curr = stack.pop()!
-    configs[curr].children.forEach((c) => stack.push(c))
-    delete configs[curr]
+  for (const child of childrenDepthTraversal(root)) {
+    delete configs[child.id]
   }
-  return configs
 }
 
 // TODO: Refactor

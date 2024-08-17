@@ -22,25 +22,28 @@ $icon-button-focus-shadow:
     background-color: themes.$layer-hover-02;
   }
 
-  .eip-node-children {
+  .eip-children-popover {
     position: absolute;
     left: layout.$spacing-02;
   }
 
-  .eip-node-children .child-icon-button {
+  .eip-children-popover__button {
     border-radius: 100%;
     padding: 0;
     align-items: center;
   }
 
-  .eip-node-children .child-icon-button:focus {
-    box-shadow: $icon-button-focus-shadow;
+  .child-tree-view {
+    inline-size: 10rem;
+    max-block-size: 15rem;
+    overflow-y: auto;
   }
 
-  // Used from React to control appearance of a focused button
-  .eip-node-children .child-icon-button-focused {
-    box-shadow: $icon-button-focus-shadow;
+
+  .child-tree-view__node {
+    background-color: themes.$background;
   }
+
 }
 
 .eip-node-selected {
@@ -55,6 +58,7 @@ $icon-button-focus-shadow:
   overflow-wrap: break-word;
   max-height: 3rem;
   overflow-y: hidden;
+  margin-bottom: layout.$spacing-02;
 }
 
 .eip-endpoint-node .eip-node-image {

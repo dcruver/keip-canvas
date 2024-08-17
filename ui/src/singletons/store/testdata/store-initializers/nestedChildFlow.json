@@ -1,0 +1,106 @@
+{
+  "nodes": [
+    {
+      "id": "FL5Tssm8tV",
+      "type": "eipNode",
+      "position": {
+        "x": 240.4526764062681,
+        "y": 178.7952780472253
+      },
+      "targetPosition": "left",
+      "sourcePosition": "right",
+      "data": {},
+      "width": 109,
+      "height": 121,
+      "selected": true,
+      "dragging": false,
+      "positionAbsolute": {
+        "x": 240.4526764062681,
+        "y": 178.7952780472253
+      }
+    }
+  ],
+  "edges": [],
+  "eipConfigs": {
+    "FL5Tssm8tV": {
+      "attributes": {},
+      "children": [
+        "43FAdk5SdBR",
+        "hSZG9DyYy8q",
+        "DD7ZbYQ3AST"
+      ],
+      "eipId": {
+        "namespace": "file",
+        "name": "outbound-gateway"
+      }
+    },
+    "43FAdk5SdBR": {
+      "eipId": {
+        "namespace": "integration",
+        "name": "poller"
+      },
+      "attributes": {},
+      "children": [
+        "9OymVfY4n4p"
+      ]
+    },
+    "hSZG9DyYy8q": {
+      "eipId": {
+        "namespace": "integration",
+        "name": "transactional"
+      },
+      "attributes": {},
+      "children": []
+    },
+    "DD7ZbYQ3AST": {
+      "eipId": {
+        "namespace": "integration",
+        "name": "request-handler-advice-chain"
+      },
+      "attributes": {},
+      "children": [
+        "5x4O_wYO-tM",
+        "LYutVnb04dY"
+      ]
+    },
+    "9OymVfY4n4p": {
+      "eipId": {
+        "namespace": "integration",
+        "name": "advice-chain"
+      },
+      "attributes": {},
+      "children": [
+        "gCL0YkrFGgW"
+      ]
+    },
+    "gCL0YkrFGgW": {
+      "eipId": {
+        "namespace": "integration",
+        "name": "ref"
+      },
+      "attributes": {},
+      "children": []
+    },
+    "5x4O_wYO-tM": {
+      "eipId": {
+        "namespace": "integration",
+        "name": "retry-advice"
+      },
+      "attributes": {},
+      "children": []
+    },
+    "LYutVnb04dY": {
+      "eipId": {
+        "namespace": "integration",
+        "name": "ref"
+      },
+      "attributes": {},
+      "children": []
+    }
+  },
+  "selectedChildNode": null,
+  "layout": {
+    "orientation": "horizontal",
+    "density": "comfortable"
+  }
+}

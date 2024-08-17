@@ -221,6 +221,8 @@
 
   .edge-config-container {
     position: relative;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
   }
 
   .form-input-label {
@@ -235,12 +237,21 @@
     padding: 0;
   }
 
-  .cfg-panel__container__padding-add {
-    padding: 1rem;
+  .cfg-panel__container__side-padding-add {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .cfg-panel__container__top-padding-add {
+    padding-top: 1rem;
   }
 
   .cfg-panel__container__padding-remove {
     padding: 0;
+  }
+
+  .cfg-panel__button {
+    width: 100%;
   }
 
   // the following two blocks are a workaround for the accordion content
@@ -252,5 +263,16 @@
 
   .cds--accordion__item--active .cds--accordion__wrapper {
     display: block;
+  }
+}
+
+.child-modal {
+  .child-modal__list > ul {
+    height: 25vh;
+    overflow-y: auto;
+  }
+
+  .child-modal__list-placeholder {
+    height: 37vh;
   }
 }

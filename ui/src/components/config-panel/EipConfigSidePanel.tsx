@@ -2,7 +2,11 @@ import { HeaderPanel } from "@carbon/react"
 import { useState } from "react"
 import { Edge, useOnSelectionChange, useStoreApi } from "reactflow"
 import { DYNAMIC_EDGE_TYPE, DynamicEdge, EipFlowNode } from "../../api/flow"
-import { Attribute } from "../../api/generated/eipComponentDef"
+import {
+  Attribute,
+  EipChildElement,
+  EipComponent,
+} from "../../api/generated/eipComponentDef"
 import { EipId } from "../../api/generated/eipFlow"
 import {
   FLOW_CONTROLLED_ATTRIBUTES,
@@ -12,9 +16,8 @@ import {
 import { clearSelectedChildNode } from "../../singletons/store/appActions"
 import { useGetSelectedChildNode } from "../../singletons/store/getterHooks"
 import { getEipId } from "../../singletons/store/storeViews"
-import ChildNodeConfig from "./ChildNodeConfig"
 import DynamicEdgeConfig from "./DynamicEdgeConfig"
-import RootNodeConfig from "./RootNodeConfig"
+import { ChildNodeConfig, RootNodeConfig } from "./NodeConfigPanel"
 
 const isDynamicRouterAttribute = (attribute: Attribute, eipId?: EipId) => {
   if (!eipId) {
@@ -41,15 +44,34 @@ const filterConfigurableAttributes = (attrs?: Attribute[], eipId?: EipId) => {
 
 const isDynamicEdge = (edge: Edge) => edge?.type === DYNAMIC_EDGE_TYPE
 
+// TODO: Should this be a utility method in the EipComponentDef module?
+// TODO: Handle invalid path error case
+const findChildDefinition = (
+  rootComponent: EipComponent,
+  childPath: string[]
+) => {
+  let children = rootComponent.childGroup?.children
+  let child: EipChildElement | null = null
+
+  for (const id of childPath.slice(1)) {
+    const name = getEipId(id)?.name
+    child = children?.find((c) => c.name === name) ?? null
+    children = child?.childGroup?.children
+  }
+
+  return child
+}
+
+// TODO: Add breadcrumb menu at the top, showing the path to child.
 const EipConfigSidePanel = () => {
   const reactFlowStore = useStoreApi()
   const [selectedNode, setSelectedNode] = useState<EipFlowNode | null>(null)
   const [selectedEdge, setSelectedEdge] = useState<DynamicEdge | null>(null)
-  const selectedChildId = useGetSelectedChildNode()
+  const selectedChildPath = useGetSelectedChildNode()
 
   useOnSelectionChange({
     onChange: ({ nodes, edges }) => {
-      selectedChildId && clearSelectedChildNode()
+      selectedChildPath && clearSelectedChildNode()
       const numSelected = nodes.length + edges.length
       setSelectedNode(numSelected === 1 ? nodes[0] : null)
       setSelectedEdge(
@@ -65,22 +87,19 @@ const EipConfigSidePanel = () => {
 
   let sidePanelContent
   // TODO: Simplify conditionals
-  if (selectedChildId && selectedNode && eipComponent) {
-    const childEipId = getEipId(selectedChildId)
-    const childName = childEipId?.name ?? ""
-    const childElement = eipComponent.childGroup!.children.find(
-      (e) => e.name === childName
-    )!
+  if (selectedChildPath && selectedNode && eipComponent) {
+    const childId = selectedChildPath[selectedChildPath.length - 1]
+
+    // TODO: Handle error case if childElement is undefined
+    const childElement = findChildDefinition(eipComponent, selectedChildPath)
     const configurableAttrs = filterConfigurableAttributes(
-      childElement.attributes
+      childElement?.attributes
     )
     sidePanelContent = (
       <ChildNodeConfig
-        key={selectedChildId}
-        childId={selectedChildId}
-        parentName={eipComponent.name}
+        key={childId}
+        childPath={selectedChildPath}
         attributes={configurableAttrs}
-        hasChildren={Boolean(childElement?.childGroup)}
       />
     )
   } else if (selectedNodeEipId && eipComponent) {
@@ -93,7 +112,6 @@ const EipConfigSidePanel = () => {
         key={selectedNode.id}
         node={selectedNode}
         attributes={configurableAttrs}
-        childGroup={eipComponent.childGroup}
       />
     )
   } else if (selectedEdge) {
@@ -108,11 +126,12 @@ const EipConfigSidePanel = () => {
       />
     )
   } else {
-    // Returning an empty fragment because the HeaderPanel component spams the logs with error messages if it doesn't have any children.
+    // Returning an empty fragment because the HeaderPanel component spams
+    // the logs with error messages if it doesn't have any children.
     sidePanelContent = <></>
   }
 
-  const showPanel = Boolean(selectedNode || selectedChildId || selectedEdge)
+  const showPanel = Boolean(selectedNode || selectedChildPath || selectedEdge)
 
   return (
     <HeaderPanel

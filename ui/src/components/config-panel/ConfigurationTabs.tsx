@@ -12,25 +12,20 @@ import { ReactNode } from "react"
 
 interface ConfigurationTabProps {
   hasAttributes: boolean
-  hasChildren: boolean
   attributesForm: React.ReactNode
-  childrenForm: React.ReactNode
 }
 
 // Workaround for 'TabList' component not filtering out null-like children.
-const getTabs = (hasAttributes: boolean, hasChildren: boolean) => {
+const getTabs = (hasAttributes: boolean) => {
   const tabList = [] as ReactNode[]
   hasAttributes && tabList.push(<Tab key="attributes">Attributes</Tab>)
-  hasChildren && tabList.push(<Tab key="children">Children</Tab>)
   return tabList
 }
 
 // Workaround for 'TabPanels' component not filtering out null-like children.
 const getTabPanels = ({
   hasAttributes,
-  hasChildren,
   attributesForm,
-  childrenForm,
 }: ConfigurationTabProps) => {
   const tabPanels = [] as ReactNode[]
   hasAttributes &&
@@ -42,17 +37,17 @@ const getTabPanels = ({
         {attributesForm}
       </TabPanel>
     )
-  hasChildren &&
-    tabPanels.push(<TabPanel key="children">{childrenForm}</TabPanel>)
   return tabPanels
 }
 
+// TODO: if we are sticking to displaying only attributes in side panel,
+// ditch the tab panel and use a plain header above the attributes form.
 const ConfigurationInputTabs = (props: ConfigurationTabProps) => (
   <Stack gap={4}>
     <Tabs>
       <Layer level={2}>
-        <TabList aria-label="Attributes/children toggle" contained fullWidth>
-          {getTabs(props.hasAttributes, props.hasChildren)}
+        <TabList aria-label="attributes panel" contained fullWidth>
+          {getTabs(props.hasAttributes)}
         </TabList>
       </Layer>
       <TabPanels>{getTabPanels(props)}</TabPanels>

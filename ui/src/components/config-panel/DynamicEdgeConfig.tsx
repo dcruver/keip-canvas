@@ -46,7 +46,7 @@ interface EdgeConfigProps {
   edge: DynamicEdge
 }
 
-const addPaddingClass = "cfg-panel__container__padding-add"
+const addPaddingClass = "cfg-panel__container__side-padding-add"
 
 const SectionHeading = ({ title, helperText }: SectionHeadingProps) => (
   <Stack gap={2}>
@@ -185,7 +185,7 @@ const DynamicEdgeConfig = ({ edge }: EdgeConfigProps) => {
   // TODO: Fix add-padding class. Add padding to sides only.
   // Vertical padding should be handled by the Stack container.
   return (
-    <Section className="edge-config-container">
+    <Section level={3} className="edge-config-container">
       <Stack gap={4}>
         <Stack gap={6} className={addPaddingClass}>
           <Heading>Edge</Heading>
