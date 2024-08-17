@@ -1,7 +1,7 @@
 import { Stack, TextArea, TextInput } from "@carbon/react"
 import { ChangeEvent, useMemo } from "react"
 import { EipFlowNode } from "../../api/flow"
-import { Attribute, EipChildGroup } from "../../api/generated/eipComponentDef"
+import { Attribute } from "../../api/generated/eipComponentDef"
 import {
   ROOT_PARENT,
   useAppActions,
@@ -9,13 +9,11 @@ import {
 } from "../../singletons/store"
 import debounce from "../../utils/debounce"
 import AttributeConfigForm from "./AttributeConfigForm"
-import ChildSelector from "./ChildSelector"
 import ConfigurationInputTabs from "./ConfigurationTabs"
 
 interface PanelContentProps {
   node: EipFlowNode
   attributes: Attribute[]
-  childGroup?: EipChildGroup
 }
 
 const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
@@ -59,16 +57,11 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
   )
 }
 
-const RootNodeConfig = ({
-  node,
-  attributes,
-  childGroup,
-}: PanelContentProps) => (
+const RootNodeConfig = ({ node, attributes }: PanelContentProps) => (
   <Stack gap={8}>
     <NodeIdentifierInputs node={node} />
     <ConfigurationInputTabs
       hasAttributes={attributes.length > 0}
-      hasChildren={Boolean(childGroup && childGroup.children.length > 0)}
       attributesForm={
         <AttributeConfigForm
           id={node.id}
@@ -76,7 +69,6 @@ const RootNodeConfig = ({
           attrs={attributes}
         />
       }
-      childrenForm={<ChildSelector nodeId={node.id} childGroup={childGroup!} />}
     />
   </Stack>
 )

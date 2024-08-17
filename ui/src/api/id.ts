@@ -1,3 +1,4 @@
+// TODO: use the EipId defined in the API generated from JSON schema instead.
 export interface EipId {
   namespace: string
   name: string

@@ -22,6 +22,7 @@ const getConfigurableAttributes = (attrs: Attribute[] | undefined) => {
     : []
 }
 
+// TODO: Add breadcrumb menu at the top, showing the path to child.
 const EipConfigSidePanel = () => {
   const { clearSelectedChildNode } = useAppActions()
   const [selectedNode, setSelectedNode] = useState<EipFlowNode | null>(null)
@@ -51,7 +52,6 @@ const EipConfigSidePanel = () => {
         childId={selectedChild}
         parentName={eipComponent.name}
         attributes={configurableAttrs}
-        hasChildren={Boolean(childElement?.childGroup)}
       />
     )
   } else if (selectedNode && eipComponent) {
@@ -62,11 +62,11 @@ const EipConfigSidePanel = () => {
         key={selectedNode.id}
         node={selectedNode}
         attributes={configurableAttrs}
-        childGroup={eipComponent.childGroup}
       />
     )
   } else {
-    // Returning an empty fragment because the HeaderPanel component spams the logs with error messages if it doesn't have any children.
+    // Returning an empty fragment because the HeaderPanel component spams
+    // the logs with error messages if it doesn't have any children.
     sidePanelContent = <></>
   }
 

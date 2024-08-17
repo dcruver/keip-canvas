@@ -1,25 +1,33 @@
-import { Button, Stack, Tile } from "@carbon/react"
-import { ServiceId } from "@carbon/react/icons"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  Button,
+  ContainedList,
+  ContainedListItem,
+  Modal,
+  Popover,
+  PopoverContent,
+  Tile,
+  TreeNode,
+  TreeView,
+} from "@carbon/react"
+import { Add, Close, ServiceId } from "@carbon/react/icons"
+import { useContext, useState } from "react"
+import { createPortal } from "react-dom"
 import { Handle, NodeProps, Position } from "reactflow"
 import { EipNodeData, Layout } from "../../api/flow"
 import { ConnectionType, EipRole } from "../../api/generated/eipComponentDef"
-import { ChildNodeId, EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
 import getIconUrl from "../../singletons/eipIconCatalog"
 import {
   useAppActions,
   useGetChildren,
   useGetLayout,
-  useIsChildSelected,
 } from "../../singletons/store"
 import { toTitleCase } from "../../utils/titleTransform"
+import EipComponentContext from "./EipComponentContext"
 import "./nodes.scss"
-
-interface ChildrenIconsProps {
-  childrenNames: string[]
-  parentNodeId: string
-  parentEipId: EipId
-}
 
 const defaultNamespace = "integration"
 
@@ -96,39 +104,153 @@ const getClassNames = (props: NodeProps<EipNodeData>, role: EipRole) => {
   return ["eip-node", roleClsName, selectedClsName].join(" ")
 }
 
-const ChildIconButton = (props: ChildNodeId) => {
-  const { updateSelectedChildNode } = useAppActions()
-  const selected = useIsChildSelected(props)
+interface UpdateModalProps {
+  open: boolean
+  setOpen: (open: boolean) => void
+}
 
-  const clsNames = ["child-icon-button"]
-  selected && clsNames.push("child-icon-button-focused")
+const ChildrenUpdateModal = ({ open, setOpen }: UpdateModalProps) => {
+  const rootEipComponent = useContext(EipComponentContext)
+  const [path, setPath] = useState([rootEipComponent?.name])
 
-  return (
-    <Button
-      className={clsNames.join(" ")}
-      hasIconOnly
-      renderIcon={ServiceId}
-      iconDescription={props.name}
-      size="sm"
-      tooltipPosition="bottom"
-      kind="primary"
-      onClick={(ev) => {
-        ev.stopPropagation()
-        updateSelectedChildNode(props)
-      }}
-    />
+  const [childConfigs, setChildConfigs] = useState<Record<string, string[]>>(
+    () =>
+      rootEipComponent!.childGroup!.children.reduce(
+        (acc, child) => ({
+          ...acc,
+          [child.name]: [],
+        }),
+        {}
+      )
+  )
+
+  return createPortal(
+    <Modal
+      open={open}
+      onRequestClose={() => setOpen(false)}
+      modalHeading="Add a new child component"
+      modalLabel="Children"
+      passiveModal
+      size="md"
+    >
+      <Breadcrumb>
+        {path.map((name, idx) => (
+          <BreadcrumbItem
+            key={idx}
+            onClick={() => setPath((prev) => prev.slice(0, idx + 1))}
+          >
+            {name}
+          </BreadcrumbItem>
+        ))}
+      </Breadcrumb>
+      {rootEipComponent?.childGroup?.children.map((child) => (
+        <ContainedList
+          key={child.name}
+          label={child.name}
+          kind="on-page"
+          action={
+            <Button
+              hasIconOnly
+              iconDescription="Add"
+              renderIcon={Add}
+              tooltipPosition="left"
+              onClick={() => {
+                const currChildren = childConfigs[child.name]
+                const newName =
+                  currChildren.length > 0
+                    ? `${child.name}${Number(currChildren[currChildren.length - 1].slice(child.name.length)) + 1}`
+                    : `${child.name}1`
+                setChildConfigs((prev) => ({
+                  ...prev,
+                  [child.name]: [...prev[child.name], newName],
+                }))
+              }}
+            />
+          }
+        >
+          {childConfigs[child.name]?.map((name) => (
+            <ContainedListItem
+              key={name}
+              onClick={() => setPath((prev) => [...prev, name])}
+              action={
+                <Button
+                  kind="ghost"
+                  iconDescription="Dismiss"
+                  hasIconOnly
+                  renderIcon={Close}
+                  tooltipPosition="left"
+                  onClick={() =>
+                    setChildConfigs((prev) => ({
+                      ...prev,
+                      [child.name]: prev[child.name].filter((n) => n !== name),
+                    }))
+                  }
+                />
+              }
+            >
+              {name}
+            </ContainedListItem>
+          ))}
+        </ContainedList>
+      ))}
+    </Modal>,
+    document.body
   )
 }
 
-// TODO: Account for a large number of children to be displayed
-// TODO: Create a mapping of children to icons (with a fallback option)
-const ChildrenIcons = ({ childrenNames, parentNodeId }: ChildrenIconsProps) => {
+const ChildTree = () => {
+  const [modalOpen, setModalOpen] = useState(true)
   return (
-    <Stack className="eip-node-children" orientation="horizontal" gap={2}>
-      {childrenNames.map((name) => (
-        <ChildIconButton key={name} name={name} parentNodeId={parentNodeId} />
-      ))}
-    </Stack>
+    <div>
+      <TreeView
+        className={"child-tree-view"}
+        label={"children-menu"}
+        hideLabel
+        size="xs"
+      >
+        <TreeNode
+          className={"child-tree-view__node"}
+          id={"_add-child-action"}
+          label="add child..."
+          onSelect={() => modalOpen || setModalOpen(true)}
+        />
+      </TreeView>
+      <ChildrenUpdateModal open={modalOpen} setOpen={setModalOpen} />
+    </div>
+  )
+}
+
+const ChildrenPopoverMenu = () => {
+  const [open, setOpen] = useState(true)
+
+  return (
+    <Popover
+      className="eip-children-popover"
+      highContrast
+      open={open}
+      onRequestClose={() => setOpen(true)}
+      onKeyDown={(ev: React.KeyboardEvent) =>
+        ev.key === "Escape" && setOpen(true)
+      }
+    >
+      {/* TODO: Make button smaller */}
+      <Button
+        className="eip-children-popover__button"
+        hasIconOnly
+        renderIcon={ServiceId}
+        iconDescription="children"
+        size="sm"
+        tooltipPosition="bottom"
+        kind="primary"
+        onClick={(ev) => {
+          ev.stopPropagation()
+          setOpen(!open)
+        }}
+      />
+      <PopoverContent>
+        <ChildTree />
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -148,26 +270,23 @@ export const EipNode = (props: NodeProps<EipNodeData>) => {
   )
 
   return (
-    <Tile
-      className={getClassNames(props, componentDefinition.role)}
-      onClick={hasChildren ? () => clearSelectedChildNode() : undefined}
-    >
-      <div>{getNamespacedTitle(data.eipId)}</div>
-      <img className="eip-node-image" src={getIconUrl(data.eipId)} />
-      <div
-        className="eip-node-label"
-        style={hasChildren ? { marginBottom: "0.5rem" } : {}}
+    <EipComponentContext.Provider value={componentDefinition}>
+      <Tile
+        className={getClassNames(props, componentDefinition.role)}
+        onClick={hasChildren ? () => clearSelectedChildNode() : undefined}
       >
-        <strong>{data.label}</strong>
-      </div>
-      {hasChildren && (
-        <ChildrenIcons
-          childrenNames={childrenState}
-          parentNodeId={props.id}
-          parentEipId={props.data.eipId}
-        />
-      )}
-      {handles}
-    </Tile>
+        <div>{getNamespacedTitle(data.eipId)}</div>
+        <img className="eip-node-image" src={getIconUrl(data.eipId)} />
+        <div
+          className="eip-node-label"
+          style={hasChildren ? { marginBottom: "0.5rem" } : {}}
+        >
+          <strong>{data.label}</strong>
+        </div>
+        {/* TODO: Only show children menu if component has a non-empty child group */}
+        <ChildrenPopoverMenu />
+        {handles}
+      </Tile>
+    </EipComponentContext.Provider>
   )
 }

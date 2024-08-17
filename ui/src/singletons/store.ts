@@ -43,12 +43,23 @@ interface ReactFlowActions {
 
 type AttributeMapping = Record<string, AttributeType>
 
+interface ChildrenMapping {
+  [id: string]: {
+    name: string
+    attributes: AttributeMapping
+    children: ChildrenMapping
+  }
+}
+
 interface EipNodeConfig {
   attributes: AttributeMapping
-  children: Record<string, AttributeMapping>
+  children: ChildrenMapping
   description?: string
 }
 
+// TODO: Bugfix. Nested updates of the 'eipNodeConfigs' store field are mutating
+// references to the current state, this could lead to subtle bugs. Modify a deep
+// copy of the state object and return that instead. Consider using Immer.
 interface AppActions {
   createDroppedNode: (eipId: EipId, position: XYPosition) => void
 
@@ -63,7 +74,9 @@ interface AppActions {
     value: AttributeType
   ) => void
 
-  updateEnabledChildren: (nodeId: string, children: string[]) => void
+  addChild: (parentId: string, childId: string, child: EipChildNode) => void
+
+  removeChild: (parentId: string, childName: string) => void
 
   updateSelectedChildNode: (childId: ChildNodeId) => void
 
@@ -162,22 +175,25 @@ const useStore = create<AppStore>()(
             if (parentId === ROOT_PARENT) {
               configs[id].attributes[attrName] = value
             } else {
-              configs[parentId].children[id][attrName] = value
+              configs[parentId].children[id].attributes[attrName] = value
             }
             return { eipNodeConfigs: configs }
           }),
 
-        updateEnabledChildren: (nodeId, children) =>
+        addChild: (parentId, childId, child) =>
           set((state) => {
             const configs = { ...state.eipNodeConfigs }
-            configs[nodeId].children = children.reduce(
-              (accum, child) => {
-                accum[child] = {}
-                return accum
-              },
-              {} as Record<string, AttributeMapping>
-            )
+            const target = configs[parentId].children[childId] ?? {}
+            target.name = child.name
+            target.attributes = child.attributes ?? {}
+            configs[parentId].children[childId] = target
+            return { eipNodeConfigs: configs }
+          }),
 
+        removeChild: (parentId, childId) =>
+          set((state) => {
+            const configs = { ...state.eipNodeConfigs }
+            delete configs[parentId].children[childId]
             return { eipNodeConfigs: configs }
           }),
 
@@ -326,7 +342,7 @@ export const useGetEipAttribute = (
     if (parentId === ROOT_PARENT) {
       return state.eipNodeConfigs[id]?.attributes[attrName]
     }
-    return state.eipNodeConfigs[parentId]?.children[id][attrName]
+    return state.eipNodeConfigs[parentId]?.children[id].attributes[attrName]
   })
 
 export const useGetChildren = (id: string) =>
@@ -369,9 +385,15 @@ export const useEipFlow = () =>
 const diagramToEipFlow = (state: AppStore): EipFlow => {
   const nodes: EipNode[] = state.nodes.map((node) => {
     const eipComponent = lookupEipComponent(node.data.eipId)!
+
+    // TODO: Will need to make sure children are in the correct order
+    // as specified by the ChildGroup indicator.
     const children: EipChildNode[] = Object.entries(
       state.eipNodeConfigs[node.id]?.children
-    ).map(([name, attrs]) => ({ name: name, attributes: { ...attrs } }))
+    ).map(([_id, child]) => ({
+      name: child.name,
+      attributes: { ...child.attributes },
+    }))
 
     return {
       id: node.id,
