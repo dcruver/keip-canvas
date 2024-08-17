@@ -41,6 +41,7 @@ const filterConfigurableAttributes = (attrs?: Attribute[], eipId?: EipId) => {
 
 const isDynamicEdge = (edge: Edge) => edge?.type === DYNAMIC_EDGE_TYPE
 
+// TODO: Add breadcrumb menu at the top, showing the path to child.
 const EipConfigSidePanel = () => {
   const reactFlowStore = useStoreApi()
   const [selectedNode, setSelectedNode] = useState<EipFlowNode | null>(null)
@@ -80,7 +81,6 @@ const EipConfigSidePanel = () => {
         childId={selectedChildId}
         parentName={eipComponent.name}
         attributes={configurableAttrs}
-        hasChildren={Boolean(childElement?.childGroup)}
       />
     )
   } else if (selectedNodeEipId && eipComponent) {
@@ -93,7 +93,6 @@ const EipConfigSidePanel = () => {
         key={selectedNode.id}
         node={selectedNode}
         attributes={configurableAttrs}
-        childGroup={eipComponent.childGroup}
       />
     )
   } else if (selectedEdge) {
@@ -108,7 +107,8 @@ const EipConfigSidePanel = () => {
       />
     )
   } else {
-    // Returning an empty fragment because the HeaderPanel component spams the logs with error messages if it doesn't have any children.
+    // Returning an empty fragment because the HeaderPanel component spams
+    // the logs with error messages if it doesn't have any children.
     sidePanelContent = <></>
   }
 

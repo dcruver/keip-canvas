@@ -1,4 +1,4 @@
-import { Stack, TextArea } from "@carbon/react"
+import { Stack } from "@carbon/react"
 import { Attribute } from "../../api/generated/eipComponentDef"
 import { getEipId } from "../../singletons/store/storeViews"
 import { toTitleCase } from "../../utils/titleTransform"
@@ -9,7 +9,6 @@ interface ChildAttributePanelProps {
   childId: string
   parentName: string
   attributes: Attribute[]
-  hasChildren: boolean
 }
 
 // TODO: Add description for child
@@ -17,7 +16,6 @@ const ChildNodeConfig = ({
   childId,
   parentName,
   attributes,
-  hasChildren,
 }: ChildAttributePanelProps) => {
   const eipId = getEipId(childId)
   const childName = eipId?.name ?? ""
@@ -30,15 +28,10 @@ const ChildNodeConfig = ({
       </Stack>
       <ConfigurationInputTabs
         hasAttributes={attributes.length > 0}
-        hasChildren={hasChildren}
-        attributesForm={<AttributeConfigForm id={childId} attrs={attributes} />}
-        childrenForm={
-          <TextArea
-            labelText="Children XML"
-            helperText="Pass in any additional nested children as XML elements"
-            id="children-xml-escape"
-            enableCounter
-            maxCount={5000}
+        attributesForm={
+          <AttributeConfigForm
+            id={childId}
+            attrs={attributes}
           />
         }
       />
