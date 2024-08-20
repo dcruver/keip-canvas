@@ -26,12 +26,38 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
 
-# TODO: add more namespace mappings
 keip:
   namespaceMappings:
     - eipNamespace: integration
       xmlNamespace: http://www.springframework.org/schema/integration
       schemaLocation: https://www.springframework.org/schema/integration/spring-integration.xsd
+    - eipNamespace: file
+      xmlNamespace: http://www.springframework.org/schema/integration/file
+      schemaLocation: https://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+    - eipNamespace: ftp
+      xmlNamespace: http://www.springframework.org/schema/integration/ftp
+      schemaLocation: https://www.springframework.org/schema/integration/ftp/spring-integration-ftp.xsd
+    - eipNamespace: groovy
+      xmlNamespace: http://www.springframework.org/schema/integration/groovy
+      schemaLocation: https://www.springframework.org/schema/integration/groovy/spring-integration-groovy.xsd
+    - eipNamespace: http
+      xmlNamespace: http://www.springframework.org/schema/integration/http
+      schemaLocation: https://www.springframework.org/schema/integration/http/spring-integration-http.xsd
     - eipNamespace: jms
       xmlNamespace: http://www.springframework.org/schema/integration/jms
       schemaLocation: https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+    - eipNamespace: kafka
+      xmlNamespace: http://www.springframework.org/schema/integration/kafka
+      schemaLocation: https://www.springframework.org/schema/integration/kafka/spring-integration-kafka.xsd
+    - eipNamespace: sftp
+      xmlNamespace: http://www.springframework.org/schema/integration/sftp
+      schemaLocation: https://www.springframework.org/schema/integration/sftp/spring-integration-sftp.xsd
+    - eipNamespace: tcp-udp
+      xmlNamespace: http://www.springframework.org/schema/integration/ip
+      schemaLocation: https://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+    - eipNamespace: web-services
+      xmlNamespace: http://www.springframework.org/schema/integration/ws
+      schemaLocation: https://www.springframework.org/schema/integration/ws/spring-integration-ws.xsd
+    - eipNamespace: xml
+      xmlNamespace: http://www.springframework.org/schema/integration/xml
+      schemaLocation: https://www.springframework.org/schema/integration/xml/spring-integration-xml.xsd
