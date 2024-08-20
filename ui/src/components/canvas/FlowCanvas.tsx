@@ -8,27 +8,28 @@ import ReactFlow, {
 } from "reactflow"
 
 import {
+  ArrowsHorizontal,
+  ArrowsVertical,
+  Maximize,
+  Redo,
+  TrashCan,
+  Undo,
+} from "@carbon/icons-react"
+import { ErrorBoundary } from "@carbon/react"
+import { KeyboardEvent, useEffect } from "react"
+import { DropTargetMonitor, useDrop } from "react-dnd"
+import { NativeTypes } from "react-dnd-html5-backend"
+import "reactflow/dist/base.css"
+import { EIP_NODE_TYPE } from "../../api/flow"
+import { EipId } from "../../api/id"
+import {
   useAppActions,
   useFlowStore,
   useGetLayout,
   useUndoRedo,
 } from "../../singletons/store"
-import "reactflow/dist/base.css"
-import {
-  TrashCan,
-  ArrowsHorizontal,
-  ArrowsVertical,
-  Maximize,
-  Undo,
-  Redo,
-} from "@carbon/icons-react"
-import { ErrorBoundary } from "@carbon/react"
-import { DropTargetMonitor, useDrop } from "react-dnd"
-import { NativeTypes } from "react-dnd-html5-backend"
-import { EipId } from "../../api/id"
 import { DragTypes } from "../draggable-panel/dragTypes"
 import { EipNode } from "./EipNode"
-import { useEffect, KeyboardEvent } from "react"
 
 const FLOW_ERROR_MESSAGE =
   "Failed to load the canvas - the stored flow is malformed. Clearing the flow from the state store."
@@ -68,7 +69,7 @@ const getDropPosition = (
 }
 
 const nodeTypes = {
-  eipNode: EipNode,
+  [EIP_NODE_TYPE]: EipNode,
 }
 
 const onUndoRedoKeyDown = (

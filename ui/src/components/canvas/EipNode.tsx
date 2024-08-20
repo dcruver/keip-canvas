@@ -21,7 +21,8 @@ interface ChildrenIconsProps {
   parentEipId: EipId
 }
 
-const defaultNamespace = "integration"
+const DEFAULT_NAMESPACE = "integration"
+const DEFAULT_NODE_LABEL = "New Node"
 
 const renderHorizontalHandles = (connectionType: ConnectionType) => {
   switch (connectionType) {
@@ -83,7 +84,7 @@ const renderHandles = (
     : renderVerticalHandles(connectionType)
 
 const getNamespacedTitle = (eipId: EipId) => {
-  if (eipId.namespace === defaultNamespace) {
+  if (eipId.namespace === DEFAULT_NAMESPACE) {
     return toTitleCase(eipId.name)
   }
   return toTitleCase(eipId.namespace) + " " + toTitleCase(eipId.name)
@@ -158,7 +159,13 @@ export const EipNode = (props: NodeProps<EipNodeData>) => {
         className="eip-node-label"
         style={hasChildren ? { marginBottom: "0.5rem" } : {}}
       >
-        <strong>{data.label}</strong>
+        <strong>
+          {
+            // disable eslint since an empty string as the labe should return default value
+            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+            data.label || DEFAULT_NODE_LABEL
+          }
+        </strong>
       </div>
       {hasChildren && (
         <ChildrenIcons

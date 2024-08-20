@@ -22,7 +22,7 @@ import {
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
 import { useStoreWithEqualityFn } from "zustand/traditional"
-import { EIP_NODE_KEY, EipFlowNode, Layout } from "../api/flow"
+import { EIP_NODE_TYPE, EipFlowNode, EipNodeData, Layout } from "../api/flow"
 import { AttributeType } from "../api/generated/eipComponentDef"
 import {
   ChildNode as EipChildNode,
@@ -89,6 +89,7 @@ interface AppStore {
   eipNodeConfigs: Record<string, EipNodeConfig>
   selectedChildNode: ChildNodeId | null
   layout: Layout
+
   reactFlowActions: ReactFlowActions
   appActions: AppActions
 }
@@ -295,13 +296,12 @@ const newNode = (
   const isHorizontal = orientation === "horizontal"
   const node: EipFlowNode = {
     id: id,
-    type: EIP_NODE_KEY,
+    type: EIP_NODE_TYPE,
     position: position,
     targetPosition: isHorizontal ? Position.Left : Position.Top,
     sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
     data: {
       eipId: eipId,
-      label: "New Node",
     },
   }
   return node
@@ -411,9 +411,8 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
     ).map(([name, attrs]) => ({ name: name, attributes: { ...attrs } }))
 
     return {
-      id: node.id,
+      id: node.data.label ?? node.id,
       eipId: node.data.eipId,
-      label: node.data.label,
       description: state.eipNodeConfigs[node.id]?.description,
       role: eipComponent.role,
       connectionType: eipComponent.connectionType,
@@ -422,14 +421,26 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
     }
   })
 
-  const edges: FlowEdge[] = state.edges.map((edge) => ({
-    id: edge.id,
-    source: edge.source,
-    target: edge.target,
-    type: edge.sourceHandle === "discard" ? "discard" : "default",
-  }))
+  const nodeLookup = createNodeLookupMap(state.nodes)
+
+  const edges: FlowEdge[] = state.edges.map((edge) => {
+    const source = nodeLookup.get(edge.source)?.label ?? edge.source
+    const target = nodeLookup.get(edge.target)?.label ?? edge.target
+    return {
+      id: `edge-${source}-${target}`,
+      source,
+      target,
+      type: edge.sourceHandle === "discard" ? "discard" : "default",
+    }
+  })
 
   return { nodes, edges }
+}
+
+const createNodeLookupMap = (nodes: EipFlowNode[]) => {
+  const map = new Map<string, EipNodeData>()
+  nodes.forEach((node) => map.set(node.id, node.data))
+  return map
 }
 
 // Warning: the following exports are not intended for use in React components

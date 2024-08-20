@@ -3,7 +3,7 @@ import { EipId } from "./id"
 
 export interface EipNodeData {
   eipId: EipId
-  label: string
+  label?: string
 }
 
 export type EipFlowNode = Node<EipNodeData>
@@ -13,4 +13,4 @@ export interface Layout {
   density: "compact" | "comfortable"
 }
 
-export const EIP_NODE_KEY = "eipNode"
+export const EIP_NODE_TYPE = "eipNode"

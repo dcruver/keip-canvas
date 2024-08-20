@@ -32,6 +32,17 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
     [node.id, updateNodeDescription]
   )
 
+  // TODO: Show an error on input if label is duplicated
+  const handleLabelUpdates = useMemo(
+    () =>
+      debounce(
+        (ev: ChangeEvent<HTMLInputElement>) =>
+          updateNodeLabel(node.id, ev.target.value),
+        300
+      ),
+    [node.id, updateNodeLabel]
+  )
+
   return (
     <Stack gap={6} className="cfg-panel__container__padding-add">
       <TextInput
@@ -40,12 +51,11 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
         disabled
         defaultValue={node.id}
       />
-      <TextInput id={"channelId"} labelText="ChannelId" disabled />
       <TextInput
         id="nodeLabel"
         labelText="Label"
         defaultValue={node ? node.data.label : ""}
-        onChange={(e) => updateNodeLabel(node.id, e.target.value)}
+        onChange={handleLabelUpdates}
       />
       <TextArea
         labelText="Description"
