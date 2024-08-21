@@ -10,8 +10,8 @@
       "connectionType": "source"
     },
     {
+      "id": "s5WQWIKq5Y",
       "eipId": {
-        "id": "s5WQWIKq5Y",
         "namespace": "jms",
         "name": "outbound-channel-adapter"
       },

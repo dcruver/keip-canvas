@@ -58,6 +58,6 @@ keip:
     - eipNamespace: web-services
       xmlNamespace: http://www.springframework.org/schema/integration/ws
       schemaLocation: https://www.springframework.org/schema/integration/ws/spring-integration-ws.xsd
-    - eipNamespace: xml
+    - eipNamespace: int-xml
       xmlNamespace: http://www.springframework.org/schema/integration/xml
       schemaLocation: https://www.springframework.org/schema/integration/xml/spring-integration-xml.xsd
