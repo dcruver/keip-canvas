@@ -10,7 +10,7 @@ const OptionsMenu = () => {
       iconClass="options-menu-icon"
       aria-label="options-menu"
       iconDescription="options"
-      align="bottom-right"
+      align="bottom-end"
       renderIcon={() => <Menu size={24} />}
       size="lg"
       flipped
