@@ -3,11 +3,12 @@ import hljs from "highlight.js/lib/core"
 import xml from "highlight.js/lib/languages/xml"
 import { useEffect, useState } from "react"
 import Editor from "react-simple-code-editor"
-import { EipFlow } from "../../api/generated/eipFlow"
-import { useEipFlow } from "../../singletons/store"
+import { EipFlow } from "../../../api/generated/eipFlow"
+import { useEipFlow } from "../../../singletons/store"
 
 // highlight.js theme
 import "highlight.js/styles/intellij-light.css"
+import { FLOW_TRANSLATOR_BASE_URL } from "../../../singletons/externalEndpoints"
 
 hljs.registerLanguage("xml", xml)
 
@@ -39,7 +40,7 @@ const getLoadingStatus = (
 // TODO: Should the fetch call be debounced?
 const fetchXmlTranslation = async (flow: EipFlow) => {
   const queryStr = new URLSearchParams({ prettyPrint: "true" }).toString()
-  const response = await fetch("http://localhost:8080?" + queryStr, {
+  const response = await fetch(`${FLOW_TRANSLATOR_BASE_URL}?` + queryStr, {
     method: "POST",
     body: JSON.stringify(flow),
     headers: {

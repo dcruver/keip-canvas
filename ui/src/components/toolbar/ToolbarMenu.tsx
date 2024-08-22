@@ -3,7 +3,8 @@ import { MachineLearning, Xml } from "@carbon/react/icons"
 import { useState } from "react"
 import AssistantChatPanel from "./assistant/AssistantChatPanel"
 import { useLlmServerStatus } from "./assistant/llmStatusHook"
-import XmlPanel from "./XmlPanel"
+import XmlPanel from "./xml/XmlPanel"
+import useTranslationServerStatus from "./xml/translatorStatusHook"
 
 interface PanelButtonProps {
   name: string
@@ -13,19 +14,28 @@ interface PanelButtonProps {
   handleClick: () => void
 }
 
+type PanelKeys = "keipAssistant" | "xml"
+
 interface PanelRef {
   icon: React.ReactNode
   panel: React.ReactNode
+  enabled?: boolean
 }
 
-const panels: Record<string, PanelRef> = {
-  "keip-assistant": {
+type Panels = {
+  [k in PanelKeys]: PanelRef
+}
+
+const panels: Panels = {
+  keipAssistant: {
     icon: <MachineLearning />,
     panel: <AssistantChatPanel />,
+    enabled: false,
   },
   xml: {
     icon: <Xml />,
     panel: <XmlPanel />,
+    enabled: false,
   },
 }
 
@@ -52,13 +62,14 @@ const PanelButton = ({
 )
 
 const ToolbarMenu = () => {
-  const [openPanel, setOpenPanel] = useState("")
+  const [openPanel, setOpenPanel] = useState<"" | PanelKeys>("")
   const isLlmServerAvailable = useLlmServerStatus()
+  const isTranslationServerAvailable = useTranslationServerStatus()
 
-  const disabledPanels = new Set<string>()
-  !isLlmServerAvailable && disabledPanels.add("keip-assistant")
+  panels.keipAssistant.enabled = isLlmServerAvailable
+  panels.xml.enabled = isTranslationServerAvailable
 
-  const handlePanelButtonClick = (name: string) => () => {
+  const handlePanelButtonClick = (name: PanelKeys) => () => {
     openPanel === name ? setOpenPanel("") : setOpenPanel(name)
   }
 
@@ -74,9 +85,9 @@ const ToolbarMenu = () => {
               key={panelName}
               name={panelName}
               icon={val.icon}
-              disabled={disabledPanels.has(panelName)}
+              disabled={!val.enabled}
               selected={panelName === openPanel}
-              handleClick={handlePanelButtonClick(panelName)}
+              handleClick={handlePanelButtonClick(panelName as PanelKeys)}
             />
           ))}
         </TableToolbarContent>

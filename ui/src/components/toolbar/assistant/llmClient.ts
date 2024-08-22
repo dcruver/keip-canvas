@@ -6,6 +6,7 @@ import {
   getLayout,
   getNodesView,
 } from "../../../singletons/store"
+import fetchWithTimeout from "../../../utils/fetch/fetchWithTimeout"
 import { newFlowLayout } from "../../layout/layouting"
 import { fuzzyMatchNodeEipIds } from "./fuzzyEipIdMatch"
 import { flowCreatePrompt, flowUpdatePrompt } from "./prompt"
@@ -78,12 +79,9 @@ class LlmClient {
   }
 
   public ping(): { success: Promise<boolean>; abort: () => void } {
-    const ctrl = new AbortController()
-    setTimeout(() => ctrl.abort(), 5000)
-    const success = fetch(this.serverBaseUrl, { signal: ctrl.signal })
-      .then((res) => res.ok)
-      .catch(() => false)
-    return { success: success, abort: () => ctrl.abort() }
+    const { response, abort } = fetchWithTimeout(this.serverBaseUrl)
+    const success = response.then((res) => res.ok).catch(() => false)
+    return { success, abort }
   }
 
   private async generatePrompt() {
