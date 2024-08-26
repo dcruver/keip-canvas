@@ -1,5 +1,7 @@
 package com.octo.keip.flow.xml;
 
+import static javax.xml.XMLConstants.XML_NS_PREFIX;
+
 import com.ctc.wstx.stax.WstxEventFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
 import com.octo.keip.flow.error.TransformationError;
@@ -13,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.XMLConstants;
@@ -28,22 +31,33 @@ import javax.xml.transform.TransformerException;
 
 public abstract class GraphTransformer {
 
-  private final XMLEventFactory eventFactory = WstxEventFactory.newFactory();
-  private final XMLOutputFactory outputFactory = WstxOutputFactory.newFactory();
-
   private static final String XSI_PREFIX = "xsi";
 
-  private final NodeTransformerFactory nodeTransformerFactory;
+  private final XMLEventFactory eventFactory = WstxEventFactory.newFactory();
+  private final XMLOutputFactory outputFactory = WstxOutputFactory.newFactory();
+  private final Set<String> reservedPrefixes =
+      Set.of(XML_NS_PREFIX, XSI_PREFIX, defaultNamespace().eipNamespace());
 
+  private final NodeTransformerFactory nodeTransformerFactory;
   // maps an eipNamespace to a NamespaceSpec
   private final Map<String, NamespaceSpec> registeredNamespaces;
 
   protected GraphTransformer(
       NodeTransformerFactory nodeTransformerFactory, Collection<NamespaceSpec> namespaceSpecs) {
+    validatePrefixes(namespaceSpecs);
     this.nodeTransformerFactory = nodeTransformerFactory;
     this.registeredNamespaces = new HashMap<>();
     this.registeredNamespaces.put(defaultNamespace().eipNamespace(), defaultNamespace());
     namespaceSpecs.forEach(s -> this.registeredNamespaces.put(s.eipNamespace(), s));
+  }
+
+  private void validatePrefixes(Collection<NamespaceSpec> namespaceSpecs) {
+    for (NamespaceSpec ns : namespaceSpecs) {
+      if (this.reservedPrefixes.contains(ns.eipNamespace())) {
+        throw new IllegalArgumentException(
+            String.format("'%s' is a reserved namespace prefix", ns.eipNamespace()));
+      }
+    }
   }
 
   public final void registerNodeTransformer(EipId id, NodeTransformer transformer) {

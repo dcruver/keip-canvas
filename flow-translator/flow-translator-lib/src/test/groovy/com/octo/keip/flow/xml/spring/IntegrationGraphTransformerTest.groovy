@@ -128,6 +128,22 @@ class IntegrationGraphTransformerTest extends Specification {
         thrown(TransformerException)
     }
 
+    def "Initializing transformer with a reserved namespace prefix throws an exception"(String prefix) {
+        given:
+        def namespaces = [new NamespaceSpec(prefix,
+                "http://www.example.com/schema/xml",
+                "https://www.example.com/schema/xml")]
+
+        when:
+        new IntegrationGraphTransformer(namespaces)
+
+        then:
+        thrown(IllegalArgumentException)
+
+        where:
+        prefix << ["xml", "xsi", "beans"]
+    }
+
     def "Registering custom node transformers resolves correctly"() {
         given: "inbound adapter -> outbound adapter"
         EipNode inbound = Stub {
