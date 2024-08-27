@@ -12,7 +12,7 @@ const fetchWithTimeout = (
   const ctrl = new AbortController()
 
   const timeoutId = setTimeout(() => {
-    console.error(`Request to ${url} timed out after ${timeout} ms`)
+    console.error(`Request timed out after ${timeout} ms:`, url)
     ctrl.abort("Request timed out")
   }, timeout)
 
