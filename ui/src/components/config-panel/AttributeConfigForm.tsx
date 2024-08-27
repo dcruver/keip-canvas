@@ -53,7 +53,7 @@ const AttributeSelectInput = ({
   id,
   parentId,
 }: AttributeInputProps<string>) => {
-  const { updateEipAttribute } = useAppActions()
+  const { updateEipAttribute, deleteEipAttribute } = useAppActions()
   const emptySelect = ""
   const options = useMemo(
     () =>
@@ -63,8 +63,11 @@ const AttributeSelectInput = ({
     [attr.restriction, attr.default]
   )
 
-  const handleSelect = (ev: ChangeEvent<HTMLSelectElement>) =>
-    updateEipAttribute(id, parentId, attr.name, ev.target.value)
+  const handleSelect = (ev: ChangeEvent<HTMLSelectElement>) => {
+    ev.target.value === emptySelect
+      ? deleteEipAttribute(id, parentId, attr.name)
+      : updateEipAttribute(id, parentId, attr.name, ev.target.value)
+  }
 
   return (
     <DescriptionTooltipWrapper id={attr.name} description={attr.description}>
@@ -120,16 +123,16 @@ const AttributeTextInput = ({
   id,
   parentId,
 }: AttributeInputProps<string>) => {
-  const { updateEipAttribute } = useAppActions()
+  const { updateEipAttribute, deleteEipAttribute } = useAppActions()
 
   const handleTextUpdates = useMemo(
     () =>
-      debounce(
-        (ev: ChangeEvent<HTMLInputElement>) =>
-          updateEipAttribute(id, parentId, attr.name, ev.target.value),
-        300
-      ),
-    [id, parentId, attr.name, updateEipAttribute]
+      debounce((ev: ChangeEvent<HTMLInputElement>) => {
+        ev.target.value === ""
+          ? deleteEipAttribute(id, parentId, attr.name)
+          : updateEipAttribute(id, parentId, attr.name, ev.target.value)
+      }, 300),
+    [id, parentId, attr.name, updateEipAttribute, deleteEipAttribute]
   )
 
   return (

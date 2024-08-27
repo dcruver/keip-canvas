@@ -34,6 +34,8 @@ import { ChildNodeId, EipId, areChildIdsEqual } from "../api/id"
 import { newFlowLayout } from "../components/layout/layouting"
 import { lookupEipComponent } from "./eipDefinitions"
 
+// TODO: Refactor store into smaller, more manageable pieces.
+
 export const ROOT_PARENT = "root"
 
 const NO_PERSIST = new Set(["appActions", "reactFlowActions"])
@@ -52,6 +54,9 @@ interface EipNodeConfig {
   description?: string
 }
 
+// TODO: Bugfix. Nested updates of the 'eipNodeConfigs' store field are mutating
+// references to the current state, this could lead to subtle bugs. Modify a deep
+// copy of the state object and return that instead. Consider using Immer.
 interface AppActions {
   createDroppedNode: (eipId: EipId, position: XYPosition) => void
 
@@ -65,6 +70,8 @@ interface AppActions {
     attrName: string,
     value: AttributeType
   ) => void
+
+  deleteEipAttribute: (id: string, parentId: string, attrName: string) => void
 
   updateEnabledChildren: (nodeId: string, children: string[]) => void
 
@@ -172,6 +179,38 @@ const useStore = create<AppStore>()(
                 configs[parentId].children[id][attrName] = value
               }
               return { eipNodeConfigs: configs }
+            }),
+
+          deleteEipAttribute: (id, parentId, attrName) =>
+            set((state) => {
+              const nodeConfigs = state.eipNodeConfigs
+              if (parentId === ROOT_PARENT) {
+                const updatedAttrs = { ...nodeConfigs[id].attributes }
+                delete updatedAttrs[attrName]
+                return {
+                  eipNodeConfigs: {
+                    ...nodeConfigs,
+                    [id]: { ...nodeConfigs[id], attributes: updatedAttrs },
+                  },
+                }
+              } else {
+                const updatedChildAttrs = {
+                  ...nodeConfigs[parentId].children[id],
+                }
+                delete updatedChildAttrs[attrName]
+                return {
+                  eipNodeConfigs: {
+                    ...nodeConfigs,
+                    [parentId]: {
+                      ...nodeConfigs[parentId],
+                      children: {
+                        ...nodeConfigs[parentId].children,
+                        [id]: updatedChildAttrs,
+                      },
+                    },
+                  },
+                }
+              }
             }),
 
           updateEnabledChildren: (nodeId, children) =>
@@ -400,7 +439,11 @@ export const useUndoRedo = () =>
 export const useAppActions = () => useStore((state) => state.appActions)
 
 export const useEipFlow = () =>
-  useStoreWithEqualityFn(useStore, (state) => diagramToEipFlow(state), isDeepEqual)
+  useStoreWithEqualityFn(
+    useStore,
+    (state) => diagramToEipFlow(state),
+    isDeepEqual
+  )
 
 const EIP_NAMESPACE_TO_XML_PREFIX: Record<string, string> = {
   xml: "int-xml",
