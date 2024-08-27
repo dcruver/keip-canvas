@@ -1,5 +1,5 @@
 import { Stack, TextArea, TextInput } from "@carbon/react"
-import { ChangeEvent, useMemo } from "react"
+import { ChangeEvent, useMemo, useState } from "react"
 import { EipFlowNode } from "../../api/flow"
 import { Attribute, EipChildGroup } from "../../api/generated/eipComponentDef"
 import {
@@ -22,6 +22,8 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
   const { updateNodeLabel, updateNodeDescription } = useAppActions()
   const description = useGetNodeDescription(node.id)
 
+  const [isLabelValid, setIsLabelValid] = useState(true)
+
   const handleDescriptionUpdates = useMemo(
     () =>
       debounce(
@@ -32,14 +34,12 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
     [node.id, updateNodeDescription]
   )
 
-  // TODO: Show an error on input if label is duplicated
   const handleLabelUpdates = useMemo(
     () =>
-      debounce(
-        (ev: ChangeEvent<HTMLInputElement>) =>
-          updateNodeLabel(node.id, ev.target.value),
-        300
-      ),
+      debounce((ev: ChangeEvent<HTMLInputElement>) => {
+        const err = updateNodeLabel(node.id, ev.target.value)
+        setIsLabelValid(!err)
+      }, 300),
     [node.id, updateNodeLabel]
   )
 
@@ -55,6 +55,11 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
         id="nodeLabel"
         labelText="Label"
         defaultValue={node ? node.data.label : ""}
+        enableCounter
+        invalid={!isLabelValid}
+        invalidText="Node labels must be unique"
+        maxCount={60}
+        placeholder="New Node"
         onChange={handleLabelUpdates}
       />
       <TextArea

@@ -60,7 +60,7 @@ interface EipNodeConfig {
 interface AppActions {
   createDroppedNode: (eipId: EipId, position: XYPosition) => void
 
-  updateNodeLabel: (nodeId: string, label: string) => void
+  updateNodeLabel: (nodeId: string, label: string) => Error | undefined
 
   updateNodeDescription: (nodeId: string, description: string) => void
 
@@ -154,14 +154,23 @@ const useStore = create<AppStore>()(
               }
             }),
 
-          updateNodeLabel: (id, label) =>
-            set((state) => ({
-              nodes: state.nodes.map((node) =>
-                node.id === id
-                  ? { ...node, data: { ...node.data, label } }
-                  : node
-              ),
-            })),
+        updateNodeLabel: (id, label) => {
+          let error: Error | undefined
+          set((state) => {
+            const updatedNodes = state.nodes.map((node) => {
+              if (node.id === id) {
+                return { ...node, data: { ...node.data, label } }
+              } else {
+                if (node.data.label === label) {
+                  error = new Error("Node labels must be unique")
+                }
+                return node
+              }
+            })
+            return { nodes: error ? state.nodes : updatedNodes }
+          })
+          return error
+        },
 
           updateNodeDescription: (id, description) =>
             set((state) => {
@@ -461,7 +470,7 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
     const namespace = node.data.eipId.namespace
 
     return {
-      id: node.data.label ?? node.id,
+      id: node.data.label ? node.data.label : node.id,
       eipId: {
         ...node.data.eipId,
         namespace: EIP_NAMESPACE_TO_XML_PREFIX[namespace] ?? namespace,
