@@ -1,4 +1,23 @@
 schemas:
+  - alias: "file"
+    namespace: "http://www.springframework.org/schema/integration/file"
+    location: "file:patched-schemas/spring-integration-file-5.2.xsd"
+    excludedElements:
+      - "locker"
+      - "nio-locker"
+
+  - alias: "ftp"
+    namespace: "http://www.springframework.org/schema/integration/ftp"
+    location: "https://www.springframework.org/schema/integration/ftp/spring-integration-ftp-5.2.xsd"
+
+  - alias: "groovy"
+    namespace: "http://www.springframework.org/schema/integration/groovy"
+    location: "https://www.springframework.org/schema/integration/groovy/spring-integration-groovy-5.2.xsd"
+
+  - alias: "http"
+    namespace: "http://www.springframework.org/schema/integration/http"
+    location: "https://www.springframework.org/schema/integration/http/spring-integration-http-5.2.xsd"
+
   - alias: "integration"
     namespace: "http://www.springframework.org/schema/integration"
     location: "https://www.springframework.org/schema/integration/spring-integration-5.2.xsd"
@@ -13,28 +32,9 @@ schemas:
     namespace: "http://www.springframework.org/schema/integration/jms"
     location: "https://www.springframework.org/schema/integration/jms/spring-integration-jms-5.2.xsd"
 
-  - alias: "http"
-    namespace: "http://www.springframework.org/schema/integration/http"
-    location: "https://www.springframework.org/schema/integration/http/spring-integration-http-5.2.xsd"
-
-  - alias: "file"
-    namespace: "http://www.springframework.org/schema/integration/file"
-    location: "file:patched-schemas/spring-integration-file-5.2.xsd"
-    excludedElements:
-      - "locker"
-      - "nio-locker"
-
   - alias: "kafka"
     namespace: "http://www.springframework.org/schema/integration/kafka"
     location: "https://www.springframework.org/schema/integration/kafka/spring-integration-kafka-3.1.xsd"
-
-  - alias: "groovy"
-    namespace: "http://www.springframework.org/schema/integration/groovy"
-    location: "https://www.springframework.org/schema/integration/groovy/spring-integration-groovy-5.2.xsd"
-
-  - alias: "ftp"
-    namespace: "http://www.springframework.org/schema/integration/ftp"
-    location: "https://www.springframework.org/schema/integration/ftp/spring-integration-ftp-5.2.xsd"
 
   - alias: "sftp"
     namespace: "http://www.springframework.org/schema/integration/sftp"
