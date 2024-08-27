@@ -55,7 +55,7 @@ keip:
     - eipNamespace: tcp-udp
       xmlNamespace: http://www.springframework.org/schema/integration/ip
       schemaLocation: https://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
-    - eipNamespace: web-services
+    - eipNamespace: ws
       xmlNamespace: http://www.springframework.org/schema/integration/ws
       schemaLocation: https://www.springframework.org/schema/integration/ws/spring-integration-ws.xsd
     - eipNamespace: int-xml
