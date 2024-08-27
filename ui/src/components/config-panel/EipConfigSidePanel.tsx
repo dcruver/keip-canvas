@@ -14,6 +14,9 @@ const flowControlledAttributes = new Set([
   "channel",
   "input-channel",
   "output-channel",
+  "discard-channel",
+  "request-channel",
+  "reply-channel",
 ])
 
 const getConfigurableAttributes = (attrs: Attribute[] | undefined) => {
