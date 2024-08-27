@@ -402,6 +402,11 @@ export const useAppActions = () => useStore((state) => state.appActions)
 export const useEipFlow = () =>
   useStoreWithEqualityFn(useStore, (state) => diagramToEipFlow(state), isDeepEqual)
 
+const EIP_NAMESPACE_TO_XML_PREFIX: Record<string, string> = {
+  xml: "int-xml",
+  "web-services": "ws",
+}
+
 // TODO: Extract flow conversion to a separate file
 const diagramToEipFlow = (state: AppStore): EipFlow => {
   const nodes: EipNode[] = state.nodes.map((node) => {
@@ -410,9 +415,14 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
       state.eipNodeConfigs[node.id]?.children
     ).map(([name, attrs]) => ({ name: name, attributes: { ...attrs } }))
 
+    const namespace = node.data.eipId.namespace
+
     return {
       id: node.data.label ?? node.id,
-      eipId: node.data.eipId,
+      eipId: {
+        ...node.data.eipId,
+        namespace: EIP_NAMESPACE_TO_XML_PREFIX[namespace] ?? namespace,
+      },
       description: state.eipNodeConfigs[node.id]?.description,
       role: eipComponent.role,
       connectionType: eipComponent.connectionType,
