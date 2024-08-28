@@ -79,9 +79,11 @@ class LlmClient {
   }
 
   public ping(): { success: Promise<boolean>; abort: () => void } {
-    const { response, abort } = fetchWithTimeout(this.serverBaseUrl)
-    const success = response.then((res) => res.ok).catch(() => false)
-    return { success, abort }
+    const abortCtrl = new AbortController()
+    const success = fetchWithTimeout(this.serverBaseUrl, { abortCtrl })
+      .then((res) => res.ok)
+      .catch(() => false)
+    return { success, abort: () => abortCtrl.abort() }
   }
 
   private async generatePrompt() {

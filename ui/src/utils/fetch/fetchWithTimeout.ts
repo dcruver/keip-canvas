@@ -2,24 +2,24 @@ export type FetchInput = string | URL | Request
 
 export type FetchWithTimeoutOptions = RequestInit & {
   timeout?: number
+  abortCtrl?: AbortController
 }
 
 const fetchWithTimeout = (
   url: FetchInput,
   options?: FetchWithTimeoutOptions
-): { response: Promise<Response>; abort: AbortController["abort"] } => {
+): Promise<Response> => {
   const timeout = options?.timeout ?? 5000
-  const ctrl = new AbortController()
+  const ctrl = options?.abortCtrl ?? new AbortController()
 
   const timeoutId = setTimeout(() => {
     console.error(`Request timed out after ${timeout} ms:`, url)
     ctrl.abort("Request timed out")
   }, timeout)
 
-  const response = fetch(url, { ...options, signal: ctrl.signal }).finally(() =>
+  return fetch(url, { ...options, signal: ctrl.signal }).finally(() =>
     clearTimeout(timeoutId)
   )
-  return { response, abort: (reason?: string) => ctrl.abort(reason) }
 }
 
 export default fetchWithTimeout

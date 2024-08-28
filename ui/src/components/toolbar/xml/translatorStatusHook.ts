@@ -20,8 +20,10 @@ const useTranslationServerStatus = () => {
   const [isAvailable, setIsAvailable] = useState(false)
 
   useEffect(() => {
-    const { response, abort } = fetchWithTimeout(statusEndpoint)
-    const status = response.then((r) => r.ok).catch(() => false)
+    const abortCtrl = new AbortController()
+    const status = fetchWithTimeout(statusEndpoint, { abortCtrl })
+      .then((r) => r.ok)
+      .catch(() => false)
 
     void (async () => {
       const resolved = await status
@@ -30,7 +32,7 @@ const useTranslationServerStatus = () => {
     })()
 
     return () => {
-      abort("Component unmounted")
+      abortCtrl.abort("Component unmounted")
     }
   }, [])
 

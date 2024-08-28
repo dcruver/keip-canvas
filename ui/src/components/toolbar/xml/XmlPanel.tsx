@@ -9,6 +9,9 @@ import { useEipFlow } from "../../../singletons/store"
 // highlight.js theme
 import "highlight.js/styles/intellij-light.css"
 import { FLOW_TRANSLATOR_BASE_URL } from "../../../singletons/externalEndpoints"
+import fetchWithTimeout from "../../../utils/fetch/fetchWithTimeout"
+
+const UNMOUNT_SIGNAL = "unmount"
 
 hljs.registerLanguage("xml", xml)
 
@@ -36,24 +39,28 @@ const getLoadingStatus = (
 }
 
 // TODO: Add client-side caching (might make sense to use a data fetching library)
-// TODO: Reduce debounce on attribute inputs to make updates a bit more snappy
-// TODO: Should the fetch call be debounced?
-const fetchXmlTranslation = async (flow: EipFlow) => {
+const fetchXmlTranslation = async (
+  flow: EipFlow,
+  abortCtrl: AbortController
+) => {
   const queryStr = new URLSearchParams({ prettyPrint: "true" }).toString()
-  const response = await fetch(`${FLOW_TRANSLATOR_BASE_URL}?` + queryStr, {
-    method: "POST",
-    body: JSON.stringify(flow),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
+  const response = await fetchWithTimeout(
+    `${FLOW_TRANSLATOR_BASE_URL}?` + queryStr,
+    {
+      method: "POST",
+      body: JSON.stringify(flow),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      timeout: 20000,
+      abortCtrl,
+    }
+  )
 
   const { data, error } = (await response.json()) as FlowTranslationResponse
 
   if (!response.ok) {
-    throw new Error(
-      `Failed to convert diagram to XML: ${JSON.stringify(error)}`
-    )
+    throw new Error(error?.message)
   }
 
   return data!
@@ -65,17 +72,24 @@ const XmlPanel = () => {
   const [isError, setError] = useState(false)
   const eipFlow = useEipFlow()
 
-  // TODO: Clean up the UseEffect fetch with an abort controller
   useEffect(() => {
+    const abortCtrl = new AbortController()
     setLoading(true)
     setError(false)
-    fetchXmlTranslation(eipFlow)
+    fetchXmlTranslation(eipFlow, abortCtrl)
       .then((data) => setContent(data))
-      .catch((err) => {
-        setError(true)
-        console.error(err)
+      .catch((err: Error) => {
+        if (abortCtrl.signal.reason !== UNMOUNT_SIGNAL) {
+          setError(true)
+          err.message && setContent(`Error:\n\n${err.message}`)
+          console.error("Failed to convert diagram to XML:", err)
+        }
       })
       .finally(() => setLoading(false))
+
+    return () => {
+      abortCtrl.abort(UNMOUNT_SIGNAL)
+    }
   }, [eipFlow])
 
   const loadingStatus = getLoadingStatus(isLoading, isError)
