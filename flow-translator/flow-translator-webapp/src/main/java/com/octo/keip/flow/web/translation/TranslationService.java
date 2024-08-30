@@ -15,10 +15,14 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 class TranslationService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(TranslationService.class);
 
   private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
@@ -59,6 +63,8 @@ class TranslationService {
     if (errors.isEmpty()) {
       return null;
     }
+
+    LOGGER.atDebug().setMessage("Partial translation errors: {}").addArgument(errors).log();
 
     List<TranslationErrorDetail> errorDetails =
         errors.stream().map(TranslationErrorDetail::from).toList();
