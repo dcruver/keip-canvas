@@ -71,8 +71,8 @@
     padding-block-start: 0.375rem;
   }
 
-  .toolbar-button-selected {
-    background-color: map-get(themes.$button-secondary-active, "white-theme");
+  .toolbar-button-selected:not(:focus) {
+    border-bottom: 4px solid themes.$interactive;
   }
 
   //        Begin AI Chat Panel       //
