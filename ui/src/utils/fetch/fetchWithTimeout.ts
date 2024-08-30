@@ -14,7 +14,7 @@ const fetchWithTimeout = (
 
   const timeoutId = setTimeout(() => {
     console.error(`Request timed out after ${timeout} ms:`, url)
-    ctrl.abort("Request timed out")
+    ctrl.abort(new Error("Request timed out"))
   }, timeout)
 
   return fetch(url, { ...options, signal: ctrl.signal }).finally(() =>

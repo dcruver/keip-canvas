@@ -60,7 +60,8 @@ const fetchXmlTranslation = async (
   const { data, error } = (await response.json()) as FlowTranslationResponse
 
   if (!response.ok) {
-    throw new Error(error?.message)
+    console.error("Failed to convert diagram to XML:", error)
+    throw new Error(JSON.stringify(error))
   }
 
   return data!
@@ -82,7 +83,6 @@ const XmlPanel = () => {
         if (abortCtrl.signal.reason !== UNMOUNT_SIGNAL) {
           setError(true)
           err.message && setContent(`Error:\n\n${err.message}`)
-          console.error("Failed to convert diagram to XML:", err)
         }
       })
       .finally(() => setLoading(false))
