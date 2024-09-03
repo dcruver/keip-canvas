@@ -11,6 +11,7 @@ import {
   useAppActions,
   useFlowStore,
   useGetLayout,
+  useUndoRedo,
 } from "../../singletons/store"
 import "reactflow/dist/base.css"
 import {
@@ -18,6 +19,8 @@ import {
   ArrowsHorizontal,
   ArrowsVertical,
   Maximize,
+  Undo,
+  Redo,
 } from "@carbon/icons-react"
 import { ErrorBoundary } from "@carbon/react"
 import { DropTargetMonitor, useDrop } from "react-dnd"
@@ -25,7 +28,7 @@ import { NativeTypes } from "react-dnd-html5-backend"
 import { EipId } from "../../api/id"
 import { DragTypes } from "../draggable-panel/dragTypes"
 import { EipNode } from "./EipNode"
-import { useEffect } from "react"
+import { useEffect, KeyboardEvent } from "react"
 
 const FLOW_ERROR_MESSAGE =
   "Failed to load the canvas - the stored flow is malformed. Clearing the flow from the state store."
@@ -68,10 +71,34 @@ const nodeTypes = {
   eipNode: EipNode,
 }
 
+const onUndoRedoKeyDown = (
+  event: KeyboardEvent,
+  undo: () => void,
+  redo: () => void
+) => {
+  if (
+    (event.ctrlKey && event.shiftKey && event.key === "Z") ||
+    (event.metaKey && event.shiftKey && event.key === "Z") ||
+    (event.metaKey && event.key === "y") ||
+    (event.ctrlKey && event.key === "y")
+  ) {
+    event.preventDefault()
+    redo()
+  } else if (
+    (event.ctrlKey && event.key === "z") ||
+    (event.metaKey && event.key === "z")
+  ) {
+    event.preventDefault()
+    undo()
+  }
+}
+
 const FlowCanvas = () => {
   const reactFlowInstance = useReactFlow()
   const flowStore = useFlowStore()
   const layout = useGetLayout()
+  const { undo, redo } = useUndoRedo()
+
   const {
     createDroppedNode,
     clearSelectedChildNode,
@@ -129,13 +156,28 @@ const FlowCanvas = () => {
           nodes={flowStore.nodes}
           edges={flowStore.edges}
           nodeTypes={nodeTypes}
+          tabIndex={0}
+          onKeyDown={(e) =>
+            onUndoRedoKeyDown(
+              e,
+              () => undo(),
+              () => redo()
+            )
+          }
           onNodesChange={flowStore.onNodesChange}
           onEdgesChange={flowStore.onEdgesChange}
           onConnect={flowStore.onConnect}
           onPaneClick={() => clearSelectedChildNode()}
           fitView
         >
-          <Controls style={{ bottom: "50px" }}>
+          <Controls style={{ bottom: "235px" }} />
+
+          <Controls
+            style={{ bottom: "130px" }}
+            showFitView={false}
+            showInteractive={false}
+            showZoom={false}
+          >
             <ControlButton
               title="horizontal layout"
               onClick={() => updateLayoutOrientation("horizontal")}
@@ -150,6 +192,20 @@ const FlowCanvas = () => {
             </ControlButton>
             <ControlButton title="change density" onClick={updateLayoutDensity}>
               <Maximize />
+            </ControlButton>
+          </Controls>
+
+          <Controls
+            style={{ bottom: "50px" }}
+            showFitView={false}
+            showInteractive={false}
+            showZoom={false}
+          >
+            <ControlButton title="undo" onClick={() => undo()}>
+              <Undo />
+            </ControlButton>
+            <ControlButton title="redo" onClick={() => redo()}>
+              <Redo />
             </ControlButton>
           </Controls>
 
