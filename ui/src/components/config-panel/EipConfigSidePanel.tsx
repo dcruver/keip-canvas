@@ -1,39 +1,42 @@
 import { HeaderPanel } from "@carbon/react"
 import { useState } from "react"
-import { useOnSelectionChange } from "reactflow"
-import { EipFlowNode } from "../../api/flow"
+import { Edge, useOnSelectionChange, useStoreApi } from "reactflow"
+import { DYNAMIC_EDGE_TYPE, DynamicEdge, EipFlowNode } from "../../api/flow"
 import { Attribute } from "../../api/generated/eipComponentDef"
 import { childIdToString } from "../../api/id"
-import { lookupEipComponent } from "../../singletons/eipDefinitions"
+import {
+  FLOW_CONTROLLED_ATTRIBUTES,
+  lookupEipComponent,
+} from "../../singletons/eipDefinitions"
 import { useAppActions, useGetSelectedChildNode } from "../../singletons/store"
 import ChildNodeConfig from "./ChildNodeConfig"
+import DynamicEdgeConfig from "./DynamicEdgeConfig"
 import RootNodeConfig from "./RootNodeConfig"
 
-const flowControlledAttributes = new Set([
-  "id",
-  "channel",
-  "input-channel",
-  "output-channel",
-  "discard-channel",
-  "request-channel",
-  "reply-channel",
-])
-
-const getConfigurableAttributes = (attrs: Attribute[] | undefined) => {
+// TODO: filter out dynamic routing based attributes and children
+const filterConfigurableAttributes = (attrs?: Attribute[]) => {
   return attrs
-    ? attrs.filter((attr) => !flowControlledAttributes.has(attr.name))
+    ? attrs.filter((attr) => !FLOW_CONTROLLED_ATTRIBUTES.has(attr.name))
     : []
 }
 
+const isDynamicEdge = (edge: Edge) => edge?.type === DYNAMIC_EDGE_TYPE
+
 const EipConfigSidePanel = () => {
+  const reactFlowStore = useStoreApi()
   const { clearSelectedChildNode } = useAppActions()
   const [selectedNode, setSelectedNode] = useState<EipFlowNode | null>(null)
+  const [selectedEdge, setSelectedEdge] = useState<DynamicEdge | null>(null)
   const selectedChild = useGetSelectedChildNode()
 
   useOnSelectionChange({
-    onChange: ({ nodes }) => {
+    onChange: ({ nodes, edges }) => {
       selectedChild && clearSelectedChildNode()
-      setSelectedNode(nodes.length === 1 ? nodes[0] : null)
+      const numSelected = nodes.length + edges.length
+      setSelectedNode(numSelected === 1 ? nodes[0] : null)
+      setSelectedEdge(
+        numSelected === 1 && isDynamicEdge(edges[0]) ? edges[0] : null
+      )
     },
   })
 
@@ -47,7 +50,9 @@ const EipConfigSidePanel = () => {
     const childElement = eipComponent.childGroup!.children.find(
       (e) => e.name === selectedChild.name
     )!
-    const configurableAttrs = getConfigurableAttributes(childElement.attributes)
+    const configurableAttrs = filterConfigurableAttributes(
+      childElement.attributes
+    )
     sidePanelContent = (
       <ChildNodeConfig
         key={childIdToString(selectedChild)}
@@ -58,8 +63,9 @@ const EipConfigSidePanel = () => {
       />
     )
   } else if (selectedNode && eipComponent) {
-    // TODO: Pass in channelId to Panel
-    const configurableAttrs = getConfigurableAttributes(eipComponent.attributes)
+    const configurableAttrs = filterConfigurableAttributes(
+      eipComponent.attributes
+    )
     sidePanelContent = (
       <RootNodeConfig
         key={selectedNode.id}
@@ -68,12 +74,25 @@ const EipConfigSidePanel = () => {
         childGroup={eipComponent.childGroup}
       />
     )
+  } else if (selectedEdge) {
+    const { nodeInternals } = reactFlowStore.getState()
+    const sourceNode = nodeInternals.get(selectedEdge.source)
+    const targetNode = nodeInternals.get(selectedEdge.target)
+
+    sidePanelContent = (
+      <DynamicEdgeConfig
+        key={selectedEdge.id}
+        edge={{ ...selectedEdge, sourceNode, targetNode }}
+      />
+    )
   } else {
     // Returning an empty fragment because the HeaderPanel component spams the logs with error messages if it doesn't have any children.
     sidePanelContent = <></>
   }
 
-  const showPanel = Boolean(selectedNode ?? selectedChild)
+  // TODO: disable this typescript warning globally
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const showPanel = Boolean(selectedNode || selectedChild || selectedEdge)
 
   return (
     <HeaderPanel

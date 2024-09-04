@@ -1,32 +1,20 @@
-import { Information } from "@carbon/icons-react"
 import {
   Accordion,
   AccordionItem,
   Form,
-  FormLabel,
   Select,
   SelectItem,
   Stack,
   TextInput,
   Toggle,
-  Tooltip,
 } from "@carbon/react"
-import {
-  ChangeEvent,
-  MouseEventHandler,
-  ReactNode,
-  ReactSVGElement,
-  useMemo,
-} from "react"
+import { ChangeEvent, useMemo } from "react"
 import { Attribute } from "../../api/generated/eipComponentDef"
 import { useAppActions, useGetEipAttribute } from "../../singletons/store"
 import debounce from "../../utils/debounce"
+import DescriptionTooltipWrapper from "./DescriptionTooltipWrapper"
 
-interface DescriptionWrapperProps {
-  id: string
-  description: string | undefined
-  children: ReactNode
-}
+const addPaddingClass = "cfg-panel__container__padding-add"
 
 interface AttributeInputFactoryProps {
   attr: Attribute
@@ -148,43 +136,6 @@ const AttributeTextInput = ({
   )
 }
 
-const DescriptionTooltipWrapper = (props: DescriptionWrapperProps) => {
-  if (!props.description) {
-    return props.children
-  }
-
-  const tooltipDivId = `tooltip-hack-${props.id}`
-
-  // Workaround for tooltip popover not 'escaping' the side panel boundary.
-  // The side panel requires vertical scrolling and so this does not allow overflow-x to be set to visible.
-  // This workaround detachesuses JS to position the popover dynamically.
-  // Long-term we would be better served by implementing our own Tooltip based on the Popover component,
-  // to have greater control over the underlying DOM elements.
-  const tooltipWorkaroundHandler: MouseEventHandler<ReactSVGElement> = (e) => {
-    const icon = e.target as Element
-    const tooltipParent = document.getElementById(tooltipDivId)
-
-    const tooltip = tooltipParent?.getElementsByClassName(
-      "cds--tooltip-content"
-    )[0] as HTMLElement
-
-    const rect = icon.getBoundingClientRect()
-    tooltip.style.left = `${rect.left}px`
-    tooltip.style.top = `${rect.top}px`
-    tooltip.style.position = "fixed"
-  }
-
-  return (
-    <div id={tooltipDivId}>
-      <FormLabel className="form-input-label">{props.id}</FormLabel>
-      <Tooltip align="top" label={props.description}>
-        <Information onMouseEnter={tooltipWorkaroundHandler} />
-      </Tooltip>
-      {props.children}
-    </div>
-  )
-}
-
 const AttributeInput = (props: AttributeInputFactoryProps) => {
   const attrValue = useGetEipAttribute(
     props.id,
@@ -208,7 +159,7 @@ const AttributeInput = (props: AttributeInputFactoryProps) => {
   }
 }
 
-const AttributeConfigForm = (props: AttributeFormProps) => {
+export const AttributeConfigForm = (props: AttributeFormProps) => {
   const required = props.attrs
     .filter((attr) => attr.required)
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -216,14 +167,12 @@ const AttributeConfigForm = (props: AttributeFormProps) => {
     .filter((attr) => !attr.required)
     .sort((a, b) => a.name.localeCompare(b.name))
 
-  const addPadding = "cfg-panel__container__padding-add"
-
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
       <Accordion isFlush size="lg">
         {required.length ? (
           <AccordionItem title="Required" open>
-            <Stack gap={6} className={addPadding}>
+            <Stack gap={6} className={addPaddingClass}>
               {required.map((attr) => (
                 <AttributeInput {...props} key={attr.name} attr={attr} />
               ))}
@@ -232,7 +181,7 @@ const AttributeConfigForm = (props: AttributeFormProps) => {
         ) : null}
         {optional.length ? (
           <AccordionItem title="Optional">
-            <Stack gap={6} className={addPadding}>
+            <Stack gap={6} className={addPaddingClass}>
               {optional.map((attr) => (
                 <AttributeInput {...props} key={attr.name} attr={attr} />
               ))}
@@ -243,5 +192,3 @@ const AttributeConfigForm = (props: AttributeFormProps) => {
     </Form>
   )
 }
-
-export default AttributeConfigForm

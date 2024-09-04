@@ -1,0 +1,216 @@
+import {
+  Heading,
+  Section,
+  SideNavDivider,
+  Stack,
+  TextInput,
+  Toggle,
+} from "@carbon/react"
+import { ChangeEvent, useMemo } from "react"
+import { ChannelMapping, DynamicEdge, RouterKeyDef } from "../../api/flow"
+import { lookupContentBasedRouterKeys } from "../../singletons/eipDefinitions"
+import {
+  getNodesView,
+  useAppActions,
+  useGetContentRouterKey,
+  useGetRouterDefaultEdgeMapping,
+} from "../../singletons/store"
+import debounce from "../../utils/debounce"
+import DescriptionTooltipWrapper from "./DescriptionTooltipWrapper"
+
+interface SectionHeadingProps {
+  title: string
+  helperText?: string
+}
+
+interface DefaultMappingToggleProps {
+  edgeId: string
+  toggled?: boolean
+  disabled?: boolean
+}
+
+interface RouterKeyProps {
+  routerNodeId: string
+  routerKeyDef: RouterKeyDef
+}
+
+interface EdgeMatcherProps {
+  edgeId: string
+  mapping: ChannelMapping
+}
+
+interface EdgeConfigProps {
+  edge: DynamicEdge
+}
+
+const addPaddingClass = "cfg-panel__container__padding-add"
+
+const SectionHeading = ({ title, helperText }: SectionHeadingProps) => (
+  <Stack gap={2}>
+    <Heading>{title}</Heading>
+    <p className="sec-header__helper-text">{helperText}</p>
+  </Stack>
+)
+
+const DefaultMappingToggle = ({
+  edgeId,
+  toggled,
+  disabled,
+}: DefaultMappingToggleProps) => {
+  const { updateDynamicEdgeMapping } = useAppActions()
+
+  const id = "isDefaultMapping"
+  const description =
+    "A message is routed through this edge when routing resolution fails to match any of the defined routing matchers. At most one outgoing edge can marked as the default output."
+
+  return (
+    <Section>
+      <DescriptionTooltipWrapper id={id} description={description}>
+        <div style={{ display: "block" }}>
+          <Toggle
+            id={id}
+            labelText=""
+            labelA=""
+            labelB=""
+            defaultToggled={toggled}
+            disabled={disabled}
+            hideLabel
+            onToggle={(checked) =>
+              updateDynamicEdgeMapping(edgeId, { isDefaultMapping: checked })
+            }
+          />
+        </div>
+      </DescriptionTooltipWrapper>
+    </Section>
+  )
+}
+
+// TODO: Consider moving router key configuration to the Node side panel
+// TODO: See if we can re-use (or generalize) the AttributeTextInput component here.
+const RouterKeyConfig = ({ routerNodeId, routerKeyDef }: RouterKeyProps) => {
+  const { updateContentRouterKey } = useAppActions()
+  const currRouterKey = useGetContentRouterKey(routerNodeId)
+
+  // TODO: debounce input
+  const handleUpdates = (attrName: string, value: string) => {
+    updateContentRouterKey(routerNodeId, routerKeyDef.name, attrName, value)
+  }
+
+  // TODO: For multiple attributes, place the required fields at the top
+  // and mark with asterisk.
+  const inputs = routerKeyDef.attributesDef.map((attr) => (
+    <DescriptionTooltipWrapper
+      key={attr.name}
+      id={attr.name}
+      description={attr.description}
+    >
+      <TextInput
+        id={attr.name}
+        labelText={attr.name}
+        defaultValue={String(currRouterKey?.attributes?.[attr.name] ?? "")}
+        hideLabel={Boolean(attr.description)}
+        onChange={(ev) => handleUpdates(attr.name, ev.target.value)}
+      />
+    </DescriptionTooltipWrapper>
+  ))
+
+  return (
+    <Section>
+      <Stack gap={6}>
+        <SectionHeading
+          title="Key"
+          helperText={
+            routerKeyDef.attributesDef.length !== 1
+              ? routerKeyDef.name
+              : "Targeted by the matcher"
+          }
+        />
+        {inputs}
+      </Stack>
+    </Section>
+  )
+}
+
+const EdgeMatcher = ({ edgeId, mapping }: EdgeMatcherProps) => {
+  const { updateDynamicEdgeMapping } = useAppActions()
+  const { mapperName, matcher, matcherValue } = mapping
+
+  const handleUpdates = useMemo(
+    () =>
+      debounce((ev: ChangeEvent<HTMLInputElement>) => {
+        updateDynamicEdgeMapping(edgeId, { matcherValue: ev.target.value })
+      }, 300),
+    [edgeId, updateDynamicEdgeMapping]
+  )
+
+  return (
+    <Section>
+      <Stack gap={6}>
+        <SectionHeading title="Matcher" helperText={mapperName} />
+        <DescriptionTooltipWrapper
+          key={matcher.name}
+          id={matcher.name}
+          description={matcher.description}
+        >
+          <TextInput
+            id={matcher.name}
+            labelText={matcher.name}
+            defaultValue={matcherValue ?? ""}
+            hideLabel={Boolean(matcher.description)}
+            onChange={handleUpdates}
+          />
+        </DescriptionTooltipWrapper>
+      </Stack>
+    </Section>
+  )
+}
+
+const DynamicEdgeConfig = ({ edge }: EdgeConfigProps) => {
+  const currDefaultEdge = useGetRouterDefaultEdgeMapping(edge.source)
+  const sourceNode = getNodesView().find((node) => node.id === edge.source)
+  const routerKeyDef =
+    sourceNode && lookupContentBasedRouterKeys(sourceNode.data.eipId)
+
+  const isTheDefaultEdge = currDefaultEdge?.id === edge.id
+
+  // TODO: Fix add-padding class. Add padding to sides only.
+  // Vertical padding should be handled by the Stack container.
+  return (
+    <Section>
+      <Stack gap={4}>
+        <Stack gap={6} className={addPaddingClass}>
+          <Heading>Edge</Heading>
+          <h5>{`Source: ${edge.source}`}</h5>
+          <h5>{`Target: ${edge.target}`}</h5>
+        </Stack>
+        <SideNavDivider />
+        <Stack gap={7} className={addPaddingClass}>
+          <SectionHeading
+            title="Routing"
+            helperText="Content-based routing configuration"
+          />
+          <DefaultMappingToggle
+            edgeId={edge.id}
+            toggled={isTheDefaultEdge}
+            disabled={!isTheDefaultEdge && Boolean(currDefaultEdge)}
+          />
+          {!isTheDefaultEdge && (
+            <>
+              {routerKeyDef && (
+                <RouterKeyConfig
+                  routerNodeId={edge.source}
+                  routerKeyDef={routerKeyDef}
+                />
+              )}
+              {edge.data?.mapping && (
+                <EdgeMatcher edgeId={edge.id} mapping={edge.data.mapping} />
+              )}
+            </>
+          )}
+        </Stack>
+      </Stack>
+    </Section>
+  )
+}
+
+export default DynamicEdgeConfig

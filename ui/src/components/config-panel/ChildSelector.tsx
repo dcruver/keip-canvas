@@ -1,6 +1,7 @@
 import { Checkbox, Form, RadioButton, RadioButtonGroup } from "@carbon/react"
 import { EipChildGroup } from "../../api/generated/eipComponentDef"
 import { useAppActions, useGetChildren } from "../../singletons/store"
+import { DYNAMIC_ROUTING_CHILDREN } from "../../singletons/eipDefinitions"
 
 interface ChildrenConfigProps {
   nodeId: string
@@ -85,7 +86,10 @@ const ChildSelector = ({ nodeId, childGroup }: ChildrenConfigProps) => {
   const updateChildrenState = (updates: string[]) =>
     updateEnabledChildren(nodeId, updates)
 
-  const sortedNames = childGroup.children.map((c) => c.name).sort()
+  const sortedNames = childGroup.children
+    .filter((c) => !DYNAMIC_ROUTING_CHILDREN.has(c.name))
+    .map((c) => c.name)
+    .sort()
 
   return (
     <Form onSubmit={(e) => e.preventDefault()}>

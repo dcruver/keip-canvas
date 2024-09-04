@@ -2,7 +2,7 @@ import { Stack, TextArea } from "@carbon/react"
 import { Attribute } from "../../api/generated/eipComponentDef"
 import { ChildNodeId } from "../../api/id"
 import { toTitleCase } from "../../utils/titleTransform"
-import AttributeConfigForm from "./AttributeConfigForm"
+import { AttributeConfigForm } from "./AttributeConfigForm"
 import ConfigurationInputTabs from "./ConfigurationTabs"
 
 interface ChildAttributePanelProps {

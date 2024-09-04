@@ -3,6 +3,7 @@ export interface EipId {
   name: string
 }
 
+// TODO: Refactor this interface when support for multiple children with the same name/type is added.
 export interface ChildNodeId {
   name: string
   parentNodeId: string

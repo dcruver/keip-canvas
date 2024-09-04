@@ -22,9 +22,19 @@ import {
 } from "reactflow"
 import { useShallow } from "zustand/react/shallow"
 import { useStoreWithEqualityFn } from "zustand/traditional"
-import { EIP_NODE_TYPE, EipFlowNode, EipNodeData, Layout } from "../api/flow"
-import { AttributeType } from "../api/generated/eipComponentDef"
 import {
+  ChannelMapping,
+  DYNAMIC_EDGE_TYPE,
+  DynamicEdge,
+  EIP_NODE_TYPE,
+  EipFlowNode,
+  EipNodeData,
+  Layout,
+  RouterKey,
+} from "../api/flow"
+import { AttributeType, EipComponent } from "../api/generated/eipComponentDef"
+import {
+  Attributes,
   ChildNode as EipChildNode,
   EipFlow,
   EipNode,
@@ -32,7 +42,13 @@ import {
 } from "../api/generated/eipFlow"
 import { ChildNodeId, EipId, areChildIdsEqual } from "../api/id"
 import { newFlowLayout } from "../components/layout/layouting"
-import { lookupEipComponent } from "./eipDefinitions"
+import {
+  CHANNEL_ATTR_NAME,
+  DEFAULT_OUTPUT_CHANNEL_NAME,
+  DYNAMIC_ROUTING_CHILDREN,
+  lookupContentBasedRouterKeys,
+  lookupEipComponent,
+} from "./eipDefinitions"
 
 // TODO: Refactor store into smaller, more manageable pieces.
 
@@ -46,12 +62,11 @@ interface ReactFlowActions {
   onConnect: OnConnect
 }
 
-type AttributeMapping = Record<string, AttributeType>
-
 interface EipNodeConfig {
-  attributes: AttributeMapping
-  children: Record<string, AttributeMapping>
+  attributes: Attributes
+  children: Record<string, EipChildNode>
   description?: string
+  routerKey?: RouterKey
 }
 
 // TODO: Bugfix. Nested updates of the 'eipNodeConfigs' store field are mutating
@@ -72,6 +87,18 @@ interface AppActions {
   ) => void
 
   deleteEipAttribute: (id: string, parentId: string, attrName: string) => void
+
+  updateDynamicEdgeMapping: (
+    edgeId: string,
+    mapping: Partial<ChannelMapping>
+  ) => void
+
+  updateContentRouterKey: (
+    nodeId: string,
+    keyName: string,
+    attrName: string,
+    value: AttributeType
+  ) => void
 
   updateEnabledChildren: (nodeId: string, children: string[]) => void
 
@@ -130,15 +157,28 @@ const useStore = create<AppStore>()(
               return updates
             }),
 
+          // TODO: Use the new 'selectable` DefaultEdgeProp after migrating to ReactFlow v12.
+          // Only dynamic router edges should be selectable.
           onEdgesChange: (changes: EdgeChange[]) =>
             set((state) => ({
               edges: applyEdgeChanges(changes, state.edges),
             })),
 
           onConnect: (connection: Connection) =>
-            set((state) => ({
-              edges: addEdge(connection, state.edges),
-            })),
+            set((state) => {
+              const sourceNode = state.nodes.find(
+                (n) => n.id === connection.source
+              )
+              const sourceComponent =
+                sourceNode && lookupEipComponent(sourceNode.data.eipId)
+              const edge =
+                sourceComponent?.role === "router"
+                  ? createDynamicRoutingEdge(connection, sourceComponent)
+                  : connection
+              return {
+                edges: addEdge(edge, state.edges),
+              }
+            }),
         },
 
         appActions: {
@@ -154,23 +194,23 @@ const useStore = create<AppStore>()(
               }
             }),
 
-        updateNodeLabel: (id, label) => {
-          let error: Error | undefined
-          set((state) => {
-            const updatedNodes = state.nodes.map((node) => {
-              if (node.id === id) {
-                return { ...node, data: { ...node.data, label } }
-              } else {
-                if (node.data.label === label) {
-                  error = new Error("Node labels must be unique")
+          updateNodeLabel: (id, label) => {
+            let error: Error | undefined
+            set((state) => {
+              const updatedNodes = state.nodes.map((node) => {
+                if (node.id === id) {
+                  return { ...node, data: { ...node.data, label } }
+                } else {
+                  if (node.data.label === label) {
+                    error = new Error("Node labels must be unique")
+                  }
+                  return node
                 }
-                return node
-              }
+              })
+              return { nodes: error ? state.nodes : updatedNodes }
             })
-            return { nodes: error ? state.nodes : updatedNodes }
-          })
-          return error
-        },
+            return error
+          },
 
           updateNodeDescription: (id, description) =>
             set((state) => {
@@ -185,7 +225,17 @@ const useStore = create<AppStore>()(
               if (parentId === ROOT_PARENT) {
                 configs[id].attributes[attrName] = value
               } else {
-                configs[parentId].children[id][attrName] = value
+                const children = configs[parentId].children
+                configs[parentId].children = {
+                  ...children,
+                  [id]: {
+                    ...children[id],
+                    attributes: {
+                      ...children[id].attributes,
+                      [attrName]: value,
+                    },
+                  },
+                }
               }
               return { eipNodeConfigs: configs }
             }),
@@ -203,10 +253,10 @@ const useStore = create<AppStore>()(
                   },
                 }
               } else {
-                const updatedChildAttrs = {
-                  ...nodeConfigs[parentId].children[id],
+                const updatedAttrs = {
+                  ...nodeConfigs[parentId].children[id].attributes,
                 }
-                delete updatedChildAttrs[attrName]
+                delete updatedAttrs[attrName]
                 return {
                   eipNodeConfigs: {
                     ...nodeConfigs,
@@ -214,7 +264,10 @@ const useStore = create<AppStore>()(
                       ...nodeConfigs[parentId],
                       children: {
                         ...nodeConfigs[parentId].children,
-                        [id]: updatedChildAttrs,
+                        [id]: {
+                          ...nodeConfigs[parentId].children[id],
+                          attributes: updatedAttrs,
+                        },
                       },
                     },
                   },
@@ -222,15 +275,50 @@ const useStore = create<AppStore>()(
               }
             }),
 
+          // TODO: Ensure no more than one default mapping edge can be set
+          updateDynamicEdgeMapping: (edgeId, mapping) =>
+            set((state) => ({
+              edges: state.edges.map((edge) => {
+                if (edge.id === edgeId) {
+                  const dynamic = validateDynamicEdgeType(edge)
+                  return {
+                    ...dynamic,
+                    data: {
+                      ...dynamic.data,
+                      mapping: { ...dynamic.data?.mapping, ...mapping },
+                    },
+                  }
+                }
+                return edge
+              }),
+            })),
+
+          updateContentRouterKey: (nodeId, keyName: string, attrName, value) =>
+            set((state) => ({
+              eipNodeConfigs: {
+                ...state.eipNodeConfigs,
+                [nodeId]: {
+                  ...state.eipNodeConfigs[nodeId],
+                  routerKey: {
+                    name: keyName,
+                    attributes: {
+                      ...state.eipNodeConfigs[nodeId].routerKey?.attributes,
+                      [attrName]: value,
+                    },
+                  },
+                },
+              },
+            })),
+
           updateEnabledChildren: (nodeId, children) =>
             set((state) => {
               const configs = { ...state.eipNodeConfigs }
               configs[nodeId].children = children.reduce(
-                (accum, child) => {
-                  accum[child] = {}
+                (accum, name) => {
+                  accum[name] = { name }
                   return accum
                 },
-                {} as Record<string, AttributeMapping>
+                {} as EipNodeConfig["children"]
               )
 
               return { eipNodeConfigs: configs }
@@ -378,6 +466,51 @@ const isStoreType = (state: unknown): state is AppStore => {
   )
 }
 
+// TODO: Refactor
+const createDynamicRoutingEdge = (
+  connection: Connection,
+  sourceComponent: EipComponent
+) => {
+  const channelMapper = sourceComponent?.childGroup?.children.find((child) =>
+    DYNAMIC_ROUTING_CHILDREN.has(child.name)
+  )
+  if (!channelMapper) {
+    throw new Error(
+      `source component (${sourceComponent.name}) does not have a recognized channel mapping child`
+    )
+  }
+
+  const matcher = channelMapper.attributes?.find(
+    (attr) => attr.name !== CHANNEL_ATTR_NAME
+  )
+  if (!matcher) {
+    throw new Error(
+      `Channel mapping component (${channelMapper.name}) does not have a recognized value matcher attribute`
+    )
+  }
+
+  return {
+    ...connection,
+    type: DYNAMIC_EDGE_TYPE,
+    data: {
+      mapping: {
+        mapperName: channelMapper.name,
+        matcher,
+      },
+    },
+    animated: true,
+  }
+}
+
+const validateDynamicEdgeType = (edge: Edge) => {
+  if (edge.type !== DYNAMIC_EDGE_TYPE) {
+    throw new Error(
+      `The provided edge did not have the expected type: "${edge.type}". Should be "${DYNAMIC_EDGE_TYPE}"`
+    )
+  }
+  return edge as DynamicEdge
+}
+
 export const useNodeCount = () => useStore((state) => state.nodes.length)
 
 export const useGetNodes = () => useStore((state) => state.nodes)
@@ -405,7 +538,8 @@ export const useGetEipAttribute = (
     if (parentId === ROOT_PARENT) {
       return state.eipNodeConfigs[id]?.attributes[attrName]
     }
-    return state.eipNodeConfigs[parentId]?.children[id][attrName]
+    const child = state.eipNodeConfigs[parentId]?.children[id]
+    return child?.attributes?.[attrName]
   })
 
 export const useGetChildren = (id: string) =>
@@ -427,6 +561,19 @@ export const useIsChildSelected = (childId: ChildNodeId) =>
     }
     return areChildIdsEqual(state.selectedChildNode, childId)
   })
+
+export const useGetContentRouterKey = (nodeId: string) =>
+  useStore(useShallow((state) => state.eipNodeConfigs[nodeId].routerKey))
+
+export const useGetRouterDefaultEdgeMapping = (routerId: string) =>
+  useStore((state) =>
+    state.edges.find(
+      (edge) =>
+        edge.source === routerId &&
+        edge.type === DYNAMIC_EDGE_TYPE &&
+        (edge as DynamicEdge).data?.mapping.isDefaultMapping
+    )
+  )
 
 export const useFlowStore = () =>
   useStore(
@@ -460,14 +607,40 @@ const EIP_NAMESPACE_TO_XML_PREFIX: Record<string, string> = {
 }
 
 // TODO: Extract flow conversion to a separate file
+// TODO: Dynamic router logic is over-complicating this method, extract to
+// a separate method and apply modifications after building original flow.
 const diagramToEipFlow = (state: AppStore): EipFlow => {
+  const nodeLookup = createNodeLookupMap(state.nodes)
+
+  const routerChildMap = new Map<string, EipChildNode[]>()
+  const routerAttrMap = new Map<string, Attributes>()
+
+  const edges: FlowEdge[] = state.edges.map((edge) => {
+    const source = nodeLookup.get(edge.source)?.label || edge.source
+    const target = nodeLookup.get(edge.target)?.label || edge.target
+    const edgeId = `ch-${source}-${target}`
+
+    if (edge.type === DYNAMIC_EDGE_TYPE) {
+      addRouterChannelMapping(edgeId, edge, routerChildMap, routerAttrMap)
+    }
+
+    return {
+      id: edgeId,
+      source,
+      target,
+      type: edge.sourceHandle === "discard" ? "discard" : "default",
+    }
+  })
+
   const nodes: EipNode[] = state.nodes.map((node) => {
     const eipComponent = lookupEipComponent(node.data.eipId)!
-    const children: EipChildNode[] = Object.entries(
-      state.eipNodeConfigs[node.id]?.children
-    ).map(([name, attrs]) => ({ name: name, attributes: { ...attrs } }))
-
     const namespace = node.data.eipId.namespace
+
+    const routerKey = state.eipNodeConfigs[node.id].routerKey
+    const routerKeyAttrs =
+      eipComponent.role === "router" && routerKey
+        ? getRouterKeyAttributes(node.data.eipId, routerKey)
+        : {}
 
     return {
       id: node.data.label ? node.data.label : node.id,
@@ -478,21 +651,15 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
       description: state.eipNodeConfigs[node.id]?.description,
       role: eipComponent.role,
       connectionType: eipComponent.connectionType,
-      attributes: { ...state.eipNodeConfigs[node.id]?.attributes },
-      children: children,
-    }
-  })
-
-  const nodeLookup = createNodeLookupMap(state.nodes)
-
-  const edges: FlowEdge[] = state.edges.map((edge) => {
-    const source = nodeLookup.get(edge.source)?.label ?? edge.source
-    const target = nodeLookup.get(edge.target)?.label ?? edge.target
-    return {
-      id: `edge-${source}-${target}`,
-      source,
-      target,
-      type: edge.sourceHandle === "discard" ? "discard" : "default",
+      attributes: {
+        ...state.eipNodeConfigs[node.id]?.attributes,
+        ...routerKeyAttrs.attributes,
+        ...routerAttrMap.get(node.id),
+      },
+      children: Object.values(state.eipNodeConfigs[node.id]?.children).concat(
+        routerKeyAttrs.child ?? [],
+        routerChildMap.get(node.id) ?? []
+      ),
     }
   })
 
@@ -505,7 +672,55 @@ const createNodeLookupMap = (nodes: EipFlowNode[]) => {
   return map
 }
 
-// Warning: the following exports are not intended for use in React components
+// TODO: consider extracting the ChannelMapping and RouterKey logic to the XML translation backend
+const addRouterChannelMapping = (
+  channelId: string,
+  edge: DynamicEdge,
+  routerChildMap: Map<string, EipChildNode[]>,
+  routerAttributeMap: Map<string, Attributes>
+) => {
+  const mapping = edge.data?.mapping
+  if (!mapping) {
+    return
+  }
+
+  if (mapping.isDefaultMapping) {
+    routerAttributeMap.set(edge.source, {
+      [DEFAULT_OUTPUT_CHANNEL_NAME]: channelId,
+    })
+  } else {
+    const child: EipChildNode = {
+      name: mapping.mapperName,
+      attributes: {
+        [CHANNEL_ATTR_NAME]: channelId,
+      },
+    }
+    if (mapping.matcherValue) {
+      child.attributes![mapping.matcher.name] = mapping.matcherValue
+    }
+    const curr = routerChildMap.get(edge.source) ?? []
+    routerChildMap.set(edge.source, curr.concat(child))
+  }
+}
+
+const getRouterKeyAttributes = (eipId: EipId, routerKey: RouterKey) => {
+  const routerKeyDef = lookupContentBasedRouterKeys(eipId)
+  if (!routerKeyDef) {
+    return {}
+  }
+  switch (routerKeyDef.type) {
+    case "attribute": {
+      return { attributes: routerKey.attributes }
+    }
+    case "child": {
+      return {
+        child: { name: routerKey.name, attributes: routerKey.attributes },
+      }
+    }
+  }
+}
+
+// Warning: the following exports provide non-reactive access to the store's state
 export const getNodesView: () => Readonly<EipFlowNode[]> = () =>
   useStore.getState().nodes
 export const getEdgesView: () => Readonly<Edge[]> = () =>

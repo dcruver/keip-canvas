@@ -8,7 +8,7 @@ import {
   useGetNodeDescription,
 } from "../../singletons/store"
 import debounce from "../../utils/debounce"
-import AttributeConfigForm from "./AttributeConfigForm"
+import { AttributeConfigForm } from "./AttributeConfigForm"
 import ChildSelector from "./ChildSelector"
 import ConfigurationInputTabs from "./ConfigurationTabs"
 

@@ -20,7 +20,7 @@ import { KeyboardEvent, useEffect } from "react"
 import { DropTargetMonitor, useDrop } from "react-dnd"
 import { NativeTypes } from "react-dnd-html5-backend"
 import "reactflow/dist/base.css"
-import { EIP_NODE_TYPE } from "../../api/flow"
+import { DYNAMIC_EDGE_TYPE, EIP_NODE_TYPE } from "../../api/flow"
 import { EipId } from "../../api/id"
 import {
   useAppActions,
@@ -29,6 +29,7 @@ import {
   useUndoRedo,
 } from "../../singletons/store"
 import { DragTypes } from "../draggable-panel/dragTypes"
+import DynamicEdge from "./DynamicEdge"
 import { EipNode } from "./EipNode"
 
 const FLOW_ERROR_MESSAGE =
@@ -70,6 +71,10 @@ const getDropPosition = (
 
 const nodeTypes = {
   [EIP_NODE_TYPE]: EipNode,
+}
+
+const edgeTypes = {
+  [DYNAMIC_EDGE_TYPE]: DynamicEdge,
 }
 
 const onUndoRedoKeyDown = (
@@ -157,6 +162,7 @@ const FlowCanvas = () => {
           nodes={flowStore.nodes}
           edges={flowStore.edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           tabIndex={0}
           onKeyDown={(e) =>
             onUndoRedoKeyDown(

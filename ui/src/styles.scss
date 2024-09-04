@@ -219,6 +219,10 @@
     margin-bottom: layout.$spacing-03;
   }
 
+  .sec-header__helper-text {
+    @include type.type-style("body-compact-01");
+  }
+
   .cds--accordion__content {
     padding: 0;
   }
