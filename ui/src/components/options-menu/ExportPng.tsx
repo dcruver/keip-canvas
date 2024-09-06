@@ -6,7 +6,7 @@ import { forwardRef } from "react"
 import { getNodesBounds, getViewportForBounds } from "reactflow"
 import { useAppActions, useGetNodes } from "../../singletons/store"
 
-const SCALING_FACTOR = 1.20
+const SCALING_FACTOR = 1.5
 
 const downloadImage = (dataUrl: string) => {
   const a = document.createElement("a")
@@ -42,6 +42,7 @@ const ExportPng = forwardRef<HTMLElement>(
         backgroundColor: layer01,
         width: imageWidth,
         height: imageHeight,
+        pixelRatio: 1,
         style: {
           width: imageWidth.toString(),
           height: imageHeight.toString(),
