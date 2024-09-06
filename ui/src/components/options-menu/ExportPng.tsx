@@ -6,7 +6,7 @@ import { forwardRef } from "react"
 import { getNodesBounds, getViewportForBounds } from "reactflow"
 import { useAppActions, useGetNodes } from "../../singletons/store"
 
-const IMAGE_PADDING = 200
+const SCALING_FACTOR = 1.20
 
 const downloadImage = (dataUrl: string) => {
   const a = document.createElement("a")
@@ -24,8 +24,8 @@ const ExportPng = forwardRef<HTMLElement>(
     const handleClick = () => {
       clearDiagramSelections()
       const nodeBounds = getNodesBounds(nodes)
-      const imageWidth = nodeBounds.width + IMAGE_PADDING
-      const imageHeight = nodeBounds.height + IMAGE_PADDING
+      const imageWidth = nodeBounds.width * SCALING_FACTOR
+      const imageHeight = nodeBounds.height * SCALING_FACTOR
       const transform = getViewportForBounds(
         nodeBounds,
         imageWidth,
