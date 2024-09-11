@@ -5,6 +5,7 @@
   "description": "Defines a connection pattern for an EIP component",
   "type": "string",
   "enum": [
+    "content_based_router",
     "passthru",
     "request_reply",
     "sink",

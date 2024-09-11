@@ -35,7 +35,7 @@
     "children": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/ChildNode"
+        "$ref": "#/$defs/EipChildNode"
       }
     }
   },
@@ -64,7 +64,7 @@
         "$ref": "attributeType.schema.json"
       }
     },
-    "ChildNode": {
+    "EipChildNode": {
       "description": "An instance of an 'EipChildElement'. Can recursively contain more child nodes as well as attributes of its own.",
       "type": "object",
       "properties": {
@@ -77,7 +77,7 @@
         "children": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/ChildNode"
+            "$ref": "#/$defs/EipChildNode"
           }
         }
       },
