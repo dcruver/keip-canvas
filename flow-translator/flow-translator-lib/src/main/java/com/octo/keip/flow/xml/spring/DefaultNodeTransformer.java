@@ -24,8 +24,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This transformer handles components with at most a single input and/or single output (e.g.
- * Endpoints, Transformers), along with an optional discard channel (e.g. filters).
+ * A default implementation for generating {@link XmlElement}s from an {@link EipNode}. The
+ * transformer should be suitable for components with simple input/output schemes, and is also
+ * responsible for creating the intermediate channels connecting the XmlElements.
  */
 public class DefaultNodeTransformer implements NodeTransformer {
 
@@ -93,12 +94,25 @@ public class DefaultNodeTransformer implements NodeTransformer {
 
       Map<String, Object> attributes = new LinkedHashMap<>();
       return switch (this.node.connectionType()) {
+        case CONTENT_BASED_ROUTER -> handleRouter(attributes, predecessors);
         case PASSTHRU -> handlePassthru(attributes, predecessors, successors);
         case REQUEST_REPLY -> handleRequestReply(attributes, predecessors, successors);
         case SINK -> handleSink(attributes, predecessors, successors);
         case SOURCE -> handleSource(attributes, predecessors, successors);
         case TEE -> handleTee(attributes, predecessors, successors);
       };
+    }
+
+    private Map<String, Object> handleRouter(
+        Map<String, Object> attributes, Set<EipNode> predecessors) {
+      if (predecessors.size() > 1) {
+        throw new IllegalArgumentException(
+            "'ContentBasedRouter' nodes can have at most one incoming edge");
+      }
+      predecessors.stream()
+          .findFirst()
+          .ifPresent(p -> attributes.put(INPUT_CHANNEL, getChannelId(p, this.node)));
+      return attributes;
     }
 
     private Map<String, Object> handlePassthru(

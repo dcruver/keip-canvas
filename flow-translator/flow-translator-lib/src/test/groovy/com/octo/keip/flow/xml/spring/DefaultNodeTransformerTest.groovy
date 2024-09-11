@@ -28,6 +28,19 @@ class DefaultNodeTransformerTest extends Specification {
 
     EipNode testNode = createNodeStub("default-test-id")
 
+    def "multi-input 'router' node fails validation"() {
+        given:
+        graph.predecessors(testNode) >> [createNodeStub("n1"), createNodeStub("n2")]
+        graph.successors(testNode) >> []
+
+        when:
+        transformer.apply(testNode, graph)
+
+        then:
+        testNode.connectionType() >> ConnectionType.CONTENT_BASED_ROUTER
+        thrown(IllegalArgumentException)
+    }
+
     def "multi-input/multi-output 'passthru' node fails validation"(Set<EipNode> predecessors, Set<EipNode> successors) {
         given:
         graph.predecessors(testNode) >> predecessors
@@ -200,6 +213,28 @@ class DefaultNodeTransformerTest extends Specification {
         testNode.role() >> Role.CHANNEL
 
         attributes.isEmpty()
+    }
+
+    def "addChannelAttributes with 'router' node -> input channel attributes added"() {
+        given:
+        def preNode = createNodeStub("pre1")
+        def postNode = createNodeStub("post1")
+
+        graph.predecessors(testNode) >> [preNode]
+        graph.successors(testNode) >> [postNode]
+
+        graph.getEdgeProps(preNode, testNode) >> createEdgeProps("in")
+        graph.getEdgeProps(testNode, postNode) >> createEdgeProps("out")
+
+        when:
+        def transformation = new DefaultNodeTransformer.DefaultTransformation(testNode, graph)
+        def attributes = transformation.createChannelAttributes()
+
+        then:
+        testNode.connectionType() >> ConnectionType.CONTENT_BASED_ROUTER
+
+        attributes.size() == 1
+        attributes[INPUT_CHANNEL] == "in"
     }
 
     def "addChannelAttributes with 'passthru' node -> input and output channel attributes added"() {
