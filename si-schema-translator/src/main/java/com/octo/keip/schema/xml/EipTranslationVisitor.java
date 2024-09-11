@@ -262,7 +262,7 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
   }
 
   // TODO: Refine how connection types are determined
-  ConnectionType getConnectionType(XmlSchemaElement element, EipComponent eipComponent) {
+  private ConnectionType getConnectionType(XmlSchemaElement element, EipComponent eipComponent) {
     String elementName = element.getName().toLowerCase();
     String extensionBaseName = getExtensionBaseName(element).toLowerCase();
 
@@ -279,6 +279,8 @@ public class EipTranslationVisitor implements XmlSchemaVisitor {
       return ConnectionType.REQUEST_REPLY;
     } else if (elementName.contains("filter")) {
       return ConnectionType.TEE;
+    } else if (elementName.contains("router")) {
+      return ConnectionType.CONTENT_BASED_ROUTER;
     } else if (elementName.contains("inbound")
         || elementName.contains("message-driven")
         || extensionBaseName.contains("inbound")) {

@@ -3,6 +3,8 @@ package com.octo.keip.schema.model.eip;
 import com.google.gson.annotations.SerializedName;
 
 public enum ConnectionType {
+  @SerializedName("content_based_router")
+  CONTENT_BASED_ROUTER,
   @SerializedName("passthru")
   PASSTHRU,
   @SerializedName("request_reply")

@@ -27,6 +27,12 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="example-Router" type="xsd:string">
+        <xsd:complexType>
+            <xsd:attribute name="input-channel" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="InboundElement">
         <xsd:complexType>
             <xsd:sequence>

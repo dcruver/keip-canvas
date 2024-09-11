@@ -209,6 +209,7 @@ class EipTranslationVisitorTest extends Specification {
         "outboundGateway"        | ConnectionType.REQUEST_REPLY
         "tee-type-element"       | ConnectionType.TEE
         "validating-Filter"      | ConnectionType.TEE
+        "example-Router"         | ConnectionType.CONTENT_BASED_ROUTER
         "InboundElement"         | ConnectionType.SOURCE
         "source"                 | ConnectionType.SOURCE
         "example-message-driven" | ConnectionType.SOURCE
