@@ -215,6 +215,10 @@
   position: static;
   z-index: 100;
 
+  .edge-config-container {
+    position: relative;
+  }
+
   .form-input-label {
     margin-bottom: layout.$spacing-03;
   }

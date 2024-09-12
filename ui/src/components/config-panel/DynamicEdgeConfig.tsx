@@ -131,6 +131,7 @@ const RouterKeyConfig = ({ routerNodeId, routerKeyDef }: RouterKeyProps) => {
   )
 }
 
+// TODO: Allow mapping multiple values to the same channel
 const EdgeMatcher = ({ edgeId, mapping }: EdgeMatcherProps) => {
   const { updateDynamicEdgeMapping } = useAppActions()
   const { mapperName, matcher, matcherValue } = mapping
@@ -176,7 +177,7 @@ const DynamicEdgeConfig = ({ edge }: EdgeConfigProps) => {
   // TODO: Fix add-padding class. Add padding to sides only.
   // Vertical padding should be handled by the Stack container.
   return (
-    <Section>
+    <Section className="edge-config-container">
       <Stack gap={4}>
         <Stack gap={6} className={addPaddingClass}>
           <Heading>Edge</Heading>
