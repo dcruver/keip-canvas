@@ -12,7 +12,7 @@ export type EipRole = "channel" | "endpoint" | "router" | "transformer";
 /**
  * Defines a connection pattern for an EIP component
  */
-export type ConnectionType = "passthru" | "request_reply" | "sink" | "source" | "tee";
+export type ConnectionType = "content_based_router" | "passthru" | "request_reply" | "sink" | "source" | "tee";
 /**
  * The attribute's value type (attribute keys are always strings)
  */
@@ -36,7 +36,7 @@ export interface EipNode {
   role: EipRole;
   connectionType: ConnectionType;
   attributes?: Attributes;
-  children?: ChildNode[];
+  children?: EipChildNode[];
 }
 /**
  * A combination of fields uniquely identifying a component in an 'EipComponentDefinition'
@@ -54,10 +54,10 @@ export interface Attributes {
 /**
  * An instance of an 'EipChildElement'. Can recursively contain more child nodes as well as attributes of its own.
  */
-export interface ChildNode {
+export interface EipChildNode {
   name: string;
   attributes?: Attributes;
-  children?: ChildNode[];
+  children?: EipChildNode[];
 }
 /**
  * A single edge in the flow diagram connecting two nodes

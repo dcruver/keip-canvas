@@ -30,6 +30,7 @@ const renderHorizontalHandles = (connectionType: ConnectionType) => {
       return <Handle id="output" type="source" position={Position.Right} />
     case "sink":
       return <Handle id="input" type="target" position={Position.Left} />
+    case "content_based_router":
     case "passthru":
     case "request_reply":
       return (
@@ -55,6 +56,7 @@ const renderVerticalHandles = (connectionType: ConnectionType) => {
       return <Handle id="output" type="source" position={Position.Bottom} />
     case "sink":
       return <Handle id="input" type="target" position={Position.Top} />
+    case "content_based_router":
     case "passthru":
     case "request_reply":
       return (
@@ -161,7 +163,7 @@ export const EipNode = (props: NodeProps<EipNodeData>) => {
       >
         <strong>
           {
-            // disable eslint since an empty string as the labe should return default value
+            // disable eslint since an empty string as the label should return default value
             // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
             data.label || DEFAULT_NODE_LABEL
           }

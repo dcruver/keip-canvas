@@ -35,7 +35,7 @@ import {
 import { AttributeType, EipComponent } from "../api/generated/eipComponentDef"
 import {
   Attributes,
-  ChildNode as EipChildNode,
+  EipChildNode,
   EipFlow,
   EipNode,
   FlowEdge,
