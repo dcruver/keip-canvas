@@ -563,7 +563,7 @@ export const useIsChildSelected = (childId: ChildNodeId) =>
   })
 
 export const useGetContentRouterKey = (nodeId: string) =>
-  useStore(useShallow((state) => state.eipNodeConfigs[nodeId].routerKey))
+  useStore(useShallow((state) => state.eipNodeConfigs[nodeId]?.routerKey))
 
 export const useGetRouterDefaultEdgeMapping = (routerId: string) =>
   useStore((state) =>
