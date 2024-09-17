@@ -161,13 +161,7 @@ export const EipNode = (props: NodeProps<EipNodeData>) => {
         className="eip-node-label"
         style={hasChildren ? { marginBottom: "0.5rem" } : {}}
       >
-        <strong>
-          {
-            // disable eslint since an empty string as the label should return default value
-            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-            data.label || DEFAULT_NODE_LABEL
-          }
-        </strong>
+        <strong>{data.label || DEFAULT_NODE_LABEL}</strong>
       </div>
       {hasChildren && (
         <ChildrenIcons

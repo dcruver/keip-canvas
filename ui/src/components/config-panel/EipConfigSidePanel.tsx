@@ -90,8 +90,6 @@ const EipConfigSidePanel = () => {
     sidePanelContent = <></>
   }
 
-  // TODO: disable this typescript warning globally
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   const showPanel = Boolean(selectedNode || selectedChild || selectedEdge)
 
   return (
