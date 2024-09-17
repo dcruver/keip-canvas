@@ -1,7 +1,13 @@
 import { Checkbox, Form, RadioButton, RadioButtonGroup } from "@carbon/react"
+import { useStoreApi } from "reactflow"
+import { EipFlowNode } from "../../api/flow"
 import { EipChildGroup } from "../../api/generated/eipComponentDef"
+import { EipId } from "../../api/id"
+import {
+  DYNAMIC_ROUTING_CHILDREN,
+  lookupContentBasedRouterKeys,
+} from "../../singletons/eipDefinitions"
 import { useAppActions, useGetChildren } from "../../singletons/store"
-import { DYNAMIC_ROUTING_CHILDREN } from "../../singletons/eipDefinitions"
 
 interface ChildrenConfigProps {
   nodeId: string
@@ -17,6 +23,19 @@ interface ChildrenInputProps {
 const idPrefix = "child-"
 const getUniqueId = (id: string) => `${idPrefix}-${id}`
 const getName = (id: string) => id.substring(idPrefix.length + 1)
+
+const isCustomDynamicRouterChild = (childName: string, eipId?: EipId) => {
+  if (!eipId) {
+    return false
+  }
+
+  const keyDef = lookupContentBasedRouterKeys(eipId)
+  if (!keyDef) {
+    return false
+  }
+
+  return keyDef.type === "child" && keyDef.name === childName
+}
 
 const ChildrenMultiSelection = ({
   childrenOptions,
@@ -80,14 +99,23 @@ const ChildrenSingleSelection = ({
 
 // TODO: Handle multiple occurences of the same child type.
 const ChildSelector = ({ nodeId, childGroup }: ChildrenConfigProps) => {
+  const reactFlowStore = useStoreApi()
+  const { nodeInternals } = reactFlowStore.getState()
+
   const { updateEnabledChildren } = useAppActions()
   const childrenState = useGetChildren(nodeId)
 
   const updateChildrenState = (updates: string[]) =>
     updateEnabledChildren(nodeId, updates)
 
+  const parentNode = nodeInternals.get(nodeId) as EipFlowNode | undefined
+
   const sortedNames = childGroup.children
-    .filter((c) => !DYNAMIC_ROUTING_CHILDREN.has(c.name))
+    .filter(
+      (c) =>
+        !DYNAMIC_ROUTING_CHILDREN.has(c.name) &&
+        !isCustomDynamicRouterChild(c.name, parentNode?.data.eipId)
+    )
     .map((c) => c.name)
     .sort()
 

@@ -3,9 +3,10 @@ import { useState } from "react"
 import { Edge, useOnSelectionChange, useStoreApi } from "reactflow"
 import { DYNAMIC_EDGE_TYPE, DynamicEdge, EipFlowNode } from "../../api/flow"
 import { Attribute } from "../../api/generated/eipComponentDef"
-import { childIdToString } from "../../api/id"
+import { childIdToString, EipId } from "../../api/id"
 import {
   FLOW_CONTROLLED_ATTRIBUTES,
+  lookupContentBasedRouterKeys,
   lookupEipComponent,
 } from "../../singletons/eipDefinitions"
 import { useAppActions, useGetSelectedChildNode } from "../../singletons/store"
@@ -13,10 +14,26 @@ import ChildNodeConfig from "./ChildNodeConfig"
 import DynamicEdgeConfig from "./DynamicEdgeConfig"
 import RootNodeConfig from "./RootNodeConfig"
 
-// TODO: filter out dynamic routing based attributes and children
-const filterConfigurableAttributes = (attrs?: Attribute[]) => {
+const isDynamicRouterAttribute = (attribute: Attribute, eipId?: EipId) => {
+  if (!eipId) {
+    return false
+  }
+
+  const keyDef = lookupContentBasedRouterKeys(eipId)
+  if (!keyDef) {
+    return false
+  }
+
+  return keyDef.type === "attribute" && keyDef.name === attribute.name
+}
+
+const filterConfigurableAttributes = (attrs?: Attribute[], eipId?: EipId) => {
   return attrs
-    ? attrs.filter((attr) => !FLOW_CONTROLLED_ATTRIBUTES.has(attr.name))
+    ? attrs.filter(
+        (attr) =>
+          !FLOW_CONTROLLED_ATTRIBUTES.has(attr.name) &&
+          !isDynamicRouterAttribute(attr, eipId)
+      )
     : []
 }
 
@@ -64,7 +81,8 @@ const EipConfigSidePanel = () => {
     )
   } else if (selectedNode && eipComponent) {
     const configurableAttrs = filterConfigurableAttributes(
-      eipComponent.attributes
+      eipComponent.attributes,
+      selectedNode.data.eipId
     )
     sidePanelContent = (
       <RootNodeConfig
