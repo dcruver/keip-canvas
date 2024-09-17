@@ -34,7 +34,6 @@ export const EIP_NODE_TYPE = "eipNode"
 
 export const DYNAMIC_EDGE_TYPE = "dynamicEdge"
 
-// TODO: Rethink router interfaces
 export interface RouterKeyDef {
   name: string
   type: "attribute" | "child"

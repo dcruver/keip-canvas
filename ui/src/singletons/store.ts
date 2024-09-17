@@ -710,15 +710,27 @@ const getRouterKeyAttributes = (eipId: EipId, routerKey: RouterKey) => {
   }
   switch (routerKeyDef.type) {
     case "attribute": {
-      return { attributes: routerKey.attributes }
+      return { attributes: filterEmptyAttrs(routerKey.attributes ?? {}) }
     }
     case "child": {
       return {
-        child: { name: routerKey.name, attributes: routerKey.attributes },
+        child: {
+          name: routerKey.name,
+          attributes: filterEmptyAttrs(routerKey.attributes ?? {}),
+        },
       }
     }
   }
 }
+
+const filterEmptyAttrs = (attrs: Attributes) =>
+  Object.keys(attrs).reduce((acc, key) => {
+    const val = attrs[key]
+    if (val) {
+      acc[key] = val
+    }
+    return acc
+  }, {} as Attributes)
 
 // Warning: the following exports provide non-reactive access to the store's state
 export const getNodesView: () => Readonly<EipFlowNode[]> = () =>

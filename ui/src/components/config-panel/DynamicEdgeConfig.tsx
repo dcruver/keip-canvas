@@ -91,14 +91,23 @@ const RouterKeyConfig = ({ routerNodeId, routerKeyDef }: RouterKeyProps) => {
   const { updateContentRouterKey } = useAppActions()
   const currRouterKey = useGetContentRouterKey(routerNodeId)
 
-  // TODO: debounce input
-  const handleUpdates = (attrName: string, value: string) => {
-    updateContentRouterKey(routerNodeId, routerKeyDef.name, attrName, value)
-  }
+  const handleUpdates = useMemo(
+    () =>
+      debounce((attrName: string, value: string) => {
+        updateContentRouterKey(routerNodeId, routerKeyDef.name, attrName, value)
+      }, 300),
+    [routerNodeId, routerKeyDef.name, updateContentRouterKey]
+  )
 
-  // TODO: For multiple attributes, place the required fields at the top
-  // and mark with asterisk.
-  const inputs = routerKeyDef.attributesDef.map((attr) => (
+  const required = routerKeyDef.attributesDef
+    .filter((attr) => attr.required)
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  const optional = routerKeyDef.attributesDef
+    .filter((attr) => !attr.required)
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  const inputs = [...required, ...optional].map((attr) => (
     <DescriptionTooltipWrapper
       key={attr.name}
       id={attr.name}
@@ -106,7 +115,7 @@ const RouterKeyConfig = ({ routerNodeId, routerKeyDef }: RouterKeyProps) => {
     >
       <TextInput
         id={attr.name}
-        labelText={attr.name}
+        labelText={attr.required ? `${attr.name} (required)` : attr.name}
         defaultValue={String(currRouterKey?.attributes?.[attr.name] ?? "")}
         hideLabel={Boolean(attr.description)}
         onChange={(ev) => handleUpdates(attr.name, ev.target.value)}
