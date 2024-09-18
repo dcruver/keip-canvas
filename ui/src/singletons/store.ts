@@ -172,7 +172,7 @@ const useStore = create<AppStore>()(
               const sourceComponent =
                 sourceNode && lookupEipComponent(sourceNode.data.eipId)
               const edge =
-                sourceComponent?.role === "router"
+                sourceComponent?.connectionType === "content_based_router"
                   ? createDynamicRoutingEdge(connection, sourceComponent)
                   : connection
               return {
@@ -638,7 +638,7 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
 
     const routerKey = state.eipNodeConfigs[node.id].routerKey
     const routerKeyAttrs =
-      eipComponent.role === "router" && routerKey
+      eipComponent.connectionType === "content_based_router" && routerKey
         ? getRouterKeyAttributes(node.data.eipId, routerKey)
         : {}
 
