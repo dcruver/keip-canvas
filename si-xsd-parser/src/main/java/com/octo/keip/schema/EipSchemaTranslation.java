@@ -1,8 +1,8 @@
 package com.octo.keip.schema;
 
 import com.octo.keip.schema.client.XmlSchemaClient;
-import com.octo.keip.schema.config.XmlSchemaSourceConfiguration;
-import com.octo.keip.schema.config.XmlSchemaSourceConfiguration.SchemaIdentifier;
+import com.octo.keip.schema.config.XsdSourceConfiguration;
+import com.octo.keip.schema.config.XsdSourceConfiguration.SchemaIdentifier;
 import com.octo.keip.schema.model.eip.EipComponent;
 import com.octo.keip.schema.model.eip.EipSchema;
 import com.octo.keip.schema.xml.SchemaTranslator;
@@ -20,7 +20,7 @@ public class EipSchemaTranslation {
   private final EipSchema eipSchema;
 
   public EipSchemaTranslation(
-      XmlSchemaSourceConfiguration sourceConfiguration, XmlSchemaClient xmlSchemaClient) {
+          XsdSourceConfiguration sourceConfiguration, XmlSchemaClient xmlSchemaClient) {
     this.xmlSchemaClient = xmlSchemaClient;
     this.eipSchema = translate(sourceConfiguration);
   }
@@ -29,7 +29,7 @@ public class EipSchemaTranslation {
     return eipSchema;
   }
 
-  private EipSchema translate(XmlSchemaSourceConfiguration sourceConfiguration) {
+  private EipSchema translate(XsdSourceConfiguration sourceConfiguration) {
     EipSchema translatedSchema = new EipSchema();
 
     for (SchemaIdentifier targetSchema : sourceConfiguration.getSchemas()) {

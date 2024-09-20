@@ -3,7 +3,7 @@ package com.octo.keip.schema
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.octo.keip.schema.client.XmlSchemaClient
-import com.octo.keip.schema.config.XmlSchemaSourceConfiguration
+import com.octo.keip.schema.config.XsdSourceConfiguration
 import com.octo.keip.schema.model.eip.EipComponent
 import com.octo.keip.schema.model.eip.EipElement
 import com.octo.keip.schema.model.eip.EipSchema
@@ -24,7 +24,7 @@ class EipSchemaTranslationTest extends Specification {
             expectedEipMap = importEipSchema(Path.of("end-to-end-eip-schema.json")).toMap()
 
     @Shared
-            schemaSourceConfig = XmlSchemaSourceConfiguration.readYaml(TestIOUtils.getYamlConfig(Path.of("end-to-end-config.yaml")))
+            schemaSourceConfig = XsdSourceConfiguration.readYaml(TestIOUtils.getYamlConfig(Path.of("end-to-end-config.yaml")))
 
     def "Use XmlSchemaSourceConfiguration to translate XML to EIP schema"() {
         given:

@@ -24,7 +24,7 @@
                   <manifestEntries>
                     <Multi-Release>true</Multi-Release>
                   </manifestEntries>
-                  <mainClass>com.octo.keip.schema.SchemaTranslatorApplication</mainClass>
+                  <mainClass>com.octo.keip.schema.XsdParserApplication</mainClass>
                 </transformer>
               </transformers>
             </configuration>

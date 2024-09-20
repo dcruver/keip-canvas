@@ -1,4 +1,4 @@
-# Spring Integration XSD Translator
+# Spring Integration XSD Parser
 
 A tool for parsing Spring Integration XSDs into
 an [Enterprise Integration Patterns (EIP)](https://www.enterpriseintegrationpatterns.com/patterns/messaging/) JSON
@@ -16,14 +16,14 @@ To build the shaded JAR, you will need the following installed:
 Clone the project and then build:
 
 ```shell
-cd si-schema-translator
+cd si-xsd-parser
 mvn package
 ```
 
 The JAR can then be executed with:
 
 ```shell
-java -jar target/si-schema-translator.jar -h
+java -jar target/si-xsd-parser.jar -h
 ```
 
 ```shell
@@ -68,7 +68,7 @@ importedSchemaLocations:
 
 ## How It Works
 
-The translator relies on the [Apache XML Schema](https://ws.apache.org/xmlschema/) library to parse XSDs into a Java
+The parser relies on the [Apache XML Schema](https://ws.apache.org/xmlschema/) library to parse XSDs into a Java
 object tree, which is then translated to the EIP Schema output model.
 
 An example (abbreviated) output JSON:

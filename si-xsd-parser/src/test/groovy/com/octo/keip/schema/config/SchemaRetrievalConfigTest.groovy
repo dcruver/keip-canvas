@@ -11,7 +11,7 @@ class SchemaRetrievalConfigTest extends Specification {
 
     def "Read schema retrieval config from yaml file"() {
         when:
-        def config = XmlSchemaSourceConfiguration.readYaml(configYaml)
+        def config = XsdSourceConfiguration.readYaml(configYaml)
 
         then:
         config.getSchemas().size() == 2

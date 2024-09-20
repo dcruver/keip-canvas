@@ -11,7 +11,7 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-public class XmlSchemaSourceConfiguration {
+public class XsdSourceConfiguration {
 
   private List<SchemaIdentifier> schemas;
 
@@ -38,9 +38,9 @@ public class XmlSchemaSourceConfiguration {
     this.importedSchemaLocations = importedSchemaLocations;
   }
 
-  public static XmlSchemaSourceConfiguration readYaml(InputStream is) {
-    Yaml yaml = new Yaml(new Constructor(XmlSchemaSourceConfiguration.class, new LoaderOptions()));
-    return yaml.loadAs(is, XmlSchemaSourceConfiguration.class);
+  public static XsdSourceConfiguration readYaml(InputStream is) {
+    Yaml yaml = new Yaml(new Constructor(XsdSourceConfiguration.class, new LoaderOptions()));
+    return yaml.loadAs(is, XsdSourceConfiguration.class);
   }
 
   public static class SchemaIdentifier {

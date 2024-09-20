@@ -2,7 +2,7 @@ package com.octo.keip.schema.cmd;
 
 import com.octo.keip.schema.EipSchemaTranslation;
 import com.octo.keip.schema.client.XmlSchemaClient;
-import com.octo.keip.schema.config.XmlSchemaSourceConfiguration;
+import com.octo.keip.schema.config.XsdSourceConfiguration;
 import com.octo.keip.schema.model.serdes.SchemaSerializer;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +33,7 @@ public class TranslateCommand implements Callable<Integer> {
 
   @Override
   public Integer call() throws Exception {
-    XmlSchemaSourceConfiguration sourceConfig = parseSourceFile();
+    XsdSourceConfiguration sourceConfig = parseSourceFile();
 
     EipSchemaTranslation translation = translateSchemas(sourceConfig);
 
@@ -42,13 +42,13 @@ public class TranslateCommand implements Callable<Integer> {
     return 0;
   }
 
-  private XmlSchemaSourceConfiguration parseSourceFile() throws IOException {
+  private XsdSourceConfiguration parseSourceFile() throws IOException {
     try (var fis = new FileInputStream(source)) {
-      return XmlSchemaSourceConfiguration.readYaml(fis);
+      return XsdSourceConfiguration.readYaml(fis);
     }
   }
 
-  private EipSchemaTranslation translateSchemas(XmlSchemaSourceConfiguration sourceConfig) {
+  private EipSchemaTranslation translateSchemas(XsdSourceConfiguration sourceConfig) {
     var schemaClient = new XmlSchemaClient(sourceConfig.getImportedSchemaLocationsMap());
     return new EipSchemaTranslation(sourceConfig, schemaClient);
   }
