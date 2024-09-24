@@ -22,9 +22,7 @@ import static com.octo.keip.flow.xml.XmlComparisonUtil.readTestXml
 
 class IntegrationGraphTransformerTest extends Specification {
 
-    private static final List<NamespaceSpec> NAMESPACES = [new NamespaceSpec("integration", "http://www.springframework.org/schema/integration", "https://www.springframework.org/schema/integration/spring-integration.xsd"),
-                                                           new NamespaceSpec("jms", "http://www.springframework.org/schema/integration/jms", "https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd")
-    ]
+    private static final List<NamespaceSpec> NAMESPACES = [new NamespaceSpec("jms", "http://www.springframework.org/schema/integration/jms", "https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd")]
 
     EipGraph graph = Stub()
 
@@ -45,10 +43,10 @@ class IntegrationGraphTransformerTest extends Specification {
         given:
         EipNode node = Stub {
             id() >> "test-id"
-            eipId() >> new EipId("integration", "transformer")
-            role() >> Role.TRANSFORMER
-            connectionType() >> ConnectionType.PASSTHRU
-            attributes() >> ["ref": "test-bean"]
+            eipId() >> new EipId("jms", "inbound-channel-adapter")
+            role() >> Role.ENDPOINT
+            connectionType() >> ConnectionType.SOURCE
+            attributes() >> ["pub-sub-domain": "true"]
             children() >> [new EipChild("poller", ["fixed-delay": 1000], null)]
         }
 
@@ -141,7 +139,7 @@ class IntegrationGraphTransformerTest extends Specification {
         thrown(IllegalArgumentException)
 
         where:
-        prefix << ["xml", "xsi", "beans"]
+        prefix << ["xml", "xsi", "beans", "integration"]
     }
 
     def "Registering custom node transformers resolves correctly"() {

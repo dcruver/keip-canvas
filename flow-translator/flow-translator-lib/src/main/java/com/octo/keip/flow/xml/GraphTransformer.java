@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.XMLConstants;
@@ -35,8 +36,7 @@ public abstract class GraphTransformer {
 
   private final XMLEventFactory eventFactory = WstxEventFactory.newFactory();
   private final XMLOutputFactory outputFactory = WstxOutputFactory.newFactory();
-  private final Set<String> reservedPrefixes =
-      Set.of(XML_NS_PREFIX, XSI_PREFIX, defaultNamespace().eipNamespace());
+  private final Set<String> reservedPrefixes = collectReservedPrefixes();
 
   private final NodeTransformerFactory nodeTransformerFactory;
   // maps an eipNamespace to a NamespaceSpec
@@ -48,6 +48,7 @@ public abstract class GraphTransformer {
     this.nodeTransformerFactory = nodeTransformerFactory;
     this.registeredNamespaces = new HashMap<>();
     this.registeredNamespaces.put(defaultNamespace().eipNamespace(), defaultNamespace());
+    requiredNamespaces().forEach(s -> this.registeredNamespaces.put(s.eipNamespace(), s));
     namespaceSpecs.forEach(s -> this.registeredNamespaces.put(s.eipNamespace(), s));
   }
 
@@ -92,6 +93,8 @@ public abstract class GraphTransformer {
 
   protected abstract NamespaceSpec defaultNamespace();
 
+  protected abstract Set<NamespaceSpec> requiredNamespaces();
+
   protected abstract QName rootElement();
 
   private NodeTransformer getNodeTransformer(EipId id) {
@@ -115,6 +118,7 @@ public abstract class GraphTransformer {
   private List<String> collectEipNamespaces(EipGraph graph) {
     return graph
         .traverse()
+        .filter(n -> !this.reservedPrefixes.contains(n.eipId().namespace()))
         .map(
             n -> {
               String ns = n.eipId().namespace();
@@ -130,12 +134,16 @@ public abstract class GraphTransformer {
   private Iterator<Attribute> getRootAttributes(List<String> eipNamespaces) {
     Stream<String> defaultNamespaceLocation =
         Stream.of(defaultNamespace().xmlNamespace(), defaultNamespace().schemaLocation());
+    Stream<String> requiredNamespaceLocations =
+        requiredNamespaces().stream()
+            .flatMap(spec -> Stream.of(spec.xmlNamespace(), spec.schemaLocation()));
     Stream<String> collectedLocations =
         eipNamespaces.stream().flatMap(ns -> Stream.of(getXmlNamespace(ns), getSchemaLocation(ns)));
 
     // TODO: Figure out how to safely use a newline inside an attribute
     String locString =
-        Stream.concat(defaultNamespaceLocation, collectedLocations)
+        Stream.of(defaultNamespaceLocation, requiredNamespaceLocations, collectedLocations)
+            .flatMap(Function.identity())
             .collect(Collectors.joining(" "));
 
     return List.of(
@@ -148,14 +156,23 @@ public abstract class GraphTransformer {
   }
 
   private Iterator<Namespace> getRootNamespaces(List<String> eipNamespaces) {
-    Namespace defaultNamespace =
-        this.eventFactory.createNamespace(defaultNamespace().xmlNamespace());
-    Namespace xsiNamespace =
-        this.eventFactory.createNamespace(XSI_PREFIX, XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI);
+    Stream<Namespace> defaultNamespace =
+        Stream.of(this.eventFactory.createNamespace(defaultNamespace().xmlNamespace()));
+    Stream<Namespace> xsiNamespace =
+        Stream.of(
+            this.eventFactory.createNamespace(
+                XSI_PREFIX, XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI));
+    Stream<Namespace> requiredNamespaces =
+        requiredNamespaces().stream()
+            .map(
+                spec ->
+                    this.eventFactory.createNamespace(spec.eipNamespace(), spec.xmlNamespace()));
     Stream<Namespace> collectedNamespaces =
         eipNamespaces.stream()
             .map(ns -> this.eventFactory.createNamespace(ns, getXmlNamespace(ns)));
-    return Stream.concat(Stream.of(defaultNamespace, xsiNamespace), collectedNamespaces).iterator();
+    return Stream.of(defaultNamespace, xsiNamespace, requiredNamespaces, collectedNamespaces)
+        .flatMap(Function.identity())
+        .iterator();
   }
 
   private void writeNodes(EipGraph graph, XMLEventWriter writer, List<TransformationError> errors) {
@@ -210,5 +227,14 @@ public abstract class GraphTransformer {
     return attributes.entrySet().stream()
         .map(e -> this.eventFactory.createAttribute(e.getKey(), e.getValue().toString()))
         .iterator();
+  }
+
+  private Set<String> collectReservedPrefixes() {
+    Stream<String> requiredPrefixes =
+        requiredNamespaces().stream().map(NamespaceSpec::eipNamespace);
+    return Stream.concat(
+            Stream.of(XML_NS_PREFIX, XSI_PREFIX, defaultNamespace().eipNamespace()),
+            requiredPrefixes)
+        .collect(Collectors.toUnmodifiableSet());
   }
 }

@@ -30,7 +30,7 @@ import java.util.Set;
  */
 public class DefaultNodeTransformer implements NodeTransformer {
 
-  static final EipId DIRECT_CHANNEL = new EipId("integration", "channel");
+  static final EipId DIRECT_CHANNEL = new EipId(Namespaces.INTEGRATION.eipNamespace(), "channel");
 
   @Override
   public List<XmlElement> apply(EipNode node, EipGraph graph) {

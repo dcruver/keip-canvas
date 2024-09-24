@@ -16,9 +16,9 @@ import static com.octo.keip.flow.xml.XmlComparisonUtil.readTestXml
 
 // TODO: Validate against spring integration XSDs
 class FlowToSpringIntegrationTest extends Specification {
-    private static final List<NamespaceSpec> NAMESPACES = [new NamespaceSpec("integration", "http://www.springframework.org/schema/integration", "https://www.springframework.org/schema/integration/spring-integration.xsd"),
-                                                           new NamespaceSpec("jms", "http://www.springframework.org/schema/integration/jms", "https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd"),
-                                                           new NamespaceSpec("http", "http://www.springframework.org/schema/integration/http", "https://www.springframework.org/schema/integration/http/spring-integration-http.xsd")
+    private static final List<NamespaceSpec> NAMESPACES = [
+            new NamespaceSpec("jms", "http://www.springframework.org/schema/integration/jms", "https://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd"),
+            new NamespaceSpec("http", "http://www.springframework.org/schema/integration/http", "https://www.springframework.org/schema/integration/http/spring-integration-http.xsd")
     ]
 
     private static final JsonMapper MAPPER =
