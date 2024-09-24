@@ -28,9 +28,6 @@ spring:
 
 keip:
   namespaceMappings:
-    - eipNamespace: integration
-      xmlNamespace: http://www.springframework.org/schema/integration
-      schemaLocation: https://www.springframework.org/schema/integration/spring-integration.xsd
     - eipNamespace: file
       xmlNamespace: http://www.springframework.org/schema/integration/file
       schemaLocation: https://www.springframework.org/schema/integration/file/spring-integration-file.xsd
