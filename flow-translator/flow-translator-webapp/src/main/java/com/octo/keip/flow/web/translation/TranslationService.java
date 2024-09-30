@@ -1,6 +1,6 @@
 package com.octo.keip.flow.web.translation;
 
-import com.octo.keip.flow.FlowTransformer;
+import com.octo.keip.flow.FlowTranslator;
 import com.octo.keip.flow.error.TransformationError;
 import com.octo.keip.flow.model.Flow;
 import com.octo.keip.flow.web.error.ApiError;
@@ -26,10 +26,10 @@ class TranslationService {
 
   private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
-  private final FlowTransformer flowTransformer;
+  private final FlowTranslator flowTranslator;
 
-  TranslationService(FlowTransformer flowTransformer) {
-    this.flowTransformer = flowTransformer;
+  TranslationService(FlowTranslator flowTranslator) {
+    this.flowTranslator = flowTranslator;
   }
 
   TranslationResponse toXml(Flow flow) {
@@ -38,7 +38,7 @@ class TranslationService {
 
   TranslationResponse toXml(Flow flow, boolean prettyPrint) {
     try (StringWriter output = new StringWriter()) {
-      List<TransformationError> errors = this.flowTransformer.toXml(flow, output);
+      List<TransformationError> errors = this.flowTranslator.toXml(flow, output);
       String data =
           prettyPrint ? this.prettyPrint(new StringReader(output.toString())) : output.toString();
       return new TranslationResponse(data, toApiError(errors));

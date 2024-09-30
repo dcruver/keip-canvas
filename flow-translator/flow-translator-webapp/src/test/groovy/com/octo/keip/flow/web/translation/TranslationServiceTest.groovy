@@ -1,6 +1,6 @@
 package com.octo.keip.flow.web.translation
 
-import com.octo.keip.flow.FlowTransformer
+import com.octo.keip.flow.FlowTranslator
 import com.octo.keip.flow.error.TransformationError
 import com.octo.keip.flow.model.Flow
 import spock.lang.Specification
@@ -12,13 +12,13 @@ class TranslationServiceTest extends Specification {
 
     private static final String OUTPUT_XML = "<test>canned</test>"
 
-    FlowTransformer flowTransformer = Stub()
+    FlowTranslator flowTranslator = Stub()
 
-    def translationSvc = new TranslationService(flowTransformer)
+    def translationSvc = new TranslationService(flowTranslator)
 
     def "error-free transformation -> transformed data plus null error field"() {
         given:
-        flowTransformer.toXml(_ as Flow, _ as Writer) >> {
+        flowTranslator.toXml(_ as Flow, _ as Writer) >> {
             args ->
                 {
                     Writer w = args[1]
@@ -36,7 +36,7 @@ class TranslationServiceTest extends Specification {
 
     def "transformation with non-critical errors -> transformed partial data plus detailed error field"() {
         given:
-        flowTransformer.toXml(_ as Flow, _ as Writer) >> {
+        flowTranslator.toXml(_ as Flow, _ as Writer) >> {
             args ->
                 {
                     Writer w = args[1]
@@ -58,7 +58,7 @@ class TranslationServiceTest extends Specification {
 
     def "transformation with critical error -> throw runtime exception"() {
         given:
-        flowTransformer.toXml(_ as Flow, _ as Writer) >> { throw new TransformerException("oops") }
+        flowTranslator.toXml(_ as Flow, _ as Writer) >> { throw new TransformerException("oops") }
 
         when:
         translationSvc.toXml(new Flow([], []))
@@ -69,7 +69,7 @@ class TranslationServiceTest extends Specification {
 
     def "transformation with pretty print -> transformed data is formatted, no errors"() {
         given:
-        flowTransformer.toXml(_ as Flow, _ as Writer) >> {
+        flowTranslator.toXml(_ as Flow, _ as Writer) >> {
             args ->
                 {
                     Writer w = args[1]
