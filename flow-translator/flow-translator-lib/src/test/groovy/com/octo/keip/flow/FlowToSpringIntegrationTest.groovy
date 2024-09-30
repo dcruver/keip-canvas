@@ -7,6 +7,7 @@ import com.octo.keip.flow.model.EipId
 import com.octo.keip.flow.model.Flow
 import com.octo.keip.flow.xml.NamespaceSpec
 import com.octo.keip.flow.xml.NodeTransformer
+import com.octo.keip.flow.xml.spring.IntegrationGraphTransformer
 import spock.lang.Specification
 
 import java.nio.file.Path
@@ -27,7 +28,7 @@ class FlowToSpringIntegrationTest extends Specification {
                       .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                       .build();
 
-    def flowTransformer = new SpringIntegrationFlowTransformer(NAMESPACES)
+    def flowTranslator = new FlowTranslator(new IntegrationGraphTransformer(NAMESPACES))
 
     def "End-to-end basic flow to spring-integration xml"(String flowFile, String xmlFile) {
         given:
@@ -35,7 +36,7 @@ class FlowToSpringIntegrationTest extends Specification {
 
         when:
         def output = new StringWriter()
-        def errors = flowTransformer.toXml(flow, output)
+        def errors = flowTranslator.toXml(flow, output)
 
         then:
         errors.isEmpty()
@@ -58,11 +59,11 @@ class FlowToSpringIntegrationTest extends Specification {
 
 
         def adapterId = new EipId("integration", "inbound-channel-adapter")
-        flowTransformer.registerNodeTransformer(adapterId, exceptionalTransformer)
+        flowTranslator.registerNodeTransformer(adapterId, exceptionalTransformer)
 
         when:
         def output = new StringWriter()
-        def errors = flowTransformer.toXml(flow, output)
+        def errors = flowTranslator.toXml(flow, output)
 
         then:
         errors.size() == 1

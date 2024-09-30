@@ -30,6 +30,11 @@ import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 import javax.xml.transform.TransformerException;
 
+/**
+ * Transforms an intermediate {@link EipGraph} representation to an XML document. This base class
+ * takes care of the general transformation process, to create XML targeting specific platforms,
+ * extend this class and register specialized {@link NodeTransformer}s.
+ */
 public abstract class GraphTransformer {
 
   private static final String XSI_PREFIX = "xsi";
@@ -61,10 +66,26 @@ public abstract class GraphTransformer {
     }
   }
 
+  /**
+   * Register a custom {@link NodeTransformer}
+   *
+   * @param id target node
+   * @param transformer responsible for transforming the target node to an {@link XmlElement}
+   */
   public final void registerNodeTransformer(EipId id, NodeTransformer transformer) {
     this.nodeTransformerFactory.register(id, transformer);
   }
 
+  /**
+   * Transform an {@link EipGraph} instance to an XML document
+   *
+   * @param graph input graph
+   * @param output where the output XML will be written to
+   * @return An empty list for a successful transformation, otherwise a non-empty list of {@link
+   *     TransformationError} is returned.
+   * @throws TransformerException thrown if a critical error preventing the transformation is
+   *     encountered
+   */
   public final List<TransformationError> toXml(EipGraph graph, Writer output)
       throws TransformerException {
     List<TransformationError> errors = new ArrayList<>();
