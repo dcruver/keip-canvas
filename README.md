@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![GitHub Pages Pipeline](https://github.com/OctoConsulting/keip-canvas/actions/workflows/deploy-canvas-webapp.yaml/badge.svg)](https://github.com/OctoConsulting/keip-canvas/actions/workflows/deploy-canvas-webapp.yaml)
 
-Intuitive drag and-drop UI for creating deployable integration flow diagrams.
+Intuitive drag and drop UI for creating deployable integration flow diagrams.
 
 Powered by [ReactFlow](https://reactflow.dev/) and [Spring Integration](https://spring.io/projects/spring-integration)
 
@@ -51,6 +51,10 @@ npm run dev
 ```
 
 Check the `ui/package.json` for more useful commands
+
+### Architecture
+
+For more details on how Keip Canvas is implemented, see the [architecture documentation](docs/ARCHITECTURE.md).
 
 ## Contributing
 
