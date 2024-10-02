@@ -33,7 +33,7 @@ Fetches XML Schema Definitions (XSD) and parses them into a catalog of EIP Compo
 The resulting component definitions are then used by the Canvas UI to populate the draggable node menu and provide the
 user with a specific set of configuration options for each EIP component type.
 
-### [Keip Canvas UI](../README.md)
+### [Keip Canvas UI](../ui/DEVELOPER.md)
 
 A single-page web application that provides drag, drop, and link capabilities for creating integration flow diagrams.
 

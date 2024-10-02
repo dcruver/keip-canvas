@@ -27,32 +27,9 @@ Keip Canvas is hosted at https://octoconsulting.github.io/keip-canvas/
 
 ## Development
 
-To run the Keip Canvas UI locally, first make sure these prerequisites are installed:
+To get started with developing the Canvas UI, see the [dev docs](./ui/DEVELOPER.md).
 
-- Node.js v20
-- npm v10
-
-Clone the repository:
-
-```shell
-git clone https://github.com/OctoConsulting/keip-canvas.git && cd keip-canvas/ui
-```
-
-Install dependencies:
-
-```shell
-npm install
-```
-
-Run the development web server:
-
-```shell
-npm run dev
-```
-
-Check the `ui/package.json` for more useful commands
-
-### Architecture
+## Architecture
 
 For more details on how Keip Canvas is implemented, see the [architecture documentation](docs/ARCHITECTURE.md).
 

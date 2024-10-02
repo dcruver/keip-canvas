@@ -7,6 +7,8 @@ import path from "node:path"
 // TODO: Look into avoiding duplication of generated types when multiple top-level schemas 
 // reference the same common schemas.
 
+// TODO: Use git tags instead of commit hashes
+// To use an updated source schema, change this to point to the desired version.
 const COMMIT_HASH = "4fe59e1438fad31b79c87568686cf867fd14a41e"
 
 const SCHEMAS = ["eipComponentDef.schema.json", "eipFlow.schema.json"]
