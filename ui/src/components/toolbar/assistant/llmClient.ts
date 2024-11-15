@@ -1,4 +1,4 @@
-import { Ollama } from "@langchain/community/llms/ollama"
+import { Ollama } from "@langchain/ollama"
 import { Edge } from "reactflow"
 import { EipFlowNode } from "../../../api/flow"
 import {
