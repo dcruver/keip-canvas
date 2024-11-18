@@ -1,2 +1,5 @@
 export const FLOW_TRANSLATOR_BASE_URL = import.meta.env
   .VITE_FLOW_TRANSLATOR_BASE_URL
+
+export const KEIP_ASSISTANT_DOCS_URL = import.meta.env
+  .VITE_KEIP_ASSISTANT_DOCS_URL

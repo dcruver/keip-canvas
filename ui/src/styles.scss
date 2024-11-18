@@ -75,6 +75,10 @@
     border-bottom: 4px solid themes.$interactive;
   }
 
+  .help-link .cds--tooltip-trigger__wrapper {
+    cursor: help;
+  }
+
   //        Begin AI Chat Panel       //
   .chat-history {
     flex: 2;

@@ -1,6 +1,7 @@
 import { IconButton, TableToolbar, TableToolbarContent } from "@carbon/react"
 import { MachineLearning, Xml } from "@carbon/react/icons"
 import { useState } from "react"
+import { KEIP_ASSISTANT_DOCS_URL } from "../../singletons/externalEndpoints"
 import AssistantChatPanel from "./assistant/AssistantChatPanel"
 import { useLlmServerStatus } from "./assistant/llmStatusHook"
 import XmlPanel from "./xml/XmlPanel"
@@ -12,6 +13,7 @@ interface PanelButtonProps {
   disabled: boolean
   selected: boolean
   handleClick: () => void
+  helpLink?: string
 }
 
 type PanelKeys = "keipAssistant" | "xml"
@@ -20,6 +22,7 @@ interface PanelRef {
   icon: React.ReactNode
   panel: React.ReactNode
   enabled?: boolean
+  helpLink?: string
 }
 
 type Panels = {
@@ -31,6 +34,7 @@ const panels: Panels = {
     icon: <MachineLearning />,
     panel: <AssistantChatPanel />,
     enabled: false,
+    helpLink: KEIP_ASSISTANT_DOCS_URL,
   },
   xml: {
     icon: <Xml />,
@@ -45,21 +49,39 @@ const PanelButton = ({
   disabled,
   selected,
   handleClick,
-}: PanelButtonProps) => (
-  <IconButton
-    className={
-      selected ? "toolbar-button toolbar-button-selected" : "toolbar-button"
-    }
-    label={name}
-    align="left"
-    kind="secondary"
-    size="lg"
-    onClick={handleClick}
-    disabled={disabled}
-  >
-    {icon}
-  </IconButton>
-)
+  helpLink,
+}: PanelButtonProps) => {
+  const button = (
+    <IconButton
+      className={
+        selected ? "toolbar-button toolbar-button-selected" : "toolbar-button"
+      }
+      label={name}
+      align="left"
+      kind="secondary"
+      size="lg"
+      onClick={handleClick}
+      disabled={disabled}
+    >
+      {icon}
+    </IconButton>
+  )
+
+  if (helpLink && disabled) {
+    return (
+      <a
+        className="help-link"
+        href={KEIP_ASSISTANT_DOCS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {button}
+      </a>
+    )
+  }
+
+  return button
+}
 
 const ToolbarMenu = () => {
   const [openPanel, setOpenPanel] = useState<"" | PanelKeys>("")
@@ -88,6 +110,7 @@ const ToolbarMenu = () => {
               disabled={!val.enabled}
               selected={panelName === openPanel}
               handleClick={handlePanelButtonClick(panelName as PanelKeys)}
+              helpLink={val.helpLink}
             />
           ))}
         </TableToolbarContent>
