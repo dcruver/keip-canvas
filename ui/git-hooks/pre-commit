@@ -7,6 +7,16 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
+UI_DIR_PATTERN='^ui/src/'
+
+git diff --cached --name-only | grep ${UI_DIR_PATTERN} --quiet
+IS_UI_CHANGED=$?
+
+if [ ${IS_UI_CHANGED} -ne 0 ]; then
+	echo "[pre-commit hook] No UI code changes detected. Skip linting."
+	exit 0
+fi
+
 LINT_CMD='npm --prefix ./ui run lint -- --color'
 
 echo "[pre-commit hook] Linting...\n"
