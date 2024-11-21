@@ -25,9 +25,7 @@ interface PanelRef {
   helpLink?: string
 }
 
-type Panels = {
-  [k in PanelKeys]: PanelRef
-}
+type Panels = Record<PanelKeys, PanelRef>
 
 const panels: Panels = {
   keipAssistant: {
