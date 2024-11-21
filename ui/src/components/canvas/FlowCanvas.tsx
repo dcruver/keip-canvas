@@ -1,8 +1,9 @@
-import ReactFlow, {
+import {
   Background,
   BackgroundVariant,
   ControlButton,
   Controls,
+  ReactFlow,
   ReactFlowInstance,
   useReactFlow,
 } from "reactflow"

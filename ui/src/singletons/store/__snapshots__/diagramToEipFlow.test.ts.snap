@@ -1,0 +1,231 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`diagram includes a router with child based matcher to EipFlow success 1`] = `
+{
+  "edges": [
+    {
+      "id": "ch-rn79OHQyAI-cGUxaVOQ7L",
+      "source": "rn79OHQyAI",
+      "target": "cGUxaVOQ7L",
+      "type": "default",
+    },
+    {
+      "id": "ch-cGUxaVOQ7L-1su4DIeR80",
+      "source": "cGUxaVOQ7L",
+      "target": "1su4DIeR80",
+      "type": "default",
+    },
+    {
+      "id": "ch-cGUxaVOQ7L-RJlDxzUi2a",
+      "source": "cGUxaVOQ7L",
+      "target": "RJlDxzUi2a",
+      "type": "default",
+    },
+  ],
+  "nodes": [
+    {
+      "attributes": {},
+      "children": [],
+      "connectionType": "source",
+      "description": undefined,
+      "eipId": {
+        "name": "inbound-channel-adapter",
+        "namespace": "ftp",
+      },
+      "id": "rn79OHQyAI",
+      "role": "endpoint",
+    },
+    {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "expression": "/target/protocol",
+          },
+          "name": "xpath-expression",
+        },
+        {
+          "attributes": {
+            "channel": "ch-cGUxaVOQ7L-1su4DIeR80",
+            "value": "jms",
+          },
+          "name": "mapping",
+        },
+        {
+          "attributes": {
+            "channel": "ch-cGUxaVOQ7L-RJlDxzUi2a",
+            "value": "kafka",
+          },
+          "name": "mapping",
+        },
+      ],
+      "connectionType": "content_based_router",
+      "description": undefined,
+      "eipId": {
+        "name": "xpath-router",
+        "namespace": "int-xml",
+      },
+      "id": "cGUxaVOQ7L",
+      "role": "router",
+    },
+    {
+      "attributes": {},
+      "children": [],
+      "connectionType": "sink",
+      "description": undefined,
+      "eipId": {
+        "name": "outbound-channel-adapter",
+        "namespace": "kafka",
+      },
+      "id": "RJlDxzUi2a",
+      "role": "endpoint",
+    },
+    {
+      "attributes": {},
+      "children": [],
+      "connectionType": "sink",
+      "description": undefined,
+      "eipId": {
+        "name": "outbound-channel-adapter",
+        "namespace": "jms",
+      },
+      "id": "1su4DIeR80",
+      "role": "endpoint",
+    },
+  ],
+}
+`;
+
+exports[`standard diagram to EipFlow success 1`] = `
+{
+  "edges": [
+    {
+      "id": "ch-inbound-test-router",
+      "source": "inbound",
+      "target": "test-router",
+      "type": "default",
+    },
+    {
+      "id": "ch-test-router-httpOut",
+      "source": "test-router",
+      "target": "httpOut",
+      "type": "default",
+    },
+    {
+      "id": "ch-test-router-test-filter",
+      "source": "test-router",
+      "target": "test-filter",
+      "type": "default",
+    },
+    {
+      "id": "ch-test-filter-fileOut",
+      "source": "test-filter",
+      "target": "fileOut",
+      "type": "default",
+    },
+    {
+      "id": "ch-test-filter-MZ1rIWIK3s",
+      "source": "test-filter",
+      "target": "MZ1rIWIK3s",
+      "type": "discard",
+    },
+  ],
+  "nodes": [
+    {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "fixed-rate": "2000",
+          },
+          "name": "poller",
+        },
+      ],
+      "connectionType": "source",
+      "description": "message incoming",
+      "eipId": {
+        "name": "inbound-channel-adapter",
+        "namespace": "integration",
+      },
+      "id": "inbound",
+      "role": "endpoint",
+    },
+    {
+      "attributes": {
+        "default-output-channel": "ch-test-router-httpOut",
+        "expression": "headers.protocol",
+        "phase": "init",
+      },
+      "children": [
+        {
+          "attributes": {
+            "channel": "ch-test-router-test-filter",
+            "value": "file",
+          },
+          "name": "mapping",
+        },
+      ],
+      "connectionType": "content_based_router",
+      "description": undefined,
+      "eipId": {
+        "name": "router",
+        "namespace": "integration",
+      },
+      "id": "test-router",
+      "role": "router",
+    },
+    {
+      "attributes": {},
+      "children": [],
+      "connectionType": "sink",
+      "description": "send an http message",
+      "eipId": {
+        "name": "outbound-channel-adapter",
+        "namespace": "http",
+      },
+      "id": "httpOut",
+      "role": "endpoint",
+    },
+    {
+      "attributes": {
+        "expression": "headers.filename != null",
+      },
+      "children": [],
+      "connectionType": "tee",
+      "description": undefined,
+      "eipId": {
+        "name": "filter",
+        "namespace": "integration",
+      },
+      "id": "test-filter",
+      "role": "router",
+    },
+    {
+      "attributes": {},
+      "children": [],
+      "connectionType": "sink",
+      "description": "write to file",
+      "eipId": {
+        "name": "outbound-channel-adapter",
+        "namespace": "file",
+      },
+      "id": "fileOut",
+      "role": "endpoint",
+    },
+    {
+      "attributes": {
+        "level": "WARN",
+      },
+      "children": [],
+      "connectionType": "sink",
+      "description": undefined,
+      "eipId": {
+        "name": "logging-channel-adapter",
+        "namespace": "integration",
+      },
+      "id": "MZ1rIWIK3s",
+      "role": "endpoint",
+    },
+  ],
+}
+`;

@@ -34,6 +34,12 @@ Run the development web server:
 npm run dev
 ```
 
+### Run tests
+
+```shell
+npm test
+```
+
 ## Dependencies
 
 The UI is mostly written in Typescript and relies heavily on the following libraries:

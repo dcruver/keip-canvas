@@ -1,0 +1,182 @@
+{
+    "nodes": [
+      {
+        "id": "rn79OHQyAI",
+        "type": "eipNode",
+        "position": {
+          "x": -23.429531055166507,
+          "y": 14.944329221193257
+        },
+        "targetPosition": "left",
+        "sourcePosition": "right",
+        "data": {
+          "eipId": {
+            "namespace": "ftp",
+            "name": "inbound-channel-adapter"
+          }
+        },
+        "width": 128,
+        "height": 132,
+        "selected": false,
+        "positionAbsolute": {
+          "x": -23.429531055166507,
+          "y": 14.944329221193257
+        },
+        "dragging": false
+      },
+      {
+        "id": "cGUxaVOQ7L",
+        "type": "eipNode",
+        "position": {
+          "x": 134.31436102080585,
+          "y": 45.35279034427229
+        },
+        "targetPosition": "left",
+        "sourcePosition": "right",
+        "data": {
+          "eipId": {
+            "namespace": "xml",
+            "name": "xpath-router"
+          }
+        },
+        "width": 114,
+        "height": 71,
+        "selected": false,
+        "positionAbsolute": {
+          "x": 134.31436102080585,
+          "y": 45.35279034427229
+        },
+        "dragging": false
+      },
+      {
+        "id": "RJlDxzUi2a",
+        "type": "eipNode",
+        "position": {
+          "x": 310.14028354278037,
+          "y": 87.30725789068367
+        },
+        "targetPosition": "left",
+        "sourcePosition": "right",
+        "data": {
+          "eipId": {
+            "namespace": "kafka",
+            "name": "outbound-channel-adapter"
+          }
+        },
+        "width": 128,
+        "height": 132,
+        "selected": false,
+        "positionAbsolute": {
+          "x": 310.14028354278037,
+          "y": 87.30725789068367
+        },
+        "dragging": false
+      },
+      {
+        "id": "1su4DIeR80",
+        "type": "eipNode",
+        "position": {
+          "x": 307.3643702586668,
+          "y": -66.29327716359978
+        },
+        "targetPosition": "left",
+        "sourcePosition": "right",
+        "data": {
+          "eipId": {
+            "namespace": "jms",
+            "name": "outbound-channel-adapter"
+          }
+        },
+        "width": 128,
+        "height": 132,
+        "selected": false,
+        "positionAbsolute": {
+          "x": 307.3643702586668,
+          "y": -66.29327716359978
+        },
+        "dragging": false
+      }
+    ],
+    "edges": [
+      {
+        "source": "rn79OHQyAI",
+        "sourceHandle": "output",
+        "target": "cGUxaVOQ7L",
+        "targetHandle": "input",
+        "id": "reactflow__edge-rn79OHQyAIoutput-cGUxaVOQ7Linput"
+      },
+      {
+        "source": "cGUxaVOQ7L",
+        "sourceHandle": "output",
+        "target": "1su4DIeR80",
+        "targetHandle": "input",
+        "type": "dynamicEdge",
+        "data": {
+          "mapping": {
+            "mapperName": "mapping",
+            "matcher": {
+              "name": "value",
+              "type": "string",
+              "description": "A value of the evaluation token that will be mapped to a channel reference (e.g., mapping value='foo' channel='myChannel')",
+              "required": false
+            },
+            "matcherValue": "jms"
+          }
+        },
+        "animated": true,
+        "id": "reactflow__edge-cGUxaVOQ7Loutput-1su4DIeR80input",
+        "selected": false
+      },
+      {
+        "source": "cGUxaVOQ7L",
+        "sourceHandle": "output",
+        "target": "RJlDxzUi2a",
+        "targetHandle": "input",
+        "type": "dynamicEdge",
+        "data": {
+          "mapping": {
+            "mapperName": "mapping",
+            "matcher": {
+              "name": "value",
+              "type": "string",
+              "description": "A value of the evaluation token that will be mapped to a channel reference (e.g., mapping value='foo' channel='myChannel')",
+              "required": false
+            },
+            "matcherValue": "kafka"
+          }
+        },
+        "animated": true,
+        "id": "reactflow__edge-cGUxaVOQ7Loutput-RJlDxzUi2ainput",
+        "selected": false
+      }
+    ],
+    "eipNodeConfigs": {
+      "rn79OHQyAI": {
+        "attributes": {},
+        "children": {}
+      },
+      "cGUxaVOQ7L": {
+        "attributes": {},
+        "children": {},
+        "routerKey": {
+          "name": "xpath-expression",
+          "attributes": {
+            "expression": "/target/protocol"
+          }
+        }
+      },
+      "RJlDxzUi2a": {
+        "attributes": {},
+        "children": {}
+      },
+      "1su4DIeR80": {
+        "attributes": {},
+        "children": {}
+      }
+    },
+    "selectedChildNode": null,
+    "layout": {
+      "orientation": "horizontal",
+      "density": "comfortable"
+    }
+  }

@@ -17,6 +17,9 @@ tmp
 build/
 target/
 
+# Test artifacts
+coverage
+
 # Editor directories and files
 **/.vscode/*
 !.vscode/extensions.json
