@@ -444,9 +444,7 @@ const newNode = (
 }
 
 const removeDeletedNodeConfigs = (state: AppStore, changes: NodeChange[]) => {
-  const deletes: NodeRemoveChange[] = changes.filter(
-    (c) => c.type === "remove"
-  ) as NodeRemoveChange[]
+  const deletes: NodeRemoveChange[] = changes.filter((c) => c.type === "remove")
 
   if (deletes.length === 0) {
     return null
@@ -733,9 +731,9 @@ const filterEmptyAttrs = (attrs: Attributes) =>
   }, {} as Attributes)
 
 // Warning: the following exports provide non-reactive access to the store's state
-export const getNodesView: () => Readonly<EipFlowNode[]> = () =>
+export const getNodesView: () => readonly EipFlowNode[] = () =>
   useStore.getState().nodes
-export const getEdgesView: () => Readonly<Edge[]> = () =>
+export const getEdgesView: () => readonly Edge[] = () =>
   useStore.getState().edges
 export const getLayout: () => Readonly<Layout> = () =>
   useStore.getState().layout

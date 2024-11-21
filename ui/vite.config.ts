@@ -7,4 +7,12 @@ export default defineConfig({
   json: {
     stringify: true,
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: "modern-compiler",
+        quietDeps: true,
+      },
+    },
+  },
 })
