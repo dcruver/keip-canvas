@@ -1,0 +1,114 @@
+{
+  "nodes": [
+    {
+      "id": "9KWCqlIyy7",
+      "type": "eipNode",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "targetPosition": "left",
+      "sourcePosition": "right",
+      "data": {
+        "eipId": {
+          "namespace": "integration",
+          "name": "inbound-channel-adapter"
+        },
+        "label": "n1"
+      },
+      "width": 114,
+      "height": 121,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 0,
+        "y": 0
+      },
+      "dragging": false
+    },
+    {
+      "id": "NTBSbnRUGJ",
+      "type": "eipNode",
+      "position": {
+        "x": 189,
+        "y": 22
+      },
+      "targetPosition": "left",
+      "sourcePosition": "right",
+      "data": {
+        "eipId": {
+          "namespace": "integration",
+          "name": "filter"
+        },
+        "label": "n2"
+      },
+      "width": 114,
+      "height": 77,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 189,
+        "y": 22
+      },
+      "dragging": false
+    },
+    {
+      "id": "pQv30nNaZI",
+      "type": "eipNode",
+      "position": {
+        "x": 378,
+        "y": 0
+      },
+      "targetPosition": "left",
+      "sourcePosition": "right",
+      "data": {
+        "eipId": {
+          "namespace": "integration",
+          "name": "outbound-channel-adapter"
+        },
+        "label": "n3"
+      },
+      "width": 119,
+      "height": 121,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 378,
+        "y": 0
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "9KWCqlIyy7",
+      "sourceHandle": "output",
+      "target": "NTBSbnRUGJ",
+      "targetHandle": "input",
+      "id": "reactflow__edge-9KWCqlIyy7output-NTBSbnRUGJinput"
+    },
+    {
+      "source": "NTBSbnRUGJ",
+      "sourceHandle": "output",
+      "target": "pQv30nNaZI",
+      "targetHandle": "input",
+      "id": "reactflow__edge-NTBSbnRUGJoutput-pQv30nNaZIinput"
+    }
+  ],
+  "eipNodeConfigs": {
+    "9KWCqlIyy7": {
+      "attributes": {},
+      "children": {}
+    },
+    "NTBSbnRUGJ": {
+      "attributes": {},
+      "children": {}
+    },
+    "pQv30nNaZI": {
+      "attributes": {},
+      "children": {}
+    }
+  },
+  "selectedChildNode": null,
+  "layout": {
+    "orientation": "horizontal",
+    "density": "comfortable"
+  }
+}

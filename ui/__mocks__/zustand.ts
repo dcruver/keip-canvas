@@ -1,8 +1,9 @@
 // Adapted from https://zustand.docs.pmnd.rs/guides/testing#vitest
 
 import { act } from "@testing-library/react"
-import { afterEach, vi } from "vitest"
+import { beforeEach, vi } from "vitest"
 import type * as ZustandExportedTypes from "zustand"
+import mockStoreInitState from "./mockStoreInitState.json"
 export * from "zustand"
 
 const { create: actualCreate } =
@@ -15,15 +16,15 @@ export const storeResetFns = new Set<() => void>()
 export const create =
   () =>
   <T>(stateCreator: ZustandExportedTypes.StateCreator<T>) => {
-    console.log("zustand create mock")
     const store = actualCreate(stateCreator)
-    const initialState = store.getInitialState()
+
+    // TODO: See if init state definition can be moved closer to actual test.
+    const initialState = mockStoreInitState as T
     storeResetFns.add(() => store.setState(initialState, true))
     return store
   }
 
-// reset all stores after each test run
-afterEach(() => {
+beforeEach(() => {
   act(() => {
     storeResetFns.forEach((resetFn) => {
       resetFn()
