@@ -5,7 +5,7 @@
       "type": "eipNode",
       "position": {
         "x": 0,
-        "y": 0
+        "y": 105
       },
       "targetPosition": "left",
       "sourcePosition": "right",
@@ -17,41 +17,41 @@
         "label": "n1"
       },
       "width": 114,
-      "height": 121,
+      "height": 129,
       "selected": false,
       "positionAbsolute": {
         "x": 0,
-        "y": 0
+        "y": 105
       },
       "dragging": false
     },
     {
-      "id": "NTBSbnRUGJ",
+      "id": "LoiC2CFbLP",
       "type": "eipNode",
       "position": {
         "x": 189,
-        "y": 22
+        "y": 134
       },
       "targetPosition": "left",
       "sourcePosition": "right",
       "data": {
         "eipId": {
           "namespace": "integration",
-          "name": "filter"
+          "name": "router"
         },
         "label": "n2"
       },
       "width": 114,
-      "height": 77,
-      "selected": false,
+      "height": 71,
+      "selected": true,
       "positionAbsolute": {
         "x": 189,
-        "y": 22
+        "y": 134
       },
       "dragging": false
     },
     {
-      "id": "pQv30nNaZI",
+      "id": "H4-ED4F0XT",
       "type": "eipNode",
       "position": {
         "x": 378,
@@ -61,18 +61,43 @@
       "sourcePosition": "right",
       "data": {
         "eipId": {
-          "namespace": "integration",
+          "namespace": "http",
           "name": "outbound-channel-adapter"
         },
         "label": "n3"
       },
-      "width": 119,
-      "height": 121,
-      "selected": false,
+      "width": 128,
+      "height": 132,
       "positionAbsolute": {
         "x": 378,
         "y": 0
       },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "eDhCM6mRA0",
+      "type": "eipNode",
+      "position": {
+        "x": 378,
+        "y": 207
+      },
+      "targetPosition": "left",
+      "sourcePosition": "right",
+      "data": {
+        "eipId": {
+          "namespace": "jms",
+          "name": "outbound-channel-adapter"
+        },
+        "label": "n4"
+      },
+      "width": 128,
+      "height": 132,
+      "positionAbsolute": {
+        "x": 378,
+        "y": 207
+      },
+      "selected": false,
       "dragging": false
     }
   ],
@@ -80,28 +105,85 @@
     {
       "source": "9KWCqlIyy7",
       "sourceHandle": "output",
-      "target": "NTBSbnRUGJ",
+      "target": "LoiC2CFbLP",
       "targetHandle": "input",
-      "id": "reactflow__edge-9KWCqlIyy7output-NTBSbnRUGJinput"
+      "id": "reactflow__edge-9KWCqlIyy7output-LoiC2CFbLPinput"
     },
     {
-      "source": "NTBSbnRUGJ",
+      "source": "LoiC2CFbLP",
       "sourceHandle": "output",
-      "target": "pQv30nNaZI",
+      "target": "H4-ED4F0XT",
       "targetHandle": "input",
-      "id": "reactflow__edge-NTBSbnRUGJoutput-pQv30nNaZIinput"
+      "type": "dynamicEdge",
+      "data": {
+        "mapping": {
+          "mapperName": "mapping",
+          "matcher": {
+            "name": "value",
+            "type": "string",
+            "description": "A value of the evaluation token that will be mapped to a channel reference (e.g., mapping value='foo' channel='myChannel')",
+            "required": false
+          },
+          "isDefaultMapping": true
+        }
+      },
+      "animated": true,
+      "id": "reactflow__edge-LoiC2CFbLPoutput-H4-ED4F0XTinput",
+      "selected": false
+    },
+    {
+      "source": "LoiC2CFbLP",
+      "sourceHandle": "output",
+      "target": "eDhCM6mRA0",
+      "targetHandle": "input",
+      "type": "dynamicEdge",
+      "data": {
+        "mapping": {
+          "mapperName": "mapping",
+          "matcher": {
+            "name": "value",
+            "type": "string",
+            "description": "A value of the evaluation token that will be mapped to a channel reference (e.g., mapping value='foo' channel='myChannel')",
+            "required": false
+          },
+          "matcherValue": "jms"
+        }
+      },
+      "animated": true,
+      "id": "reactflow__edge-LoiC2CFbLPoutput-eDhCM6mRA0input",
+      "selected": false
     }
   ],
   "eipNodeConfigs": {
     "9KWCqlIyy7": {
       "attributes": {},
-      "children": {}
+      "children": {
+        "poller": {
+          "name": "poller",
+          "attributes": {
+            "fixed-rate": "2000"
+          }
+        }
+      },
+      "description": "message incoming"
     },
-    "NTBSbnRUGJ": {
+    "LoiC2CFbLP": {
+      "attributes": {
+        "phase": "init"
+      },
+      "children": {},
+      "routerKey": {
+        "name": "expression",
+        "attributes": {
+          "expression": "headers.protocol"
+        }
+      }
+    },
+    "H4-ED4F0XT": {
       "attributes": {},
       "children": {}
     },
-    "pQv30nNaZI": {
+    "eDhCM6mRA0": {
       "attributes": {},
       "children": {}
     }

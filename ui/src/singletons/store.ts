@@ -487,6 +487,7 @@ const createDynamicRoutingEdge = (
     )
   }
 
+  // TODO: Avoid storing matcher attribute descriptions in the store.
   return {
     ...connection,
     type: DYNAMIC_EDGE_TYPE,
