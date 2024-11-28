@@ -18,8 +18,7 @@ build/
 target/
 
 # Test artifacts
-testcoverage/
-__snapshots__
+coverage
 
 # Editor directories and files
 **/.vscode/*

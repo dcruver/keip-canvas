@@ -5,7 +5,7 @@
       "type": "eipNode",
       "position": {
         "x": 0,
-        "y": 105
+        "y": 91.25
       },
       "targetPosition": "left",
       "sourcePosition": "right",
@@ -14,23 +14,19 @@
           "namespace": "integration",
           "name": "inbound-channel-adapter"
         },
-        "label": "n1"
+        "label": "inbound"
       },
       "width": 114,
       "height": 129,
       "selected": false,
-      "positionAbsolute": {
-        "x": 0,
-        "y": 105
-      },
       "dragging": false
     },
     {
       "id": "LoiC2CFbLP",
       "type": "eipNode",
       "position": {
-        "x": 189,
-        "y": 134
+        "x": 201.02071435884494,
+        "y": 121.16003882408089
       },
       "targetPosition": "left",
       "sourcePosition": "right",
@@ -39,23 +35,23 @@
           "namespace": "integration",
           "name": "router"
         },
-        "label": "n2"
+        "label": "test-router"
       },
       "width": 114,
       "height": 71,
-      "selected": true,
+      "selected": false,
+      "dragging": false,
       "positionAbsolute": {
-        "x": 189,
-        "y": 134
-      },
-      "dragging": false
+        "x": 201.02071435884494,
+        "y": 121.16003882408089
+      }
     },
     {
       "id": "H4-ED4F0XT",
       "type": "eipNode",
       "position": {
-        "x": 378,
-        "y": 0
+        "x": 402.5684310475592,
+        "y": -19.39612977438884
       },
       "targetPosition": "left",
       "sourcePosition": "right",
@@ -64,39 +60,52 @@
           "namespace": "http",
           "name": "outbound-channel-adapter"
         },
-        "label": "n3"
+        "label": "httpOut"
       },
       "width": 128,
       "height": 132,
-      "positionAbsolute": {
-        "x": 378,
-        "y": 0
-      },
       "selected": false,
       "dragging": false
     },
     {
-      "id": "eDhCM6mRA0",
+      "id": "SV43RVeijQ",
       "type": "eipNode",
       "position": {
-        "x": 378,
-        "y": 207
+        "x": 378.5346234085371,
+        "y": 244.49918423048507
       },
       "targetPosition": "left",
       "sourcePosition": "right",
       "data": {
         "eipId": {
-          "namespace": "jms",
+          "namespace": "integration",
+          "name": "filter"
+        },
+        "label": "test-filter"
+      },
+      "width": 114,
+      "height": 77,
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "MrMneIdthg",
+      "type": "eipNode",
+      "position": {
+        "x": 557.741165016793,
+        "y": 220.00829459816538
+      },
+      "targetPosition": "left",
+      "sourcePosition": "right",
+      "data": {
+        "eipId": {
+          "namespace": "file",
           "name": "outbound-channel-adapter"
         },
-        "label": "n4"
+        "label": "fileOut"
       },
       "width": 128,
       "height": 132,
-      "positionAbsolute": {
-        "x": 378,
-        "y": 207
-      },
       "selected": false,
       "dragging": false
     }
@@ -134,7 +143,7 @@
     {
       "source": "LoiC2CFbLP",
       "sourceHandle": "output",
-      "target": "eDhCM6mRA0",
+      "target": "SV43RVeijQ",
       "targetHandle": "input",
       "type": "dynamicEdge",
       "data": {
@@ -146,12 +155,19 @@
             "description": "A value of the evaluation token that will be mapped to a channel reference (e.g., mapping value='foo' channel='myChannel')",
             "required": false
           },
-          "matcherValue": "jms"
+          "matcherValue": "file"
         }
       },
       "animated": true,
-      "id": "reactflow__edge-LoiC2CFbLPoutput-eDhCM6mRA0input",
+      "id": "reactflow__edge-LoiC2CFbLPoutput-SV43RVeijQinput",
       "selected": false
+    },
+    {
+      "source": "SV43RVeijQ",
+      "sourceHandle": "output",
+      "target": "MrMneIdthg",
+      "targetHandle": "input",
+      "id": "reactflow__edge-SV43RVeijQoutput-MrMneIdthginput"
     }
   ],
   "eipNodeConfigs": {
@@ -181,11 +197,19 @@
     },
     "H4-ED4F0XT": {
       "attributes": {},
+      "children": {},
+      "description": "send an http message"
+    },
+    "SV43RVeijQ": {
+      "attributes": {
+        "expression": "headers.filename != null"
+      },
       "children": {}
     },
-    "eDhCM6mRA0": {
+    "MrMneIdthg": {
       "attributes": {},
-      "children": {}
+      "children": {},
+      "description": "write to file"
     }
   },
   "selectedChildNode": null,

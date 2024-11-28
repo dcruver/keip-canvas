@@ -1,6 +1,6 @@
-import { renderHook } from "@testing-library/react"
-import { describe, expect, test, vi } from "vitest"
-import { RouterKey } from "../api/flow"
+import { act, renderHook } from "@testing-library/react"
+import { beforeEach, describe, expect, test, vi } from "vitest"
+import { RouterKey } from "../../api/flow"
 import {
   ROOT_PARENT,
   useGetChildren,
@@ -12,9 +12,10 @@ import {
   useGetRouterDefaultEdgeMapping,
   useNodeCount,
   useSerializedStore,
-} from "./store"
+} from "../store"
+import { resetMockStore } from "./storeTestingUtils"
+import initState from "./testdata/storeState1.json"
 
-// NOTE: store is initialized in 'ui/__mocks__/mockStoreInitState.json'
 vi.mock("zustand")
 
 const N1_ID = "9KWCqlIyy7"
@@ -26,15 +27,28 @@ function renderAndUnwrapHook<T>(hookFn: () => T): T {
   return result.current
 }
 
-test("initial node count should be 4", () => {
+// TODO: Do we really need to use 'act'?
+beforeEach(() => {
+  act(() => {
+    resetMockStore(initState)
+  })
+})
+
+test("initial node count should be 5", () => {
   const count = renderAndUnwrapHook(useNodeCount)
-  expect(count).toEqual(4)
+  expect(count).toEqual(5)
 })
 
 test("get nodes and check labels are set", () => {
   const nodes = renderAndUnwrapHook(useGetNodes)
   const labels = nodes.map((n) => n.data.label)
-  expect(labels).toEqual(["n1", "n2", "n3", "n4"])
+  expect(labels).toEqual([
+    "inbound",
+    "test-router",
+    "httpOut",
+    "test-filter",
+    "fileOut",
+  ])
 })
 
 test("get diagram layout settings", () => {

@@ -1,0 +1,115 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`diagram to EipFlow success 1`] = `
+{
+  "edges": [
+    {
+      "id": "ch-inbound-test-router",
+      "source": "inbound",
+      "target": "test-router",
+      "type": "default",
+    },
+    {
+      "id": "ch-test-router-httpOut",
+      "source": "test-router",
+      "target": "httpOut",
+      "type": "default",
+    },
+    {
+      "id": "ch-test-router-test-filter",
+      "source": "test-router",
+      "target": "test-filter",
+      "type": "default",
+    },
+    {
+      "id": "ch-test-filter-fileOut",
+      "source": "test-filter",
+      "target": "fileOut",
+      "type": "default",
+    },
+  ],
+  "nodes": [
+    {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {
+            "fixed-rate": "2000",
+          },
+          "name": "poller",
+        },
+      ],
+      "connectionType": "source",
+      "description": "message incoming",
+      "eipId": {
+        "name": "inbound-channel-adapter",
+        "namespace": "integration",
+      },
+      "id": "inbound",
+      "role": "endpoint",
+    },
+    {
+      "attributes": {
+        "default-output-channel": "ch-test-router-httpOut",
+        "expression": "headers.protocol",
+        "phase": "init",
+      },
+      "children": [
+        {
+          "attributes": {
+            "channel": "ch-test-router-test-filter",
+            "value": "file",
+          },
+          "name": "mapping",
+        },
+      ],
+      "connectionType": "content_based_router",
+      "description": undefined,
+      "eipId": {
+        "name": "router",
+        "namespace": "integration",
+      },
+      "id": "test-router",
+      "role": "router",
+    },
+    {
+      "attributes": {},
+      "children": [],
+      "connectionType": "sink",
+      "description": "send an http message",
+      "eipId": {
+        "name": "outbound-channel-adapter",
+        "namespace": "http",
+      },
+      "id": "httpOut",
+      "role": "endpoint",
+    },
+    {
+      "attributes": {
+        "expression": "headers.filename != null",
+      },
+      "children": [],
+      "connectionType": "tee",
+      "description": undefined,
+      "eipId": {
+        "name": "filter",
+        "namespace": "integration",
+      },
+      "id": "test-filter",
+      "role": "router",
+    },
+    {
+      "attributes": {},
+      "children": [],
+      "connectionType": "sink",
+      "description": "write to file",
+      "eipId": {
+        "name": "outbound-channel-adapter",
+        "namespace": "file",
+      },
+      "id": "fileOut",
+      "role": "endpoint",
+    },
+  ],
+}
+`;
