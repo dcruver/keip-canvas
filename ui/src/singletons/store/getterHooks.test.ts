@@ -11,8 +11,8 @@ import {
   useSerializedStore,
 } from "../store"
 import { renderAndUnwrapHook, resetMockStore } from "./storeTestingUtils"
-import childBasedRouterState from "./testdata/childBasedRouterFlow.json"
-import standardFlow from "./testdata/standardFlow.json"
+import childBasedRouterFlow from "./testdata/store-initializers/childBasedRouterFlow.json"
+import standardFlow from "./testdata/store-initializers/standardFlow.json"
 
 vi.mock("zustand")
 
@@ -157,7 +157,7 @@ describe("get content router default edge mapping", () => {
 
   test("node is a router with no default mapping -> undefined", () => {
     act(() => {
-      resetMockStore(childBasedRouterState)
+      resetMockStore(childBasedRouterFlow)
     })
     const edge = renderAndUnwrapHook(() =>
       useGetRouterDefaultEdgeMapping("cGUxaVOQ7L")

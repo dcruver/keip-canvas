@@ -344,6 +344,7 @@ const useStore = create<AppStore>()(
               edges: state.edges.map((edge) => ({ ...edge, selected: false })),
             })),
 
+          // TODO: Should importing throw an error on failure instead?
           importFlowFromJson: (json: string) =>
             set(() => {
               const imported = JSON.parse(json) as Partial<AppStore>

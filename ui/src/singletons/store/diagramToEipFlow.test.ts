@@ -2,8 +2,8 @@ import { act, renderHook } from "@testing-library/react"
 import { expect, test, vi } from "vitest"
 import { useEipFlow } from "../store"
 import { resetMockStore } from "./storeTestingUtils"
-import childBasedRouterState from "./testdata/childBasedRouterFlow.json"
-import standardFlow from "./testdata/standardFlow.json"
+import childBasedRouterFlow from "./testdata/store-initializers/childBasedRouterFlow.json"
+import standardFlow from "./testdata/store-initializers/standardFlow.json"
 
 vi.mock("zustand")
 
@@ -18,7 +18,7 @@ test("standard diagram to EipFlow success", () => {
 
 test("diagram includes a router with child based matcher to EipFlow success", () => {
   act(() => {
-    resetMockStore(childBasedRouterState)
+    resetMockStore(childBasedRouterFlow)
   })
 
   const { result } = renderHook(() => useEipFlow())

@@ -6,6 +6,7 @@ import {
   ChannelMapping,
   DynamicEdgeData,
   EIP_NODE_TYPE,
+  Layout,
   RouterKey,
 } from "../../api/flow"
 import { ChildNodeId } from "../../api/id"
@@ -22,9 +23,11 @@ import {
   useGetSelectedChildNode,
 } from "../store"
 import { renderAndUnwrapHook, resetMockStore } from "./storeTestingUtils"
-import selectedNodeFlow from "./testdata/singleSelectedNodeFlow.json"
-import standardFlow from "./testdata/standardFlow.json"
-import verticalFlow from "./testdata/verticalFlow.json"
+import selectedNodeFlow from "./testdata/store-initializers/singleSelectedNodeFlow.json"
+import standardFlow from "./testdata/store-initializers/standardFlow.json"
+import verticalFlow from "./testdata/store-initializers/verticalFlow.json"
+
+import validExportedFlow from "./testdata/exported-diagrams/validFlow.json?raw"
 
 vi.mock("zustand")
 
@@ -47,6 +50,14 @@ const getNode = (id: string) => {
   }
   return target
 }
+
+const getNodePositions = () =>
+  getNodesView().map((node) => ({
+    [node.id]: {
+      position: node.position,
+      absPosition: node.positionAbsolute,
+    },
+  }))
 
 describe("create dropped node", () => {
   test.each([
@@ -430,4 +441,85 @@ test("clear root node selections from diagram success", () => {
 
   selected = getNodesView().find((n) => n.selected)
   expect(selected).toBeUndefined()
+})
+
+describe("import flow from an exported JSON file", () => {
+  test("import a valid flow", () => {
+    const initNodes = getNodesView()
+
+    act(() => appActions.importFlowFromJson(validExportedFlow))
+
+    const updatedState = {
+      nodes: getNodesView(),
+      edges: getEdgesView(),
+      children: getNodesView().map((node) => ({
+        [node.id]: renderAndUnwrapHook(() => useGetChildren(node.id)),
+      })),
+    }
+
+    expect(updatedState.nodes).not.toEqual(initNodes)
+    expect(updatedState).toMatchSnapshot()
+  })
+
+  test.each([{ key: "nodes" }, { key: "edges" }, { key: "eipNodeConfigs" }])(
+    "import a malformed flow (missing '$key' field) is a no-op",
+    ({ key }) => {
+      const initialNodes = getNodesView()
+      const initialEdges = getEdgesView()
+
+      // Invalidate the flow JSON
+      const flow = JSON.parse(validExportedFlow) as Record<string, object>
+      delete flow[key]
+
+      act(() => appActions.importFlowFromJson(JSON.stringify(flow)))
+
+      expect(getNodesView()).toEqual(initialNodes)
+      expect(getEdgesView()).toEqual(initialEdges)
+    }
+  )
+})
+
+describe("update layout orientation", () => {
+  test.each([
+    {
+      orientation: "horizontal",
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
+    },
+    {
+      orientation: "vertical",
+      sourcePosition: Position.Bottom,
+      targetPosition: Position.Top,
+    },
+  ])(
+    "set to $orientation",
+    ({ orientation, sourcePosition, targetPosition }) => {
+      act(() =>
+        appActions.updateLayoutOrientation(orientation as Layout["orientation"])
+      )
+
+      expect(getLayout().orientation).toEqual(orientation)
+
+      getNodesView().forEach((node) => {
+        expect(node.sourcePosition).toEqual(sourcePosition)
+        expect(node.targetPosition).toEqual(targetPosition)
+      })
+    }
+  )
+})
+
+test("toggle layout density", () => {
+  expect(getLayout().density).toEqual("comfortable")
+
+  const initialPositions = getNodePositions()
+
+  act(() => appActions.updateLayoutDensity())
+  const compactPositions = getNodePositions()
+  expect(compactPositions).not.toEqual(initialPositions)
+  expect(getLayout().density).toEqual("compact")
+
+  act(() => appActions.updateLayoutDensity())
+  const comfortablePositions = getNodePositions()
+  expect(comfortablePositions).not.toEqual(compactPositions)
+  expect(getLayout().density).toEqual("comfortable")
 })
