@@ -3,7 +3,7 @@ import { expect, test, vi } from "vitest"
 import { useEipFlow } from "../store"
 import { resetMockStore } from "./storeTestingUtils"
 import childBasedRouterState from "./testdata/childBasedRouterFlow.json"
-import standardFlow from "./testdata/testFlow1.json"
+import standardFlow from "./testdata/standardFlow.json"
 
 vi.mock("zustand")
 

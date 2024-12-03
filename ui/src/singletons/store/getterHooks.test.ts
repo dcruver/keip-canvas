@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react"
+import { act } from "@testing-library/react"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { RouterKey } from "../../api/flow"
 import {
@@ -10,20 +10,15 @@ import {
   useGetRouterDefaultEdgeMapping,
   useSerializedStore,
 } from "../store"
-import { resetMockStore } from "./storeTestingUtils"
+import { renderAndUnwrapHook, resetMockStore } from "./storeTestingUtils"
 import childBasedRouterState from "./testdata/childBasedRouterFlow.json"
-import standardFlow from "./testdata/testFlow1.json"
+import standardFlow from "./testdata/standardFlow.json"
 
 vi.mock("zustand")
 
 const N1_ID = "9KWCqlIyy7"
 const N2_ID = "LoiC2CFbLP"
 const N3_ID = "pQv30nNaZI"
-
-function renderAndUnwrapHook<T>(hookFn: () => T): T {
-  const { result } = renderHook(hookFn)
-  return result.current
-}
 
 // TODO: Do we really need to use 'act'?
 beforeEach(() => {

@@ -14,6 +14,6 @@ export const create =
   () =>
   <T>(stateCreator: ZustandExportedTypes.StateCreator<T>) => {
     const store = actualCreate(stateCreator)
-    resetStore = (state) => store.setState(state, true)
+    resetStore = (state) => store.setState(state, false)
     return store
   }
