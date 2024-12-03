@@ -108,6 +108,30 @@
       "height": 132,
       "selected": false,
       "dragging": false
+    },
+    {
+      "id": "MZ1rIWIK3s",
+      "type": "eipNode",
+      "position": {
+        "x": 526.8005098062063,
+        "y": 400.71416837852064
+      },
+      "targetPosition": "left",
+      "sourcePosition": "right",
+      "data": {
+        "eipId": {
+          "namespace": "integration",
+          "name": "logging-channel-adapter"
+        }
+      },
+      "width": 111,
+      "height": 121,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 526.8005098062063,
+        "y": 400.71416837852064
+      },
+      "dragging": false
     }
   ],
   "edges": [
@@ -168,6 +192,13 @@
       "target": "MrMneIdthg",
       "targetHandle": "input",
       "id": "reactflow__edge-SV43RVeijQoutput-MrMneIdthginput"
+    },
+    {
+      "source": "SV43RVeijQ",
+      "sourceHandle": "discard",
+      "target": "MZ1rIWIK3s",
+      "targetHandle": "input",
+      "id": "reactflow__edge-SV43RVeijQdiscard-MZ1rIWIK3sinput"
     }
   ],
   "eipNodeConfigs": {
@@ -210,6 +241,12 @@
       "attributes": {},
       "children": {},
       "description": "write to file"
+    },
+    "MZ1rIWIK3s": {
+      "attributes": {
+        "level": "WARN"
+      },
+      "children": {}
     }
   },
   "selectedChildNode": null,

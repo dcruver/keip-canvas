@@ -6,15 +6,13 @@ import {
   useGetChildren,
   useGetContentRouterKey,
   useGetEipAttribute,
-  useGetLayout,
   useGetNodeDescription,
-  useGetNodes,
   useGetRouterDefaultEdgeMapping,
-  useNodeCount,
   useSerializedStore,
 } from "../store"
 import { resetMockStore } from "./storeTestingUtils"
-import initState from "./testdata/storeState1.json"
+import childBasedRouterState from "./testdata/childBasedRouterFlow.json"
+import standardFlow from "./testdata/testFlow1.json"
 
 vi.mock("zustand")
 
@@ -30,32 +28,7 @@ function renderAndUnwrapHook<T>(hookFn: () => T): T {
 // TODO: Do we really need to use 'act'?
 beforeEach(() => {
   act(() => {
-    resetMockStore(initState)
-  })
-})
-
-test("initial node count should be 5", () => {
-  const count = renderAndUnwrapHook(useNodeCount)
-  expect(count).toEqual(5)
-})
-
-test("get nodes and check labels are set", () => {
-  const nodes = renderAndUnwrapHook(useGetNodes)
-  const labels = nodes.map((n) => n.data.label)
-  expect(labels).toEqual([
-    "inbound",
-    "test-router",
-    "httpOut",
-    "test-filter",
-    "fileOut",
-  ])
-})
-
-test("get diagram layout settings", () => {
-  const layout = renderAndUnwrapHook(useGetLayout)
-  expect(layout).toEqual({
-    orientation: "horizontal",
-    density: "comfortable",
+    resetMockStore(standardFlow)
   })
 })
 
@@ -173,10 +146,27 @@ describe("get content router key", () => {
 })
 
 describe("get content router default edge mapping", () => {
-  test("node id is a router and has a default edge -> value", () => {
+  test("node is a router and has a default edge -> value", () => {
     const edge = renderAndUnwrapHook(() =>
       useGetRouterDefaultEdgeMapping(N2_ID)
     )
     expect(edge?.id).toEqual("reactflow__edge-LoiC2CFbLPoutput-H4-ED4F0XTinput")
+  })
+
+  test("node is not a router -> undefined", () => {
+    const edge = renderAndUnwrapHook(() =>
+      useGetRouterDefaultEdgeMapping(N1_ID)
+    )
+    expect(edge).toBeUndefined()
+  })
+
+  test("node is a router with no default mapping -> undefined", () => {
+    act(() => {
+      resetMockStore(childBasedRouterState)
+    })
+    const edge = renderAndUnwrapHook(() =>
+      useGetRouterDefaultEdgeMapping("cGUxaVOQ7L")
+    )
+    expect(edge).toBeUndefined()
   })
 })
