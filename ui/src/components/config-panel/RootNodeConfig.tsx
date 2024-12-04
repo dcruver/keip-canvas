@@ -2,11 +2,12 @@ import { Stack, TextArea, TextInput } from "@carbon/react"
 import { ChangeEvent, useMemo, useState } from "react"
 import { EipFlowNode } from "../../api/flow"
 import { Attribute, EipChildGroup } from "../../api/generated/eipComponentDef"
+import { ROOT_PARENT } from "../../api/id"
 import {
-  ROOT_PARENT,
-  useAppActions,
-  useGetNodeDescription,
-} from "../../singletons/store"
+  updateNodeDescription,
+  updateNodeLabel,
+} from "../../singletons/store/appActions"
+import { useGetNodeDescription } from "../../singletons/store/getterHooks"
 import debounce from "../../utils/debounce"
 import { AttributeConfigForm } from "./AttributeConfigForm"
 import ChildSelector from "./ChildSelector"
@@ -19,7 +20,6 @@ interface PanelContentProps {
 }
 
 const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
-  const { updateNodeLabel, updateNodeDescription } = useAppActions()
   const description = useGetNodeDescription(node.id)
 
   const [isLabelValid, setIsLabelValid] = useState(true)
@@ -31,7 +31,7 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
           updateNodeDescription(node.id, ev.target.value),
         300
       ),
-    [node.id, updateNodeDescription]
+    [node.id]
   )
 
   const handleLabelUpdates = useMemo(
@@ -40,7 +40,7 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
         const err = updateNodeLabel(node.id, ev.target.value)
         setIsLabelValid(!err)
       }, 300),
-    [node.id, updateNodeLabel]
+    [node.id]
   )
 
   return (

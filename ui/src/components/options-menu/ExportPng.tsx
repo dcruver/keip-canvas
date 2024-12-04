@@ -4,7 +4,8 @@ import { layer01 } from "@carbon/themes"
 import { toPng } from "html-to-image"
 import { forwardRef } from "react"
 import { getNodesBounds, getViewportForBounds } from "reactflow"
-import { useAppActions, useGetNodes } from "../../singletons/store"
+import { clearDiagramSelections } from "../../singletons/store/appActions"
+import { useGetNodes } from "../../singletons/store/getterHooks"
 
 const SCALING_FACTOR = 1.5
 
@@ -19,7 +20,6 @@ const downloadImage = (dataUrl: string) => {
 const ExportPng = forwardRef<HTMLElement>(
   (props: OverflowMenuItemProps, ref) => {
     const nodes = useGetNodes()
-    const { clearDiagramSelections } = useAppActions()
 
     const handleClick = () => {
       clearDiagramSelections()

@@ -12,7 +12,7 @@ import { EipComponent } from "../../api/generated/eipComponentDef"
 import { EipId } from "../../api/id"
 import { EIP_SCHEMA } from "../../singletons/eipDefinitions"
 import getIconUrl from "../../singletons/eipIconCatalog"
-import { useNodeCount } from "../../singletons/store"
+import { useNodeCount } from "../../singletons/store/getterHooks"
 import { toTitleCase } from "../../utils/titleTransform"
 import { DragTypes } from "./dragTypes"
 

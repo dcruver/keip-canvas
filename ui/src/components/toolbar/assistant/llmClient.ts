@@ -3,9 +3,9 @@ import { Edge } from "reactflow"
 import { EipFlowNode } from "../../../api/flow"
 import {
   getEdgesView,
-  getLayout,
+  getLayoutView,
   getNodesView,
-} from "../../../singletons/store"
+} from "../../../singletons/store/storeViews"
 import fetchWithTimeout from "../../../utils/fetch/fetchWithTimeout"
 import { newFlowLayout } from "../../layout/layouting"
 import { fuzzyMatchNodeEipIds } from "./fuzzyEipIdMatch"
@@ -128,7 +128,7 @@ class LlmClient {
 
     fuzzyMatchNodeEipIds(response.nodes)
 
-    const layout = getLayout()
+    const layout = getLayoutView()
     response.nodes = newFlowLayout(response.nodes, response.edges, layout)
 
     return JSON.stringify(response)

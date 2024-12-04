@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 import { expect, test, vi } from "vitest"
-import { useEipFlow } from "../store"
+import { useEipFlow } from "./diagramToEipFlow"
 import { resetMockStore } from "./storeTestingUtils"
 import childBasedRouterFlow from "./testdata/store-initializers/childBasedRouterFlow.json"
 import standardFlow from "./testdata/store-initializers/standardFlow.json"

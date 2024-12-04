@@ -9,7 +9,8 @@ import {
   lookupContentBasedRouterKeys,
   lookupEipComponent,
 } from "../../singletons/eipDefinitions"
-import { useAppActions, useGetSelectedChildNode } from "../../singletons/store"
+import { clearSelectedChildNode } from "../../singletons/store/appActions"
+import { useGetSelectedChildNode } from "../../singletons/store/getterHooks"
 import ChildNodeConfig from "./ChildNodeConfig"
 import DynamicEdgeConfig from "./DynamicEdgeConfig"
 import RootNodeConfig from "./RootNodeConfig"
@@ -41,7 +42,6 @@ const isDynamicEdge = (edge: Edge) => edge?.type === DYNAMIC_EDGE_TYPE
 
 const EipConfigSidePanel = () => {
   const reactFlowStore = useStoreApi()
-  const { clearSelectedChildNode } = useAppActions()
   const [selectedNode, setSelectedNode] = useState<EipFlowNode | null>(null)
   const [selectedEdge, setSelectedEdge] = useState<DynamicEdge | null>(null)
   const selectedChild = useGetSelectedChildNode()

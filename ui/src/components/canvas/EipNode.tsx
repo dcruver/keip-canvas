@@ -7,11 +7,14 @@ import { ChildNodeId, EipId } from "../../api/id"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
 import getIconUrl from "../../singletons/eipIconCatalog"
 import {
-  useAppActions,
+  clearSelectedChildNode,
+  updateSelectedChildNode,
+} from "../../singletons/store/appActions"
+import {
   useGetChildren,
   useGetLayout,
   useIsChildSelected,
-} from "../../singletons/store"
+} from "../../singletons/store/getterHooks"
 import { toTitleCase } from "../../utils/titleTransform"
 import "./nodes.scss"
 
@@ -100,7 +103,6 @@ const getClassNames = (props: NodeProps<EipNodeData>, role: EipRole) => {
 }
 
 const ChildIconButton = (props: ChildNodeId) => {
-  const { updateSelectedChildNode } = useAppActions()
   const selected = useIsChildSelected(props)
 
   const clsNames = ["child-icon-button"]
@@ -138,7 +140,6 @@ const ChildrenIcons = ({ childrenNames, parentNodeId }: ChildrenIconsProps) => {
 // TODO: Consider separating into Endpoint and Channel custom node types
 export const EipNode = (props: NodeProps<EipNodeData>) => {
   // TODO: clearSelectedChildNode is used in too many different components. See if that can be reduced (or elimnated).
-  const { clearSelectedChildNode } = useAppActions()
   const childrenState = useGetChildren(props.id)
   const hasChildren = childrenState.length > 0
 

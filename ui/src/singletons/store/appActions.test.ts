@@ -9,29 +9,39 @@ import {
   Layout,
   RouterKey,
 } from "../../api/flow"
-import { ChildNodeId } from "../../api/id"
+import { ChildNodeId, ROOT_PARENT } from "../../api/id"
 import {
-  getEdgesView,
-  getLayout,
-  getNodesView,
-  ROOT_PARENT,
-  useAppActions,
   useGetChildren,
   useGetContentRouterKey,
   useGetEipAttribute,
   useGetNodeDescription,
   useGetSelectedChildNode,
-} from "../store"
+} from "./getterHooks"
 import { renderAndUnwrapHook, resetMockStore } from "./storeTestingUtils"
 import selectedNodeFlow from "./testdata/store-initializers/singleSelectedNodeFlow.json"
 import standardFlow from "./testdata/store-initializers/standardFlow.json"
 import verticalFlow from "./testdata/store-initializers/verticalFlow.json"
 
+import {
+  clearDiagramSelections,
+  clearFlow,
+  createDroppedNode,
+  deleteEipAttribute,
+  importFlowFromJson,
+  toggleLayoutDensity,
+  updateContentRouterKey,
+  updateDynamicEdgeMapping,
+  updateEipAttribute,
+  updateEnabledChildren,
+  updateLayoutOrientation,
+  updateNodeDescription,
+  updateNodeLabel,
+  updateSelectedChildNode,
+} from "./appActions"
+import { getEdgesView, getLayoutView, getNodesView } from "./storeViews"
 import validExportedFlow from "./testdata/exported-diagrams/validFlow.json?raw"
 
 vi.mock("zustand")
-
-const appActions = renderAndUnwrapHook(useAppActions)
 
 const N1_ID = "9KWCqlIyy7"
 const N2_ID = "LoiC2CFbLP"
@@ -86,12 +96,12 @@ describe("create dropped node", () => {
     })
 
     // Assert expected layout
-    const layout = getLayout()
+    const layout = getLayoutView()
     expect(layout.orientation).toEqual(orientation)
 
     const eipId = { namespace: "test", name: "transformer" }
     const position = { x: 5, y: 10 }
-    act(() => appActions.createDroppedNode(eipId, position))
+    act(() => createDroppedNode(eipId, position))
 
     const nodes = getNodesView()
     const node = nodes.find((n) => isDeepEqual(n.data.eipId, eipId))!
@@ -108,7 +118,7 @@ describe("update node label", () => {
   test("update node with unique label success", () => {
     const label = "test-label-123"
 
-    act(() => void appActions.updateNodeLabel(N1_ID, label))
+    act(() => void updateNodeLabel(N1_ID, label))
 
     const target = getNode(N1_ID)
     expect(target.data.label).toEqual(label)
@@ -120,7 +130,7 @@ describe("update node label", () => {
 
     const duplicatedLabel = "test-router"
 
-    const result = appActions.updateNodeLabel(N1_ID, duplicatedLabel)
+    const result = updateNodeLabel(N1_ID, duplicatedLabel)
     expect(result instanceof Error).toBeTruthy()
 
     target = getNode(N1_ID)
@@ -129,7 +139,7 @@ describe("update node label", () => {
 
   test("update non-existent node is a no-op", () => {
     const before = getNodesView()
-    act(() => void appActions.updateNodeLabel("fakeid", "test-label"))
+    act(() => void updateNodeLabel("fakeid", "test-label"))
     const after = getNodesView()
     expect(before).toEqual(after)
   })
@@ -138,16 +148,14 @@ describe("update node label", () => {
 describe("update node description", () => {
   test("update node description success", () => {
     const description = "testing description update"
-    act(() => appActions.updateNodeDescription(N1_ID, description))
+    act(() => updateNodeDescription(N1_ID, description))
 
     const actual = renderAndUnwrapHook(() => useGetNodeDescription(N1_ID))
     expect(actual).toEqual(description)
   })
 
   test("update non-existent node throws error", () => {
-    expect(() =>
-      appActions.updateNodeDescription("fakeid", "test")
-    ).toThrowError()
+    expect(() => updateNodeDescription("fakeid", "test")).toThrowError()
   })
 })
 
@@ -173,12 +181,7 @@ describe("updating EIP Attributes", () => {
     },
   ])("$msg", ({ nodeId, parentId, attribute }) => {
     act(() =>
-      appActions.updateEipAttribute(
-        nodeId,
-        parentId,
-        attribute.name,
-        attribute.value
-      )
+      updateEipAttribute(nodeId, parentId, attribute.name, attribute.value)
     )
 
     const actual = renderAndUnwrapHook(() =>
@@ -215,12 +218,7 @@ describe("updating EIP Attributes", () => {
     expect(actual).not.toEqual(attribute.value)
 
     act(() =>
-      appActions.updateEipAttribute(
-        nodeId,
-        parentId,
-        attribute.name,
-        attribute.value
-      )
+      updateEipAttribute(nodeId, parentId, attribute.name, attribute.value)
     )
 
     actual = renderAndUnwrapHook(() =>
@@ -249,12 +247,7 @@ describe("updating EIP Attributes", () => {
     const attribute = { name: "foo", value: "bar" }
 
     expect(() =>
-      appActions.updateEipAttribute(
-        nodeId,
-        parentId,
-        attribute.name,
-        attribute.value
-      )
+      updateEipAttribute(nodeId, parentId, attribute.name, attribute.value)
     ).toThrowError()
   })
 })
@@ -280,7 +273,7 @@ describe("deleting EIP Attributes", () => {
     )
     expect(attribute).toBeTruthy()
 
-    act(() => appActions.deleteEipAttribute(nodeId, parentId, attrName))
+    act(() => deleteEipAttribute(nodeId, parentId, attrName))
 
     attribute = renderAndUnwrapHook(() =>
       useGetEipAttribute(nodeId, parentId, attrName)
@@ -302,7 +295,7 @@ describe("deleting EIP Attributes", () => {
   ])("$msg", ({ nodeId, parentId }) => {
     const attrName = "fakeattr"
 
-    act(() => appActions.deleteEipAttribute(nodeId, parentId, attrName))
+    act(() => deleteEipAttribute(nodeId, parentId, attrName))
 
     const attribute = renderAndUnwrapHook(() =>
       useGetEipAttribute(nodeId, parentId, attrName)
@@ -320,7 +313,7 @@ describe("mapping a dynamic router edge", () => {
       matcherValue: "abc",
     }
 
-    act(() => appActions.updateDynamicEdgeMapping(edgeId, mapping))
+    act(() => updateDynamicEdgeMapping(edgeId, mapping))
 
     const edge = getEdgesView().find((edge) => edge.id === edgeId)!
     const data = edge.data as DynamicEdgeData
@@ -335,9 +328,7 @@ describe("mapping a dynamic router edge", () => {
       matcherValue: "abc",
     }
 
-    expect(() =>
-      appActions.updateDynamicEdgeMapping(edgeId, mapping)
-    ).toThrowError()
+    expect(() => updateDynamicEdgeMapping(edgeId, mapping)).toThrowError()
   })
 })
 
@@ -351,12 +342,7 @@ describe("update content router key", () => {
     }
 
     act(() =>
-      appActions.updateContentRouterKey(
-        N2_ID,
-        routerKey.name,
-        attrName,
-        attrValue
-      )
+      updateContentRouterKey(N2_ID, routerKey.name, attrName, attrValue)
     )
 
     const actual = renderAndUnwrapHook(() => useGetContentRouterKey(N2_ID))
@@ -374,12 +360,7 @@ describe("update content router key", () => {
     }
 
     act(() =>
-      appActions.updateContentRouterKey(
-        N2_ID,
-        routerKey.name,
-        attrName,
-        attrValue
-      )
+      updateContentRouterKey(N2_ID, routerKey.name, attrName, attrValue)
     )
 
     const actual = renderAndUnwrapHook(() => useGetContentRouterKey(N2_ID))
@@ -389,7 +370,7 @@ describe("update content router key", () => {
   // TODO: unskip this test once action is fixed
   test.skip("update non-router node throws error", () => {
     expect(() =>
-      appActions.updateContentRouterKey(N1_ID, "test-key", "foo", "bar")
+      updateContentRouterKey(N1_ID, "test-key", "foo", "bar")
     ).toThrowError()
   })
 })
@@ -397,7 +378,7 @@ describe("update content router key", () => {
 test("update enabled children success", () => {
   const children = ["child1", "child2"]
 
-  act(() => appActions.updateEnabledChildren(N2_ID, children))
+  act(() => updateEnabledChildren(N2_ID, children))
 
   const actual = renderAndUnwrapHook(() => useGetChildren(N2_ID))
   expect(actual).toEqual(children)
@@ -409,14 +390,14 @@ test("update selected child node success", () => {
     parentNodeId: N2_ID,
   }
 
-  act(() => appActions.updateSelectedChildNode(childId))
+  act(() => updateSelectedChildNode(childId))
 
   const actual = renderAndUnwrapHook(useGetSelectedChildNode)
   expect(actual).toEqual(childId)
 })
 
 test("clear flow success", () => {
-  act(() => appActions.clearFlow())
+  act(() => clearFlow())
 
   const nodes = getNodesView()
   const edges = getEdgesView()
@@ -437,7 +418,7 @@ test("clear root node selections from diagram success", () => {
   let selected = getNodesView().find((n) => n.selected)
   expect(selected).not.toBeUndefined()
 
-  act(() => appActions.clearDiagramSelections())
+  act(() => clearDiagramSelections())
 
   selected = getNodesView().find((n) => n.selected)
   expect(selected).toBeUndefined()
@@ -447,7 +428,7 @@ describe("import flow from an exported JSON file", () => {
   test("import a valid flow", () => {
     const initNodes = getNodesView()
 
-    act(() => appActions.importFlowFromJson(validExportedFlow))
+    act(() => importFlowFromJson(validExportedFlow))
 
     const updatedState = {
       nodes: getNodesView(),
@@ -471,7 +452,7 @@ describe("import flow from an exported JSON file", () => {
       const flow = JSON.parse(validExportedFlow) as Record<string, object>
       delete flow[key]
 
-      act(() => appActions.importFlowFromJson(JSON.stringify(flow)))
+      act(() => importFlowFromJson(JSON.stringify(flow)))
 
       expect(getNodesView()).toEqual(initialNodes)
       expect(getEdgesView()).toEqual(initialEdges)
@@ -494,11 +475,9 @@ describe("update layout orientation", () => {
   ])(
     "set to $orientation",
     ({ orientation, sourcePosition, targetPosition }) => {
-      act(() =>
-        appActions.updateLayoutOrientation(orientation as Layout["orientation"])
-      )
+      act(() => updateLayoutOrientation(orientation as Layout["orientation"]))
 
-      expect(getLayout().orientation).toEqual(orientation)
+      expect(getLayoutView().orientation).toEqual(orientation)
 
       getNodesView().forEach((node) => {
         expect(node.sourcePosition).toEqual(sourcePosition)
@@ -509,17 +488,17 @@ describe("update layout orientation", () => {
 })
 
 test("toggle layout density", () => {
-  expect(getLayout().density).toEqual("comfortable")
+  expect(getLayoutView().density).toEqual("comfortable")
 
   const initialPositions = getNodePositions()
 
-  act(() => appActions.updateLayoutDensity())
+  act(() => toggleLayoutDensity())
   const compactPositions = getNodePositions()
   expect(compactPositions).not.toEqual(initialPositions)
-  expect(getLayout().density).toEqual("compact")
+  expect(getLayoutView().density).toEqual("compact")
 
-  act(() => appActions.updateLayoutDensity())
+  act(() => toggleLayoutDensity())
   const comfortablePositions = getNodePositions()
   expect(comfortablePositions).not.toEqual(compactPositions)
-  expect(getLayout().density).toEqual("comfortable")
+  expect(getLayoutView().density).toEqual("comfortable")
 })

@@ -1,14 +1,4 @@
 import {
-  Background,
-  BackgroundVariant,
-  ControlButton,
-  Controls,
-  ReactFlow,
-  ReactFlowInstance,
-  useReactFlow,
-} from "reactflow"
-
-import {
   ArrowsHorizontal,
   ArrowsVertical,
   Maximize,
@@ -20,15 +10,36 @@ import { ErrorBoundary } from "@carbon/react"
 import { KeyboardEvent, useEffect } from "react"
 import { DropTargetMonitor, useDrop } from "react-dnd"
 import { NativeTypes } from "react-dnd-html5-backend"
+import {
+  Background,
+  BackgroundVariant,
+  ControlButton,
+  Controls,
+  ReactFlow,
+  ReactFlowInstance,
+  useReactFlow,
+} from "reactflow"
 import "reactflow/dist/base.css"
 import { DYNAMIC_EDGE_TYPE, EIP_NODE_TYPE } from "../../api/flow"
 import { EipId } from "../../api/id"
 import {
-  useAppActions,
+  clearFlow,
+  clearSelectedChildNode,
+  createDroppedNode,
+  importFlowFromJson,
+  toggleLayoutDensity,
+  updateLayoutOrientation,
+} from "../../singletons/store/appActions"
+import {
   useFlowStore,
   useGetLayout,
   useUndoRedo,
-} from "../../singletons/store"
+} from "../../singletons/store/getterHooks"
+import {
+  onConnect,
+  onEdgesChange,
+  onNodesChange,
+} from "../../singletons/store/reactFlowActions"
 import { DragTypes } from "../draggable-panel/dragTypes"
 import DynamicEdge from "./DynamicEdge"
 import { EipNode } from "./EipNode"
@@ -106,15 +117,6 @@ const FlowCanvas = () => {
   const layout = useGetLayout()
   const { undo, redo } = useUndoRedo()
 
-  const {
-    createDroppedNode,
-    clearSelectedChildNode,
-    clearFlow,
-    importFlowFromJson,
-    updateLayoutOrientation,
-    updateLayoutDensity,
-  } = useAppActions()
-
   useEffect(() => {
     reactFlowInstance.fitView()
   }, [layout, reactFlowInstance])
@@ -172,9 +174,9 @@ const FlowCanvas = () => {
               () => redo()
             )
           }
-          onNodesChange={flowStore.onNodesChange}
-          onEdgesChange={flowStore.onEdgesChange}
-          onConnect={flowStore.onConnect}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
           onPaneClick={() => clearSelectedChildNode()}
           fitView
         >
@@ -198,7 +200,7 @@ const FlowCanvas = () => {
             >
               <ArrowsVertical />
             </ControlButton>
-            <ControlButton title="change density" onClick={updateLayoutDensity}>
+            <ControlButton title="change density" onClick={toggleLayoutDensity}>
               <Maximize />
             </ControlButton>
           </Controls>

@@ -1,15 +1,15 @@
 import { act } from "@testing-library/react"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { RouterKey } from "../../api/flow"
+import { ROOT_PARENT } from "../../api/id"
 import {
-  ROOT_PARENT,
   useGetChildren,
   useGetContentRouterKey,
   useGetEipAttribute,
   useGetNodeDescription,
   useGetRouterDefaultEdgeMapping,
   useSerializedStore,
-} from "../store"
+} from "./getterHooks"
 import { renderAndUnwrapHook, resetMockStore } from "./storeTestingUtils"
 import childBasedRouterFlow from "./testdata/store-initializers/childBasedRouterFlow.json"
 import standardFlow from "./testdata/store-initializers/standardFlow.json"

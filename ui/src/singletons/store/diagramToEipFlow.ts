@@ -1,0 +1,163 @@
+import isDeepEqual from "fast-deep-equal"
+import { useStoreWithEqualityFn } from "zustand/traditional"
+import {
+    DYNAMIC_EDGE_TYPE,
+    DynamicEdge,
+    EipFlowNode,
+    EipNodeData,
+    RouterKey,
+} from "../../api/flow"
+import {
+    Attributes,
+    EipChildNode,
+    EipFlow,
+    EipNode,
+    FlowEdge,
+} from "../../api/generated/eipFlow"
+import { EipId } from "../../api/id"
+import {
+    CHANNEL_ATTR_NAME,
+    DEFAULT_OUTPUT_CHANNEL_NAME,
+    lookupContentBasedRouterKeys,
+    lookupEipComponent,
+} from "../eipDefinitions"
+import { AppStore } from "./api"
+import { useAppStore } from "./appStore"
+
+const EIP_NAMESPACE_TO_XML_PREFIX: Record<string, string> = {
+    xml: "int-xml",
+    "web-services": "ws",
+  }
+
+export const useEipFlow = () =>
+  useStoreWithEqualityFn(
+    useAppStore,
+    (state) => diagramToEipFlow(state),
+    isDeepEqual
+  )
+
+// TODO: Extract flow conversion to a separate file
+// TODO: Dynamic router logic is over-complicating this method, extract to
+// a separate method and apply modifications after building original flow.
+const diagramToEipFlow = (state: AppStore): EipFlow => {
+  const nodeLookup = createNodeLookupMap(state.nodes)
+
+  const routerChildMap = new Map<string, EipChildNode[]>()
+  const routerAttrMap = new Map<string, Attributes>()
+
+  const edges: FlowEdge[] = state.edges.map((edge) => {
+    const source = nodeLookup.get(edge.source)?.label || edge.source
+    const target = nodeLookup.get(edge.target)?.label || edge.target
+    const edgeId = `ch-${source}-${target}`
+
+    if (edge.type === DYNAMIC_EDGE_TYPE) {
+      addRouterChannelMapping(edgeId, edge, routerChildMap, routerAttrMap)
+    }
+
+    return {
+      id: edgeId,
+      source,
+      target,
+      type: edge.sourceHandle === "discard" ? "discard" : "default",
+    }
+  })
+
+  const nodes: EipNode[] = state.nodes.map((node) => {
+    const eipComponent = lookupEipComponent(node.data.eipId)!
+    const namespace = node.data.eipId.namespace
+
+    const routerKey = state.eipNodeConfigs[node.id].routerKey
+    const routerKeyAttrs =
+      eipComponent.connectionType === "content_based_router" && routerKey
+        ? getRouterKeyAttributes(node.data.eipId, routerKey)
+        : {}
+
+    return {
+      id: node.data.label ? node.data.label : node.id,
+      eipId: {
+        ...node.data.eipId,
+        namespace: EIP_NAMESPACE_TO_XML_PREFIX[namespace] ?? namespace,
+      },
+      description: state.eipNodeConfigs[node.id]?.description,
+      role: eipComponent.role,
+      connectionType: eipComponent.connectionType,
+      attributes: {
+        ...state.eipNodeConfigs[node.id]?.attributes,
+        ...routerKeyAttrs.attributes,
+        ...routerAttrMap.get(node.id),
+      },
+      children: Object.values(state.eipNodeConfigs[node.id]?.children).concat(
+        routerKeyAttrs.child ?? [],
+        routerChildMap.get(node.id) ?? []
+      ),
+    }
+  })
+
+  return { nodes, edges }
+}
+
+const createNodeLookupMap = (nodes: EipFlowNode[]) => {
+  const map = new Map<string, EipNodeData>()
+  nodes.forEach((node) => map.set(node.id, node.data))
+  return map
+}
+
+// TODO: consider extracting the ChannelMapping and RouterKey logic to the XML translation backend
+const addRouterChannelMapping = (
+  channelId: string,
+  edge: DynamicEdge,
+  routerChildMap: Map<string, EipChildNode[]>,
+  routerAttributeMap: Map<string, Attributes>
+) => {
+  const mapping = edge.data?.mapping
+  if (!mapping) {
+    return
+  }
+
+  if (mapping.isDefaultMapping) {
+    routerAttributeMap.set(edge.source, {
+      [DEFAULT_OUTPUT_CHANNEL_NAME]: channelId,
+    })
+  } else {
+    const child: EipChildNode = {
+      name: mapping.mapperName,
+      attributes: {
+        [CHANNEL_ATTR_NAME]: channelId,
+      },
+    }
+    if (mapping.matcherValue) {
+      child.attributes![mapping.matcher.name] = mapping.matcherValue
+    }
+    const curr = routerChildMap.get(edge.source) ?? []
+    routerChildMap.set(edge.source, curr.concat(child))
+  }
+}
+
+const getRouterKeyAttributes = (eipId: EipId, routerKey: RouterKey) => {
+  const routerKeyDef = lookupContentBasedRouterKeys(eipId)
+  if (!routerKeyDef) {
+    return {}
+  }
+  switch (routerKeyDef.type) {
+    case "attribute": {
+      return { attributes: filterEmptyAttrs(routerKey.attributes ?? {}) }
+    }
+    case "child": {
+      return {
+        child: {
+          name: routerKey.name,
+          attributes: filterEmptyAttrs(routerKey.attributes ?? {}),
+        },
+      }
+    }
+  }
+}
+
+const filterEmptyAttrs = (attrs: Attributes) =>
+  Object.keys(attrs).reduce((acc, key) => {
+    const val = attrs[key]
+    if (val) {
+      acc[key] = val
+    }
+    return acc
+  }, {} as Attributes)
