@@ -1,0 +1,123 @@
+{
+    "nodes": [
+      {
+        "id": "ihLSJU8QVc",
+        "type": "eipNode",
+        "position": {
+          "x": 207.59999084472656,
+          "y": 361.5
+        },
+        "targetPosition": "left",
+        "sourcePosition": "right",
+        "data": {
+          "eipId": {
+            "namespace": "integration",
+            "name": "router"
+          }
+        },
+        "width": 114,
+        "height": 71,
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "oLBCevdvtj",
+        "type": "eipNode",
+        "position": {
+          "x": 383.39998626708984,
+          "y": 239.25
+        },
+        "targetPosition": "left",
+        "sourcePosition": "right",
+        "data": {
+          "eipId": {
+            "namespace": "file",
+            "name": "outbound-channel-adapter"
+          }
+        },
+        "width": 128,
+        "height": 132
+      },
+      {
+        "id": "SjVdssieQP",
+        "type": "eipNode",
+        "position": {
+          "x": 389.89998626708984,
+          "y": 431.75
+        },
+        "targetPosition": "left",
+        "sourcePosition": "right",
+        "data": {
+          "eipId": {
+            "namespace": "http",
+            "name": "outbound-channel-adapter"
+          }
+        },
+        "width": 128,
+        "height": 132
+      }
+    ],
+    "edges": [
+      {
+        "source": "ihLSJU8QVc",
+        "sourceHandle": "output",
+        "target": "oLBCevdvtj",
+        "targetHandle": "input",
+        "type": "dynamicEdge",
+        "data": {
+          "mapping": {
+            "mapperName": "mapping",
+            "matcher": {
+              "name": "value",
+              "type": "string",
+              "description": "A value of the evaluation token that will be mapped to a channel reference (e.g., mapping value='foo' channel='myChannel')",
+              "required": false
+            }
+          }
+        },
+        "animated": true,
+        "id": "reactflow__edge-ihLSJU8QVcoutput-oLBCevdvtjinput",
+        "selected": false
+      },
+      {
+        "source": "ihLSJU8QVc",
+        "sourceHandle": "output",
+        "target": "SjVdssieQP",
+        "targetHandle": "input",
+        "type": "dynamicEdge",
+        "data": {
+          "mapping": {
+            "mapperName": "mapping",
+            "matcher": {
+              "name": "value",
+              "type": "string",
+              "description": "A value of the evaluation token that will be mapped to a channel reference (e.g., mapping value='foo' channel='myChannel')",
+              "required": false
+            }
+          }
+        },
+        "animated": true,
+        "id": "reactflow__edge-ihLSJU8QVcoutput-SjVdssieQPinput",
+        "selected": false
+      }
+    ],
+    "eipNodeConfigs": {
+      "ihLSJU8QVc": {
+        "attributes": {},
+        "children": {}
+      },
+      "oLBCevdvtj": {
+        "attributes": {},
+        "children": {}
+      },
+      "SjVdssieQP": {
+        "attributes": {},
+        "children": {}
+      }
+    },
+    "selectedChildNode": null,
+    "layout": {
+      "orientation": "horizontal",
+      "density": "comfortable"
+    }
+  }
