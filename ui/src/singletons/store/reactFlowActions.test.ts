@@ -2,20 +2,15 @@ import { act } from "@testing-library/react"
 import { Connection, NodeRemoveChange } from "reactflow"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { DYNAMIC_EDGE_TYPE, DynamicEdgeData } from "../../api/flow"
-import {
-  getEdgesView,
-  getNodesView,
-  ROOT_PARENT,
-  useFlowStore,
-  useGetEipAttribute,
-} from "../store"
+import { ROOT_PARENT } from "../../api/id"
+import { useGetEipAttribute } from "./getterHooks"
+import { onConnect, onNodesChange } from "./reactFlowActions"
 import { renderAndUnwrapHook, resetMockStore } from "./storeTestingUtils"
+import { getEdgesView, getNodesView } from "./storeViews"
 import disconnectedFlow from "./testdata/store-initializers/disconnectedFlow.json"
 import standardFlow from "./testdata/store-initializers/standardFlow.json"
 
 vi.mock("zustand")
-
-const flowActions = renderAndUnwrapHook(useFlowStore)
 
 const FILTER_ID = "SV43RVeijQ"
 
@@ -36,7 +31,7 @@ describe("onNodesChange", () => {
     expect(initialValue).toBeTruthy()
 
     const change: NodeRemoveChange = { id: FILTER_ID, type: "remove" }
-    act(() => flowActions.onNodesChange([change]))
+    act(() => onNodesChange([change]))
 
     const finalValue = renderAndUnwrapHook(() =>
       useGetEipAttribute(FILTER_ID, ROOT_PARENT, attrName)
@@ -63,7 +58,7 @@ describe("onConnect", () => {
       targetHandle: null,
     }
 
-    act(() => flowActions.onConnect(connection))
+    act(() => onConnect(connection))
 
     const edges = getEdgesView()
     expect(edges).toHaveLength(1)
@@ -83,7 +78,7 @@ describe("onConnect", () => {
       targetHandle: null,
     }
 
-    act(() => flowActions.onConnect(connection))
+    act(() => onConnect(connection))
 
     const edges = getEdgesView()
     expect(edges).toHaveLength(1)

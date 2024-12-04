@@ -10,7 +10,11 @@ import {
 } from "@carbon/react"
 import { ChangeEvent, useMemo } from "react"
 import { Attribute } from "../../api/generated/eipComponentDef"
-import { useAppActions, useGetEipAttribute } from "../../singletons/store"
+import {
+  deleteEipAttribute,
+  updateEipAttribute,
+} from "../../singletons/store/appActions"
+import { useGetEipAttribute } from "../../singletons/store/getterHooks"
 import debounce from "../../utils/debounce"
 import DescriptionTooltipWrapper from "./DescriptionTooltipWrapper"
 
@@ -41,7 +45,6 @@ const AttributeSelectInput = ({
   id,
   parentId,
 }: AttributeInputProps<string>) => {
-  const { updateEipAttribute, deleteEipAttribute } = useAppActions()
   const emptySelect = ""
   const options = useMemo(
     () =>
@@ -80,8 +83,6 @@ const AttributeBoolInput = ({
   id,
   parentId,
 }: AttributeInputProps<boolean>) => {
-  const { updateEipAttribute } = useAppActions()
-
   const handleToggle = (checked: boolean) =>
     updateEipAttribute(id, parentId, attr.name, checked)
 
@@ -111,8 +112,6 @@ const AttributeTextInput = ({
   id,
   parentId,
 }: AttributeInputProps<string>) => {
-  const { updateEipAttribute, deleteEipAttribute } = useAppActions()
-
   const handleTextUpdates = useMemo(
     () =>
       debounce((ev: ChangeEvent<HTMLInputElement>) => {
@@ -120,7 +119,7 @@ const AttributeTextInput = ({
           ? deleteEipAttribute(id, parentId, attr.name)
           : updateEipAttribute(id, parentId, attr.name, ev.target.value)
       }, 300),
-    [id, parentId, attr.name, updateEipAttribute, deleteEipAttribute]
+    [id, parentId, attr.name]
   )
 
   return (

@@ -4,7 +4,7 @@ import xml from "highlight.js/lib/languages/xml"
 import { useEffect, useState } from "react"
 import Editor from "react-simple-code-editor"
 import { EipFlow } from "../../../api/generated/eipFlow"
-import { useEipFlow } from "../../../singletons/store"
+import { useEipFlow } from "../../../singletons/store/diagramToEipFlow"
 
 // highlight.js theme
 import "highlight.js/styles/intellij-light.css"

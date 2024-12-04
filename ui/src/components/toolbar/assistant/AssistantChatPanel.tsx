@@ -10,7 +10,7 @@ import {
 import { CloseOutline, Send } from "@carbon/react/icons"
 import { interactive } from "@carbon/themes"
 import { forwardRef, useEffect, useRef, useState } from "react"
-import { useAppActions } from "../../../singletons/store"
+import { importFlowFromJson } from "../../../singletons/store/appActions"
 import { llmClientInstance as llmClient } from "./llmClient"
 
 type ChatEntrySource = "user" | "AI"
@@ -128,10 +128,9 @@ const ChatHistory = forwardRef<HTMLParagraphElement, ChatHistoryProps>(
 
 ChatHistory.displayName = "ChatHistory"
 
+// TODO: Create a new store action to set nodes/edges directly from object instead of JSON string.
 const AssistantChatPanel = () => {
   const chatHistoryEndRef = useRef<HTMLParagraphElement | null>(null)
-  // TODO: Create a new action to set nodes/edges directly from object instead of JSON string.
-  const { importFlowFromJson } = useAppActions()
   const [chatEntries, setChatEntries] = useState<ChatEntry[]>([])
   const [streamingResponse, setStreamingResponse] = useState("")
 

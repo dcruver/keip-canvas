@@ -7,7 +7,8 @@ import {
   DYNAMIC_ROUTING_CHILDREN,
   lookupContentBasedRouterKeys,
 } from "../../singletons/eipDefinitions"
-import { useAppActions, useGetChildren } from "../../singletons/store"
+import { updateEnabledChildren } from "../../singletons/store/appActions"
+import { useGetChildren } from "../../singletons/store/getterHooks"
 
 interface ChildrenConfigProps {
   nodeId: string
@@ -102,7 +103,6 @@ const ChildSelector = ({ nodeId, childGroup }: ChildrenConfigProps) => {
   const reactFlowStore = useStoreApi()
   const { nodeInternals } = reactFlowStore.getState()
 
-  const { updateEnabledChildren } = useAppActions()
   const childrenState = useGetChildren(nodeId)
 
   const updateChildrenState = (updates: string[]) =>

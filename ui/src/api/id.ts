@@ -14,3 +14,5 @@ export const childIdToString = (cid: ChildNodeId) =>
 
 export const areChildIdsEqual = (c1: ChildNodeId, c2: ChildNodeId) =>
   childIdToString(c1) === childIdToString(c2)
+
+export const ROOT_PARENT = "root"

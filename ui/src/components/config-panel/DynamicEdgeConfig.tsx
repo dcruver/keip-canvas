@@ -10,11 +10,14 @@ import { ChangeEvent, useMemo } from "react"
 import { ChannelMapping, DynamicEdge, RouterKeyDef } from "../../api/flow"
 import { lookupContentBasedRouterKeys } from "../../singletons/eipDefinitions"
 import {
-  getNodesView,
-  useAppActions,
+  updateContentRouterKey,
+  updateDynamicEdgeMapping,
+} from "../../singletons/store/appActions"
+import {
   useGetContentRouterKey,
   useGetRouterDefaultEdgeMapping,
-} from "../../singletons/store"
+} from "../../singletons/store/getterHooks"
+import { getNodesView } from "../../singletons/store/storeViews"
 import debounce from "../../utils/debounce"
 import DescriptionTooltipWrapper from "./DescriptionTooltipWrapper"
 
@@ -57,8 +60,6 @@ const DefaultMappingToggle = ({
   toggled,
   disabled,
 }: DefaultMappingToggleProps) => {
-  const { updateDynamicEdgeMapping } = useAppActions()
-
   const id = "isDefaultMapping"
   const description =
     "A message is routed through this edge when routing resolution fails to match any of the defined routing matchers. At most one outgoing edge can marked as the default output."
@@ -88,7 +89,6 @@ const DefaultMappingToggle = ({
 // TODO: Consider moving router key configuration to the Node side panel
 // TODO: See if we can re-use (or generalize) the AttributeTextInput component here.
 const RouterKeyConfig = ({ routerNodeId, routerKeyDef }: RouterKeyProps) => {
-  const { updateContentRouterKey } = useAppActions()
   const currRouterKey = useGetContentRouterKey(routerNodeId)
 
   const handleUpdates = useMemo(
@@ -96,7 +96,7 @@ const RouterKeyConfig = ({ routerNodeId, routerKeyDef }: RouterKeyProps) => {
       debounce((attrName: string, value: string) => {
         updateContentRouterKey(routerNodeId, routerKeyDef.name, attrName, value)
       }, 300),
-    [routerNodeId, routerKeyDef.name, updateContentRouterKey]
+    [routerNodeId, routerKeyDef.name]
   )
 
   const required = routerKeyDef.attributesDef
@@ -142,7 +142,6 @@ const RouterKeyConfig = ({ routerNodeId, routerKeyDef }: RouterKeyProps) => {
 
 // TODO: Allow mapping multiple values to the same channel
 const EdgeMatcher = ({ edgeId, mapping }: EdgeMatcherProps) => {
-  const { updateDynamicEdgeMapping } = useAppActions()
   const { mapperName, matcher, matcherValue } = mapping
 
   const handleUpdates = useMemo(
@@ -150,7 +149,7 @@ const EdgeMatcher = ({ edgeId, mapping }: EdgeMatcherProps) => {
       debounce((ev: ChangeEvent<HTMLInputElement>) => {
         updateDynamicEdgeMapping(edgeId, { matcherValue: ev.target.value })
       }, 300),
-    [edgeId, updateDynamicEdgeMapping]
+    [edgeId]
   )
 
   return (
