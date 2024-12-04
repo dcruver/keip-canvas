@@ -1,7 +1,4 @@
-// TODO: Bugfix. Nested updates of the 'eipNodeConfigs' store field are mutating
-// references to the current state, this could lead to subtle bugs. Modify a deep
-// copy of the state object and return that instead. Consider using Immer.
-
+import { produce } from "immer"
 import { nanoid } from "nanoid/non-secure"
 import { Edge, Position, XYPosition } from "reactflow"
 import {
@@ -49,11 +46,11 @@ export const updateNodeLabel = (id: string, label: string) => {
 }
 
 export const updateNodeDescription = (id: string, description: string) =>
-  useAppStore.setState((state) => {
-    const configs = { ...state.eipNodeConfigs }
-    configs[id].description = description
-    return { eipNodeConfigs: configs }
-  })
+  useAppStore.setState(
+    produce((draft: AppStore) => {
+      draft.eipNodeConfigs[id].description = description
+    })
+  )
 
 export const updateEipAttribute = (
   id: string,
@@ -61,64 +58,34 @@ export const updateEipAttribute = (
   attrName: string,
   value: AttributeType
 ) =>
-  useAppStore.setState((state) => {
-    const configs = { ...state.eipNodeConfigs }
-    if (parentId === ROOT_PARENT) {
-      configs[id].attributes[attrName] = value
-    } else {
-      const children = configs[parentId].children
-      configs[parentId].children = {
-        ...children,
-        [id]: {
-          ...children[id],
-          attributes: {
-            ...children[id].attributes,
-            [attrName]: value,
-          },
-        },
+  useAppStore.setState(
+    produce((draft: AppStore) => {
+      if (parentId === ROOT_PARENT) {
+        draft.eipNodeConfigs[id].attributes[attrName] = value
+      } else {
+        const child = draft.eipNodeConfigs[parentId].children[id]
+        child.attributes ??= {}
+        child.attributes[attrName] = value
       }
-    }
-    return { eipNodeConfigs: configs }
-  })
+    })
+  )
 
 export const deleteEipAttribute = (
   id: string,
   parentId: string,
   attrName: string
 ) =>
-  useAppStore.setState((state) => {
-    const nodeConfigs = state.eipNodeConfigs
-    if (parentId === ROOT_PARENT) {
-      const updatedAttrs = { ...nodeConfigs[id].attributes }
-      delete updatedAttrs[attrName]
-      return {
-        eipNodeConfigs: {
-          ...nodeConfigs,
-          [id]: { ...nodeConfigs[id], attributes: updatedAttrs },
-        },
+  useAppStore.setState(
+    produce((draft: AppStore) => {
+      if (parentId === ROOT_PARENT) {
+        delete draft.eipNodeConfigs[id].attributes[attrName]
+      } else {
+        const attributes =
+          draft.eipNodeConfigs[parentId].children[id].attributes
+        attributes && delete attributes[attrName]
       }
-    } else {
-      const updatedAttrs = {
-        ...nodeConfigs[parentId].children[id].attributes,
-      }
-      delete updatedAttrs[attrName]
-      return {
-        eipNodeConfigs: {
-          ...nodeConfigs,
-          [parentId]: {
-            ...nodeConfigs[parentId],
-            children: {
-              ...nodeConfigs[parentId].children,
-              [id]: {
-                ...nodeConfigs[parentId].children[id],
-                attributes: updatedAttrs,
-              },
-            },
-          },
-        },
-      }
-    }
-  })
+    })
+  )
 
 // TODO: Ensure no more than one default mapping edge can be set
 export const updateDynamicEdgeMapping = (
@@ -147,35 +114,30 @@ export const updateContentRouterKey = (
   attrName: string,
   value: AttributeType
 ) =>
-  useAppStore.setState((state) => ({
-    eipNodeConfigs: {
-      ...state.eipNodeConfigs,
-      [nodeId]: {
-        ...state.eipNodeConfigs[nodeId],
-        routerKey: {
-          name: keyName,
-          attributes: {
-            ...state.eipNodeConfigs[nodeId].routerKey?.attributes,
-            [attrName]: value,
-          },
-        },
-      },
-    },
-  }))
+  useAppStore.setState(
+    produce((draft: AppStore) => {
+      const config = draft.eipNodeConfigs[nodeId]
+      config.routerKey ??= { name: keyName }
+      config.routerKey.name = keyName
+
+      const routerKey = config.routerKey
+      routerKey.attributes ??= {}
+      routerKey.attributes[attrName] = value
+    })
+  )
 
 export const updateEnabledChildren = (nodeId: string, children: string[]) =>
-  useAppStore.setState((state) => {
-    const configs = { ...state.eipNodeConfigs }
-    configs[nodeId].children = children.reduce(
-      (accum, name) => {
-        accum[name] = { name }
-        return accum
-      },
-      {} as EipNodeConfig["children"]
-    )
-
-    return { eipNodeConfigs: configs }
-  })
+  useAppStore.setState(
+    produce((draft: AppStore) => {
+      draft.eipNodeConfigs[nodeId].children = children.reduce(
+        (accum, name) => {
+          accum[name] = { name }
+          return accum
+        },
+        {} as EipNodeConfig["children"]
+      )
+    })
+  )
 
 export const updateSelectedChildNode = (childId: ChildNodeId) =>
   useAppStore.setState(() => ({ selectedChildNode: childId }))

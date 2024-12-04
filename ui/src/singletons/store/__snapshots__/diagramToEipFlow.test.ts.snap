@@ -202,7 +202,11 @@ exports[`standard diagram to EipFlow success 1`] = `
     },
     {
       "attributes": {},
-      "children": [],
+      "children": [
+        {
+          "name": "transactional",
+        },
+      ],
       "connectionType": "sink",
       "description": "write to file",
       "eipId": {

@@ -20,6 +20,7 @@ import {
 import { renderAndUnwrapHook, resetMockStore } from "./storeTestingUtils"
 import selectedNodeFlow from "./testdata/store-initializers/singleSelectedNodeFlow.json"
 import standardFlow from "./testdata/store-initializers/standardFlow.json"
+import unspecifiedRouterFlow from "./testdata/store-initializers/unspecifiedRouterFlow.json"
 import verticalFlow from "./testdata/store-initializers/verticalFlow.json"
 
 import {
@@ -163,6 +164,15 @@ describe("updating EIP Attributes", () => {
   test.each([
     {
       msg: "add root node attr",
+      nodeId: N2_ID,
+      parentId: ROOT_PARENT,
+      attribute: {
+        name: "foo",
+        value: "bar",
+      },
+    },
+    {
+      msg: "add the first attr for a root node",
       nodeId: N1_ID,
       parentId: ROOT_PARENT,
       attribute: {
@@ -174,6 +184,15 @@ describe("updating EIP Attributes", () => {
       msg: "add child node attr",
       nodeId: "poller",
       parentId: N1_ID,
+      attribute: {
+        name: "child-foo",
+        value: "child-bar",
+      },
+    },
+    {
+      msg: "add the first attr for a child node",
+      nodeId: "transactional",
+      parentId: "MrMneIdthg",
       attribute: {
         name: "child-foo",
         value: "child-bar",
@@ -349,6 +368,25 @@ describe("update content router key", () => {
     expect(actual).toEqual(routerKey)
   })
 
+  test("create new content router key success", () => {
+    act(() => resetMockStore(unspecifiedRouterFlow))
+    const routerId = "ihLSJU8QVc"
+
+    const attrName = "expression"
+    const attrValue = "bar"
+    const routerKey: RouterKey = {
+      name: "test-key",
+      attributes: { [attrName]: attrValue },
+    }
+
+    act(() =>
+      updateContentRouterKey(routerId, routerKey.name, attrName, attrValue)
+    )
+
+    const actual = renderAndUnwrapHook(() => useGetContentRouterKey(routerId))
+    expect(actual).toEqual(routerKey)
+  })
+
   test("add additional router key attribute success", () => {
     const initialKey = renderAndUnwrapHook(() => useGetContentRouterKey(N2_ID))
 
@@ -371,6 +409,12 @@ describe("update content router key", () => {
   test.skip("update non-router node throws error", () => {
     expect(() =>
       updateContentRouterKey(N1_ID, "test-key", "foo", "bar")
+    ).toThrowError()
+  })
+
+  test("update non-existent node throws error", () => {
+    expect(() =>
+      updateContentRouterKey("fakeid", "test-key", "foo", "bar")
     ).toThrowError()
   })
 })
