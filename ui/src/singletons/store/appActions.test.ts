@@ -11,7 +11,7 @@ import {
 } from "../../api/flow"
 import { ChildNodeId, ROOT_PARENT } from "../../api/id"
 import {
-  useGetChildren,
+  useGetEnabledChildren,
   useGetContentRouterKey,
   useGetEipAttribute,
   useGetNodeDescription,
@@ -424,7 +424,7 @@ test("update enabled children success", () => {
 
   act(() => updateEnabledChildren(N2_ID, children))
 
-  const actual = renderAndUnwrapHook(() => useGetChildren(N2_ID))
+  const actual = renderAndUnwrapHook(() => useGetEnabledChildren(N2_ID))
   expect(actual).toEqual(children)
 })
 
@@ -478,7 +478,7 @@ describe("import flow from an exported JSON file", () => {
       nodes: getNodesView(),
       edges: getEdgesView(),
       children: getNodesView().map((node) => ({
-        [node.id]: renderAndUnwrapHook(() => useGetChildren(node.id)),
+        [node.id]: renderAndUnwrapHook(() => useGetEnabledChildren(node.id)),
       })),
     }
 

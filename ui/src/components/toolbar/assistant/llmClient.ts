@@ -1,20 +1,26 @@
 import { Ollama } from "@langchain/ollama"
-import { Edge } from "reactflow"
-import { EipFlowNode } from "../../../api/flow"
+import { Edge, Node } from "reactflow"
+import { EipId } from "../../../api/id"
+import { EipConfig } from "../../../singletons/store/api"
 import {
   getEdgesView,
+  getEipId,
   getLayoutView,
   getNodesView,
 } from "../../../singletons/store/storeViews"
 import fetchWithTimeout from "../../../utils/fetch/fetchWithTimeout"
 import { newFlowLayout } from "../../layout/layouting"
-import { fuzzyMatchNodeEipIds } from "./fuzzyEipIdMatch"
+import { fuzzyEipMatch } from "./fuzzyEipIdMatch"
 import { flowCreatePrompt, flowUpdatePrompt } from "./prompt"
 
+interface GenNodeData {
+  eipId: EipId
+}
+
 interface ModelFlowResponse {
-  nodes: EipFlowNode[]
+  nodes: Node<GenNodeData>[]
   edges: Edge[]
-  eipNodeConfigs: Record<string, object>
+  eipConfigs: Record<string, EipConfig>
 }
 
 interface PromptResponse {
@@ -93,7 +99,7 @@ class LlmClient {
         nodes: nodes.map((n) => ({
           id: n.id,
           type: n.type,
-          data: { eipId: n.data.eipId },
+          data: { eipId: getEipId(n.id) },
         })),
         edges: getEdgesView(),
       })
@@ -115,24 +121,34 @@ class LlmClient {
     }
 
     if (!response.edges) {
-      if (response.nodes.length == 1) {
+      if (response.nodes.length === 1) {
         response.edges = []
       } else {
         throw new Error("No edges provided in model response: " + jsonResponse)
       }
     }
 
-    if (!response.eipNodeConfigs) {
-      response.eipNodeConfigs = {}
-    }
-
-    fuzzyMatchNodeEipIds(response.nodes)
+    response.eipConfigs = {}
+    collectEipIds(response)
 
     const layout = getLayoutView()
-    response.nodes = newFlowLayout(response.nodes, response.edges, layout)
+    const eipFlow = convertToEipFlow(response)
+    eipFlow.nodes = newFlowLayout(eipFlow.nodes, eipFlow.edges, layout)
 
     return JSON.stringify(response)
   }
 }
+
+const convertToEipFlow = (response: ModelFlowResponse) => ({
+  nodes: response.nodes.map((node) => ({ ...node, data: {} })),
+  edges: response.edges,
+  eipConfigs: response.eipConfigs,
+})
+
+const collectEipIds = (response: ModelFlowResponse) =>
+  response.nodes.forEach((node) => {
+    const eipId = fuzzyEipMatch(node.data.eipId)
+    response.eipConfigs[node.id] = { eipId, attributes: {}, children: [] }
+  })
 
 export const llmClientInstance = new LlmClient()

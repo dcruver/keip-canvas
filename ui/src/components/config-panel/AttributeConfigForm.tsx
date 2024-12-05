@@ -23,12 +23,10 @@ const addPaddingClass = "cfg-panel__container__padding-add"
 interface AttributeInputFactoryProps {
   attr: Attribute
   id: string
-  parentId: string
 }
 
 interface AttributeInputProps<T> {
   id: string
-  parentId: string
   attr: Attribute
   attrValue: T
 }
@@ -36,14 +34,12 @@ interface AttributeInputProps<T> {
 interface AttributeFormProps {
   attrs: Attribute[]
   id: string
-  parentId: string
 }
 
 const AttributeSelectInput = ({
   attr,
   attrValue,
   id,
-  parentId,
 }: AttributeInputProps<string>) => {
   const emptySelect = ""
   const options = useMemo(
@@ -56,8 +52,8 @@ const AttributeSelectInput = ({
 
   const handleSelect = (ev: ChangeEvent<HTMLSelectElement>) => {
     ev.target.value === emptySelect
-      ? deleteEipAttribute(id, parentId, attr.name)
-      : updateEipAttribute(id, parentId, attr.name, ev.target.value)
+      ? deleteEipAttribute(id, attr.name)
+      : updateEipAttribute(id, attr.name, ev.target.value)
   }
 
   return (
@@ -81,10 +77,9 @@ const AttributeBoolInput = ({
   attr,
   attrValue,
   id,
-  parentId,
 }: AttributeInputProps<boolean>) => {
   const handleToggle = (checked: boolean) =>
-    updateEipAttribute(id, parentId, attr.name, checked)
+    updateEipAttribute(id, attr.name, checked)
 
   return (
     <DescriptionTooltipWrapper id={attr.name} description={attr.description}>
@@ -110,16 +105,15 @@ const AttributeTextInput = ({
   attr,
   attrValue,
   id,
-  parentId,
 }: AttributeInputProps<string>) => {
   const handleTextUpdates = useMemo(
     () =>
       debounce((ev: ChangeEvent<HTMLInputElement>) => {
         ev.target.value === ""
-          ? deleteEipAttribute(id, parentId, attr.name)
-          : updateEipAttribute(id, parentId, attr.name, ev.target.value)
+          ? deleteEipAttribute(id, attr.name)
+          : updateEipAttribute(id, attr.name, ev.target.value)
       }, 300),
-    [id, parentId, attr.name]
+    [id, attr.name]
   )
 
   return (
@@ -136,11 +130,7 @@ const AttributeTextInput = ({
 }
 
 const AttributeInput = (props: AttributeInputFactoryProps) => {
-  const attrValue = useGetEipAttribute(
-    props.id,
-    props.parentId,
-    props.attr.name
-  )
+  const attrValue = useGetEipAttribute(props.id, props.attr.name)
 
   switch (props.attr.type) {
     // TODO: Handle number types with more specific input components (e.g. NumberInput, Slider).

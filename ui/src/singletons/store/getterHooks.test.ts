@@ -1,9 +1,8 @@
 import { act } from "@testing-library/react"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { RouterKey } from "../../api/flow"
-import { ROOT_PARENT } from "../../api/id"
 import {
-  useGetChildren,
+  useGetEnabledChildren,
   useGetContentRouterKey,
   useGetEipAttribute,
   useGetNodeDescription,
@@ -109,17 +108,17 @@ describe("get EIP attribute", () => {
 
 describe("get list of children", () => {
   test("node has children -> value", () => {
-    const children = renderAndUnwrapHook(() => useGetChildren(N1_ID))
+    const children = renderAndUnwrapHook(() => useGetEnabledChildren(N1_ID))
     expect(children).toEqual(["poller"])
   })
 
   test("node does not have children -> empty array", () => {
-    const children = renderAndUnwrapHook(() => useGetChildren(N3_ID))
+    const children = renderAndUnwrapHook(() => useGetEnabledChildren(N3_ID))
     expect(children).toEqual([])
   })
 
   test("unknown node id -> empty array", () => {
-    const children = renderAndUnwrapHook(() => useGetChildren("fakeid"))
+    const children = renderAndUnwrapHook(() => useGetEnabledChildren("fakeid"))
     expect(children).toEqual([])
   })
 })
