@@ -1,8 +1,7 @@
 import { useShallow } from "zustand/react/shallow"
 import { DYNAMIC_EDGE_TYPE, DynamicEdge } from "../../api/flow"
-import { areChildIdsEqual, ChildNodeId, ROOT_PARENT } from "../../api/id"
-import { AppStore } from "./api"
-import { useAppStore } from "./appStore"
+import { AppStore, SerializedFlow } from "./api"
+import { EXPORTED_FLOW_VERSION, useAppStore } from "./appStore"
 
 export const useNodeCount = () => useAppStore((state) => state.nodes.length)
 
@@ -24,53 +23,35 @@ export const useUndoRedo = () =>
     redo: useAppStore.temporal.getState().redo,
   }))
 
-export const useSerializedStore = () =>
-  useAppStore((state) =>
-    JSON.stringify({
+export const useSerializedFlow = () =>
+  useAppStore((state) => {
+    const flow: SerializedFlow = {
       nodes: state.nodes,
       edges: state.edges,
-      eipNodeConfigs: state.eipNodeConfigs,
-    })
-  )
-
-export const useGetNodeDescription = (id: string) =>
-  useAppStore((state) => state.eipNodeConfigs[id]?.description)
-
-export const useGetEipAttribute = (
-  id: string,
-  parentId: string,
-  attrName: string
-) =>
-  useAppStore((state) => {
-    if (parentId === ROOT_PARENT) {
-      return state.eipNodeConfigs[id]?.attributes[attrName]
+      eipConfigs: state.eipConfigs,
+      version: EXPORTED_FLOW_VERSION,
     }
-    const child = state.eipNodeConfigs[parentId]?.children[id]
-    return child?.attributes?.[attrName]
+    return JSON.stringify(flow)
   })
 
-export const useGetChildren = (id: string) =>
+export const useGetNodeDescription = (id: string) =>
+  useAppStore((state) => state.eipConfigs[id]?.description)
+
+export const useGetEipAttribute = (id: string, attrName: string) =>
+  useAppStore((state) => state.eipConfigs[id]?.attributes[attrName])
+
+export const useGetEnabledChildren = (id: string) =>
   useAppStore(
     useShallow((state) =>
-      state.eipNodeConfigs[id]
-        ? Object.keys(state.eipNodeConfigs[id].children)
-        : []
+      state.eipConfigs[id] ? state.eipConfigs[id].children : []
     )
   )
 
 export const useGetSelectedChildNode = () =>
-  useAppStore(useShallow((state) => state.selectedChildNode))
-
-export const useIsChildSelected = (childId: ChildNodeId) =>
-  useAppStore((state) => {
-    if (state.selectedChildNode === null) {
-      return false
-    }
-    return areChildIdsEqual(state.selectedChildNode, childId)
-  })
+  useAppStore((state) => state.selectedChildNode)
 
 export const useGetContentRouterKey = (nodeId: string) =>
-  useAppStore(useShallow((state) => state.eipNodeConfigs[nodeId]?.routerKey))
+  useAppStore(useShallow((state) => state.eipConfigs[nodeId]?.routerKey))
 
 export const useGetRouterDefaultEdgeMapping = (routerId: string) =>
   useAppStore((state) =>

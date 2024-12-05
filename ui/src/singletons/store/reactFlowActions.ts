@@ -16,6 +16,7 @@ import {
 } from "../eipDefinitions"
 import { AppStore } from "./api"
 import { useAppStore } from "./appStore"
+import { getEipId } from "./storeViews"
 
 export const onNodesChange = (changes: NodeChange[]) =>
   useAppStore.setState((state) => {
@@ -25,7 +26,7 @@ export const onNodesChange = (changes: NodeChange[]) =>
 
     const updatedEipConfigs = removeDeletedNodeConfigs(state, changes)
     if (updatedEipConfigs) {
-      updates.eipNodeConfigs = updatedEipConfigs
+      updates.eipConfigs = updatedEipConfigs
     }
 
     return updates
@@ -41,8 +42,8 @@ export const onEdgesChange = (changes: EdgeChange[]) =>
 export const onConnect = (connection: Connection) =>
   useAppStore.setState((state) => {
     const sourceNode = state.nodes.find((n) => n.id === connection.source)
-    const sourceComponent =
-      sourceNode && lookupEipComponent(sourceNode.data.eipId)
+    const sourceEipId = sourceNode && getEipId(sourceNode.id)
+    const sourceComponent = sourceEipId && lookupEipComponent(sourceEipId)
     const edge =
       sourceComponent?.connectionType === "content_based_router"
         ? createDynamicRoutingEdge(connection, sourceComponent)
@@ -59,9 +60,21 @@ const removeDeletedNodeConfigs = (state: AppStore, changes: NodeChange[]) => {
     return null
   }
 
-  const updatedConfigs = { ...state.eipNodeConfigs }
-  deletes.forEach((c) => delete updatedConfigs[c.id])
+  const updatedConfigs = { ...state.eipConfigs }
+  deletes.forEach((c) => removeNestedConfigs(c.id, updatedConfigs))
   return updatedConfigs
+}
+
+const removeNestedConfigs = (root: string, configs: AppStore["eipConfigs"]) => {
+  const stack = []
+  stack.push(root)
+
+  while (stack.length > 0) {
+    const curr = stack.pop()!
+    configs[curr].children.forEach((c) => stack.push(c))
+    delete configs[curr]
+  }
+  return configs
 }
 
 // TODO: Refactor

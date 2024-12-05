@@ -1,6 +1,5 @@
-import { EipFlowNode } from "../../../api/flow"
 import { EipComponent } from "../../../api/generated/eipComponentDef"
-import { EipId } from "../../../api/id"
+import { EipId } from "../../../api/generated/eipFlow"
 import {
   EIP_SCHEMA,
   lookupEipComponent,
@@ -10,13 +9,13 @@ import {
  * The purpose of this function is to relax matching for EipIds returned by the LLM.
  *
  * Implements a rudimentary fuzzy search that returns immediately if one of the
- * following conditions is true (the provided id is return if no matches are found):
+ * following conditions is true (the provided id is returned if no matches are found):
  * - Check if the given EipId has an exact match in the schema definition
  * - Split the component name into tokens and check for a partial match in the provided namespace
  * - Check if the provided component name has an exact match in the 'integration' namespace
  * - Split the component name into tokens and check for a partial match in the 'integration' namespace
  */
-const fuzzyEipMatch = (id: EipId): EipId => {
+export const fuzzyEipMatch = (id: EipId): EipId => {
   const targetId: EipId = {
     namespace: id.namespace.toLowerCase(),
     name: id.name.toLowerCase(),
@@ -68,11 +67,4 @@ const searchByToken = (
     }
   }
   return null
-}
-
-export const fuzzyMatchNodeEipIds = (nodes: EipFlowNode[]) => {
-  nodes.forEach((node) => {
-    node.data.eipId = fuzzyEipMatch(node.data.eipId)
-    return node
-  })
 }

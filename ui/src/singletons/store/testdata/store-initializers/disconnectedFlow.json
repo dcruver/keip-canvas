@@ -1,96 +1,93 @@
 {
-    "nodes": [
-      {
-        "id": "yiSAwF9JPY",
-        "type": "eipNode",
-        "position": {
-          "x": -8.813082912319118,
-          "y": 113.59746102027287
-        },
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "data": {
-          "eipId": {
-            "namespace": "integration",
-            "name": "inbound-channel-adapter"
-          }
-        },
-        "width": 114,
-        "height": 121,
-        "selected": false,
-        "positionAbsolute": {
-          "x": -8.813082912319118,
-          "y": 113.59746102027287
-        },
-        "dragging": false
+  "nodes": [
+    {
+      "id": "yiSAwF9JPY",
+      "type": "eipNode",
+      "position": {
+        "x": -8.813082912319118,
+        "y": 113.59746102027287
       },
-      {
-        "id": "1QUBRFgUcd",
-        "type": "eipNode",
-        "position": {
-          "x": 197.24568570810294,
-          "y": 74.05877001110413
-        },
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "data": {
-          "eipId": {
-            "namespace": "integration",
-            "name": "header-value-router"
-          }
-        },
-        "width": 114,
-        "height": 71,
-        "selected": false,
-        "positionAbsolute": {
-          "x": 197.24568570810294,
-          "y": 74.05877001110413
-        },
-        "dragging": false
+      "targetPosition": "left",
+      "sourcePosition": "right",
+      "data": {},
+      "width": 114,
+      "height": 121,
+      "selected": false,
+      "positionAbsolute": {
+        "x": -8.813082912319118,
+        "y": 113.59746102027287
       },
-      {
-        "id": "XMypRiNV-I",
-        "type": "eipNode",
-        "position": {
-          "x": 191.29150284979056,
-          "y": 210.41352010814853
-        },
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "data": {
-          "eipId": {
-            "namespace": "ftp",
-            "name": "outbound-channel-adapter"
-          }
-        },
-        "width": 128,
-        "height": 132,
-        "selected": true,
-        "positionAbsolute": {
-          "x": 191.29150284979056,
-          "y": 210.41352010814853
-        },
-        "dragging": false
-      }
-    ],
-    "edges": [],
-    "eipNodeConfigs": {
-      "yiSAwF9JPY": {
-        "attributes": {},
-        "children": {}
+      "dragging": false
+    },
+    {
+      "id": "1QUBRFgUcd",
+      "type": "eipNode",
+      "position": {
+        "x": 197.24568570810294,
+        "y": 74.05877001110413
       },
-      "1QUBRFgUcd": {
-        "attributes": {},
-        "children": {}
+      "targetPosition": "left",
+      "sourcePosition": "right",
+      "data": {},
+      "width": 114,
+      "height": 71,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 197.24568570810294,
+        "y": 74.05877001110413
       },
-      "XMypRiNV-I": {
-        "attributes": {},
-        "children": {}
+      "dragging": false
+    },
+    {
+      "id": "XMypRiNV-I",
+      "type": "eipNode",
+      "position": {
+        "x": 191.29150284979056,
+        "y": 210.41352010814853
+      },
+      "targetPosition": "left",
+      "sourcePosition": "right",
+      "data": {},
+      "width": 128,
+      "height": 132,
+      "selected": true,
+      "positionAbsolute": {
+        "x": 191.29150284979056,
+        "y": 210.41352010814853
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [],
+  "eipConfigs": {
+    "yiSAwF9JPY": {
+      "attributes": {},
+      "children": [],
+      "eipId": {
+        "namespace": "integration",
+        "name": "inbound-channel-adapter"
       }
     },
-    "selectedChildNode": null,
-    "layout": {
-      "orientation": "horizontal",
-      "density": "comfortable"
+    "1QUBRFgUcd": {
+      "attributes": {},
+      "children": [],
+      "eipId": {
+        "namespace": "integration",
+        "name": "header-value-router"
+      }
+    },
+    "XMypRiNV-I": {
+      "attributes": {},
+      "children": [],
+      "eipId": {
+        "namespace": "ftp",
+        "name": "outbound-channel-adapter"
+      }
     }
+  },
+  "selectedChildNode": null,
+  "layout": {
+    "orientation": "horizontal",
+    "density": "comfortable"
   }
+}

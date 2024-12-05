@@ -1,7 +1,7 @@
 import { OverflowMenuItem } from "@carbon/react"
 import { OverflowMenuItemProps } from "@carbon/react/lib/components/OverflowMenuItem/OverflowMenuItem"
 import { forwardRef } from "react"
-import { useSerializedStore } from "../../singletons/store/getterHooks"
+import { useSerializedFlow } from "../../singletons/store/getterHooks"
 
 const downloadFile = (json: string) => {
   const blob = new Blob([json], { type: "application/json" })
@@ -16,7 +16,7 @@ const downloadFile = (json: string) => {
 
 const SaveDiagram = forwardRef<HTMLElement>(
   (props: OverflowMenuItemProps, ref) => {
-    const storeJson = useSerializedStore()
+    const storeJson = useSerializedFlow()
 
     return (
       <OverflowMenuItem

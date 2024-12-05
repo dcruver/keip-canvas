@@ -1,109 +1,102 @@
 {
-    "nodes": [
-      {
-        "id": "SLamPCIOnG",
-        "type": "eipNode",
-        "position": {
-          "x": 2.5,
-          "y": 0
-        },
-        "targetPosition": "top",
-        "sourcePosition": "bottom",
-        "data": {
-          "eipId": {
-            "namespace": "integration",
-            "name": "inbound-channel-adapter"
-          }
-        },
-        "width": 114,
-        "height": 121,
-        "positionAbsolute": {
-          "x": 2.5,
-          "y": 0
-        },
-        "selected": false,
-        "dragging": false
+  "nodes": [
+    {
+      "id": "SLamPCIOnG",
+      "type": "eipNode",
+      "position": {
+        "x": 2.5,
+        "y": 0
       },
-      {
-        "id": "UrnBcciyaA",
-        "type": "eipNode",
-        "position": {
-          "x": 2.5,
-          "y": 141
-        },
-        "targetPosition": "top",
-        "sourcePosition": "bottom",
-        "data": {
-          "eipId": {
-            "namespace": "integration",
-            "name": "header-enricher"
-          }
-        },
-        "width": 114,
-        "height": 76,
-        "selected": false,
-        "positionAbsolute": {
-          "x": 2.5,
-          "y": 141
-        },
-        "dragging": false
-      },
-      {
-        "id": "4s1rNUykz1",
-        "type": "eipNode",
-        "position": {
-          "x": 0,
-          "y": 237
-        },
-        "targetPosition": "top",
-        "sourcePosition": "bottom",
-        "data": {
-          "eipId": {
-            "namespace": "integration",
-            "name": "outbound-channel-adapter"
-          }
-        },
-        "width": 119,
-        "height": 121,
-        "positionAbsolute": {
-          "x": 0,
-          "y": 237
-        }
-      }
-    ],
-    "edges": [
-      {
-        "source": "SLamPCIOnG",
-        "sourceHandle": "output",
-        "target": "UrnBcciyaA",
-        "targetHandle": "input",
-        "id": "reactflow__edge-SLamPCIOnGoutput-UrnBcciyaAinput"
-      },
-      {
-        "source": "UrnBcciyaA",
-        "sourceHandle": "output",
-        "target": "4s1rNUykz1",
-        "targetHandle": "input",
-        "id": "reactflow__edge-UrnBcciyaAoutput-4s1rNUykz1input"
-      }
-    ],
-    "eipNodeConfigs": {
-      "SLamPCIOnG": {
-        "attributes": {},
-        "children": {}
-      },
-      "UrnBcciyaA": {
-        "attributes": {},
-        "children": {}
-      },
-      "4s1rNUykz1": {
-        "attributes": {},
-        "children": {}
+      "targetPosition": "top",
+      "sourcePosition": "bottom",
+      "data": {},
+      "width": 114,
+      "height": 121,
+      "positionAbsolute": {
+        "x": 2.5,
+        "y": 0
       }
     },
-    "selectedChildNode": null,
-    "layout": {
-      "orientation": "vertical",
-      "density": "compact"
+    {
+      "id": "UrnBcciyaA",
+      "type": "eipNode",
+      "position": {
+        "x": 2.5,
+        "y": 141
+      },
+      "targetPosition": "top",
+      "sourcePosition": "bottom",
+      "data": {},
+      "width": 114,
+      "height": 76,
+      "positionAbsolute": {
+        "x": 2.5,
+        "y": 141
+      }
+    },
+    {
+      "id": "4s1rNUykz1",
+      "type": "eipNode",
+      "position": {
+        "x": 0,
+        "y": 237
+      },
+      "targetPosition": "top",
+      "sourcePosition": "bottom",
+      "data": {},
+      "width": 119,
+      "height": 121,
+      "positionAbsolute": {
+        "x": 0,
+        "y": 237
+      }
     }
+  ],
+  "edges": [
+    {
+      "source": "SLamPCIOnG",
+      "sourceHandle": "output",
+      "target": "UrnBcciyaA",
+      "targetHandle": "input",
+      "id": "reactflow__edge-SLamPCIOnGoutput-UrnBcciyaAinput"
+    },
+    {
+      "source": "UrnBcciyaA",
+      "sourceHandle": "output",
+      "target": "4s1rNUykz1",
+      "targetHandle": "input",
+      "id": "reactflow__edge-UrnBcciyaAoutput-4s1rNUykz1input"
+    }
+  ],
+  "eipConfigs": {
+    "SLamPCIOnG": {
+      "attributes": {},
+      "children": [],
+      "eipId": {
+        "namespace": "integration",
+        "name": "inbound-channel-adapter"
+      }
+    },
+    "UrnBcciyaA": {
+      "attributes": {},
+      "children": [],
+      "eipId": {
+        "namespace": "integration",
+        "name": "header-enricher"
+      }
+    },
+    "4s1rNUykz1": {
+      "attributes": {},
+      "children": [],
+      "eipId": {
+        "namespace": "integration",
+        "name": "outbound-channel-adapter"
+      }
+    }
+  },
+  "selectedChildNode": null,
+  "layout": {
+    "orientation": "vertical",
+    "density": "compact"
   }
+}

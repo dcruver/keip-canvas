@@ -1,14 +1,13 @@
 import { Checkbox, Form, RadioButton, RadioButtonGroup } from "@carbon/react"
-import { useStoreApi } from "reactflow"
-import { EipFlowNode } from "../../api/flow"
 import { EipChildGroup } from "../../api/generated/eipComponentDef"
-import { EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import {
   DYNAMIC_ROUTING_CHILDREN,
   lookupContentBasedRouterKeys,
 } from "../../singletons/eipDefinitions"
-import { updateEnabledChildren } from "../../singletons/store/appActions"
-import { useGetChildren } from "../../singletons/store/getterHooks"
+import { disableChild, enableChild } from "../../singletons/store/appActions"
+import { useGetEnabledChildren } from "../../singletons/store/getterHooks"
+import { getEipId } from "../../singletons/store/storeViews"
 
 interface ChildrenConfigProps {
   nodeId: string
@@ -16,14 +15,14 @@ interface ChildrenConfigProps {
 }
 
 interface ChildrenInputProps {
-  childrenOptions: string[]
-  childrenState: string[]
-  updateChildrenState: (updates: string[]) => void
+  childrenOptions: EipId[]
+  childIds: string[]
+  parentId: string
 }
 
 const idPrefix = "child-"
 const getUniqueId = (id: string) => `${idPrefix}-${id}`
-const getName = (id: string) => id.substring(idPrefix.length + 1)
+const getName = (eipId: EipId | null) => eipId?.name ?? "none"
 
 const isCustomDynamicRouterChild = (childName: string, eipId?: EipId) => {
   if (!eipId) {
@@ -40,58 +39,63 @@ const isCustomDynamicRouterChild = (childName: string, eipId?: EipId) => {
 
 const ChildrenMultiSelection = ({
   childrenOptions,
-  childrenState,
-  updateChildrenState,
+  childIds,
+  parentId,
 }: ChildrenInputProps) => {
-  const handleChange = (checked: boolean, id: string) => {
-    const name = getName(id)
-    const updatedChildren = checked
-      ? [...childrenState, name].sort()
-      : childrenState.filter((c) => c !== name)
-    updateChildrenState(updatedChildren)
+  const enabledChildren = childIds.reduce(
+    (acc, curr) => {
+      const eipId = getEipId(curr)!
+      acc[eipId.name] = curr
+      return acc
+    },
+    {} as Record<string, string>
+  )
+
+  const handleChange = (checked: boolean, eipId: EipId) => {
+    checked
+      ? enableChild(parentId, eipId)
+      : disableChild(parentId, enabledChildren[eipId.name])
   }
 
-  return childrenOptions.map((name) => (
+  return childrenOptions.map((eipId) => (
     <Checkbox
-      key={name}
-      id={getUniqueId(name)}
-      labelText={name}
-      defaultChecked={childrenState.includes(name)}
-      onChange={(_, { checked, id }) => handleChange(checked, id)}
+      key={eipId.name}
+      id={getUniqueId(eipId.name)}
+      labelText={eipId.name}
+      defaultChecked={Boolean(enabledChildren[eipId.name])}
+      onChange={(_, { checked }) => handleChange(checked, eipId)}
     />
   ))
 }
 
 const ChildrenSingleSelection = ({
   childrenOptions,
-  childrenState,
-  updateChildrenState,
+  childIds,
+  parentId,
 }: ChildrenInputProps) => {
-  if (childrenState?.length > 1) {
-    console.warn(
-      "Expected a single child element in state array",
-      childrenState
-    )
+  if (childIds?.length > 1) {
+    console.warn("Expected at most a single enabled child in array", childIds)
   }
 
-  const elements = ["none", ...childrenOptions]
-  const handleClick = (name: string) => {
-    name === "none" ? updateChildrenState([]) : updateChildrenState([name])
+  const elements = [null, ...childrenOptions]
+  const handleClick = (eipId: EipId | null) => {
+    childIds.length > 0 && disableChild(parentId, childIds[0])
+    eipId !== null && enableChild(parentId, eipId)
   }
 
   return (
     <RadioButtonGroup
       name="children"
       orientation="vertical"
-      defaultSelected={childrenState?.[0] || "none"}
+      defaultSelected={childIds?.[0] || "none"}
     >
-      {elements.map((name) => (
+      {elements.map((eipId) => (
         <RadioButton
-          key={name}
-          id={getUniqueId(name)}
-          value={name}
-          labelText={name}
-          onClick={(ev) => handleClick(ev.currentTarget.value)}
+          key={getName(eipId)}
+          id={getUniqueId(getName(eipId))}
+          value={getName(eipId)}
+          labelText={getName(eipId)}
+          onClick={() => handleClick(eipId)}
         />
       ))}
     </RadioButtonGroup>
@@ -100,38 +104,32 @@ const ChildrenSingleSelection = ({
 
 // TODO: Handle multiple occurences of the same child type.
 const ChildSelector = ({ nodeId, childGroup }: ChildrenConfigProps) => {
-  const reactFlowStore = useStoreApi()
-  const { nodeInternals } = reactFlowStore.getState()
+  const childIds = useGetEnabledChildren(nodeId)
 
-  const childrenState = useGetChildren(nodeId)
-
-  const updateChildrenState = (updates: string[]) =>
-    updateEnabledChildren(nodeId, updates)
-
-  const parentNode = nodeInternals.get(nodeId) as EipFlowNode | undefined
+  const parentEipId = getEipId(nodeId)
 
   const sortedNames = childGroup.children
     .filter(
       (c) =>
         !DYNAMIC_ROUTING_CHILDREN.has(c.name) &&
-        !isCustomDynamicRouterChild(c.name, parentNode?.data.eipId)
+        !isCustomDynamicRouterChild(c.name, parentEipId)
     )
-    .map((c) => c.name)
-    .sort()
+    .map((c) => ({ name: c.name, namespace: parentEipId?.namespace }) as EipId)
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
       {childGroup.indicator === "choice" ? (
         <ChildrenSingleSelection
           childrenOptions={sortedNames}
-          childrenState={childrenState}
-          updateChildrenState={updateChildrenState}
+          childIds={childIds}
+          parentId={nodeId}
         />
       ) : (
         <ChildrenMultiSelection
           childrenOptions={sortedNames}
-          childrenState={childrenState}
-          updateChildrenState={updateChildrenState}
+          childIds={childIds}
+          parentId={nodeId}
         />
       )}
     </Form>

@@ -1,4 +1,4 @@
-import { EipId } from "../api/id"
+import { EipId } from "../api/generated/eipFlow"
 import aggregatorImg from "../assets/eip/aggregator.svg"
 import annotationImg from "../assets/eip/annotation.svg"
 import barrierImg from "../assets/eip/barrier.svg"

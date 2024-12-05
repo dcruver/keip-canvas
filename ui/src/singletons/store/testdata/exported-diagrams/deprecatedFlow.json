@@ -6,7 +6,10 @@
       "position": { "x": 0, "y": 0 },
       "targetPosition": "left",
       "sourcePosition": "right",
-      "data": { "label": "ws-in" },
+      "data": {
+        "eipId": { "namespace": "web-services", "name": "inbound-gateway" },
+        "label": "ws-in"
+      },
       "width": 128,
       "height": 124,
       "positionAbsolute": { "x": 0, "y": 0 },
@@ -19,7 +22,9 @@
       "position": { "x": 203, "y": 18.5 },
       "targetPosition": "left",
       "sourcePosition": "right",
-      "data": {},
+      "data": {
+        "eipId": { "namespace": "integration", "name": "transformer" }
+      },
       "width": 99,
       "height": 87,
       "positionAbsolute": { "x": 203, "y": 18.5 },
@@ -32,7 +37,7 @@
       "position": { "x": 377, "y": 5.5 },
       "targetPosition": "left",
       "sourcePosition": "right",
-      "data": {},
+      "data": { "eipId": { "namespace": "http", "name": "outbound-gateway" } },
       "width": 109,
       "height": 121,
       "positionAbsolute": { "x": 377, "y": 5.5 },
@@ -56,28 +61,21 @@
       "id": "reactflow__edge-Hz22QyhCpjoutput-THgI9WvsJhinput"
     }
   ],
-  "eipConfigs": {
-    "81HAL73ElW": {
-      "attributes": {},
-      "children": [],
-      "eipId": { "namespace": "web-services", "name": "inbound-gateway" }
-    },
+  "eipNodeConfigs": {
+    "81HAL73ElW": { "attributes": {}, "children": {} },
     "Hz22QyhCpj": {
       "attributes": { "ref": "testTransformer" },
-      "children": [],
-      "eipId": { "namespace": "integration", "name": "transformer" },
+      "children": {},
       "description": "generic transformer"
     },
     "THgI9WvsJh": {
       "attributes": { "charset": "UTF-8" },
-      "children": ["mbL_mB1wGOY"],
-      "eipId": { "namespace": "http", "name": "outbound-gateway" }
-    },
-    "mbL_mB1wGOY": {
-      "eipId": { "name": "transactional", "namespace": "http" },
-      "attributes": { "isolation": "SERIALIZABLE" },
-      "children": []
+      "children": {
+        "transactional": {
+          "name": "transactional",
+          "attributes": { "isolation": "SERIALIZABLE" }
+        }
+      }
     }
-  },
-  "version": "1.0"
+  }
 }

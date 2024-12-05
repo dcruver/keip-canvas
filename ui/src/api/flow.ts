@@ -1,7 +1,6 @@
 import { Edge, Node } from "reactflow"
 import { Attribute } from "./generated/eipComponentDef"
 import { Attributes } from "./generated/eipFlow"
-import { EipId } from "./id"
 
 export interface Layout {
   orientation: "horizontal" | "vertical"
@@ -9,7 +8,6 @@ export interface Layout {
 }
 
 export interface EipNodeData {
-  eipId: EipId
   label?: string
 }
 

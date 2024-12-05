@@ -3,7 +3,7 @@ import { useState } from "react"
 import { Edge, useOnSelectionChange, useStoreApi } from "reactflow"
 import { DYNAMIC_EDGE_TYPE, DynamicEdge, EipFlowNode } from "../../api/flow"
 import { Attribute } from "../../api/generated/eipComponentDef"
-import { childIdToString, EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import {
   FLOW_CONTROLLED_ATTRIBUTES,
   lookupContentBasedRouterKeys,
@@ -11,6 +11,7 @@ import {
 } from "../../singletons/eipDefinitions"
 import { clearSelectedChildNode } from "../../singletons/store/appActions"
 import { useGetSelectedChildNode } from "../../singletons/store/getterHooks"
+import { getEipId } from "../../singletons/store/storeViews"
 import ChildNodeConfig from "./ChildNodeConfig"
 import DynamicEdgeConfig from "./DynamicEdgeConfig"
 import RootNodeConfig from "./RootNodeConfig"
@@ -44,11 +45,11 @@ const EipConfigSidePanel = () => {
   const reactFlowStore = useStoreApi()
   const [selectedNode, setSelectedNode] = useState<EipFlowNode | null>(null)
   const [selectedEdge, setSelectedEdge] = useState<DynamicEdge | null>(null)
-  const selectedChild = useGetSelectedChildNode()
+  const selectedChildId = useGetSelectedChildNode()
 
   useOnSelectionChange({
     onChange: ({ nodes, edges }) => {
-      selectedChild && clearSelectedChildNode()
+      selectedChildId && clearSelectedChildNode()
       const numSelected = nodes.length + edges.length
       setSelectedNode(numSelected === 1 ? nodes[0] : null)
       setSelectedEdge(
@@ -57,32 +58,35 @@ const EipConfigSidePanel = () => {
     },
   })
 
-  const eipComponent = selectedNode
-    ? lookupEipComponent(selectedNode.data.eipId)
+  const selectedNodeEipId = selectedNode && getEipId(selectedNode.id)
+  const eipComponent = selectedNodeEipId
+    ? lookupEipComponent(selectedNodeEipId)
     : null
 
   let sidePanelContent
   // TODO: Simplify conditionals
-  if (selectedChild && selectedNode && eipComponent) {
+  if (selectedChildId && selectedNode && eipComponent) {
+    const childEipId = getEipId(selectedChildId)
+    const childName = childEipId?.name ?? ""
     const childElement = eipComponent.childGroup!.children.find(
-      (e) => e.name === selectedChild.name
+      (e) => e.name === childName
     )!
     const configurableAttrs = filterConfigurableAttributes(
       childElement.attributes
     )
     sidePanelContent = (
       <ChildNodeConfig
-        key={childIdToString(selectedChild)}
-        childId={selectedChild}
+        key={selectedChildId}
+        childId={selectedChildId}
         parentName={eipComponent.name}
         attributes={configurableAttrs}
         hasChildren={Boolean(childElement?.childGroup)}
       />
     )
-  } else if (selectedNode && eipComponent) {
+  } else if (selectedNodeEipId && eipComponent) {
     const configurableAttrs = filterConfigurableAttributes(
       eipComponent.attributes,
-      selectedNode.data.eipId
+      selectedNodeEipId
     )
     sidePanelContent = (
       <RootNodeConfig
@@ -108,7 +112,7 @@ const EipConfigSidePanel = () => {
     sidePanelContent = <></>
   }
 
-  const showPanel = Boolean(selectedNode || selectedChild || selectedEdge)
+  const showPanel = Boolean(selectedNode || selectedChildId || selectedEdge)
 
   return (
     <HeaderPanel

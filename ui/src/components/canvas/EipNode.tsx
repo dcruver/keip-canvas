@@ -3,7 +3,7 @@ import { ServiceId } from "@carbon/react/icons"
 import { Handle, NodeProps, Position } from "reactflow"
 import { EipNodeData, Layout } from "../../api/flow"
 import { ConnectionType, EipRole } from "../../api/generated/eipComponentDef"
-import { ChildNodeId, EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
 import getIconUrl from "../../singletons/eipIconCatalog"
 import {
@@ -11,17 +11,20 @@ import {
   updateSelectedChildNode,
 } from "../../singletons/store/appActions"
 import {
-  useGetChildren,
+  useGetEnabledChildren,
   useGetLayout,
-  useIsChildSelected,
+  useGetSelectedChildNode,
 } from "../../singletons/store/getterHooks"
+import { getEipId } from "../../singletons/store/storeViews"
 import { toTitleCase } from "../../utils/titleTransform"
 import "./nodes.scss"
 
 interface ChildrenIconsProps {
-  childrenNames: string[]
-  parentNodeId: string
-  parentEipId: EipId
+  childIds: string[]
+}
+
+interface ChildIconButtonProps {
+  id: string
 }
 
 const DEFAULT_NAMESPACE = "integration"
@@ -102,36 +105,39 @@ const getClassNames = (props: NodeProps<EipNodeData>, role: EipRole) => {
   return ["eip-node", roleClsName, selectedClsName].join(" ")
 }
 
-const ChildIconButton = (props: ChildNodeId) => {
-  const selected = useIsChildSelected(props)
+const ChildIconButton = (props: ChildIconButtonProps) => {
+  const currSelection = useGetSelectedChildNode()
+  const isSelected = currSelection === props.id
 
   const clsNames = ["child-icon-button"]
-  selected && clsNames.push("child-icon-button-focused")
+  isSelected && clsNames.push("child-icon-button-focused")
 
-  return (
+  const eipId = getEipId(props.id)
+
+  return eipId ? (
     <Button
       className={clsNames.join(" ")}
       hasIconOnly
       renderIcon={ServiceId}
-      iconDescription={props.name}
+      iconDescription={eipId.name}
       size="sm"
       tooltipPosition="bottom"
       kind="primary"
       onClick={(ev) => {
         ev.stopPropagation()
-        updateSelectedChildNode(props)
+        updateSelectedChildNode(props.id)
       }}
     />
-  )
+  ) : null
 }
 
 // TODO: Account for a large number of children to be displayed
 // TODO: Create a mapping of children to icons (with a fallback option)
-const ChildrenIcons = ({ childrenNames, parentNodeId }: ChildrenIconsProps) => {
+const ChildrenIcons = ({ childIds }: ChildrenIconsProps) => {
   return (
     <Stack className="eip-node-children" orientation="horizontal" gap={2}>
-      {childrenNames.map((name) => (
-        <ChildIconButton key={name} name={name} parentNodeId={parentNodeId} />
+      {childIds.map((id) => (
+        <ChildIconButton key={id} id={id} />
       ))}
     </Stack>
   )
@@ -140,37 +146,37 @@ const ChildrenIcons = ({ childrenNames, parentNodeId }: ChildrenIconsProps) => {
 // TODO: Consider separating into Endpoint and Channel custom node types
 export const EipNode = (props: NodeProps<EipNodeData>) => {
   // TODO: clearSelectedChildNode is used in too many different components. See if that can be reduced (or elimnated).
-  const childrenState = useGetChildren(props.id)
+  const layout = useGetLayout()
+  const childrenState = useGetEnabledChildren(props.id)
   const hasChildren = childrenState.length > 0
 
-  const { data } = props
-  const componentDefinition = lookupEipComponent(data.eipId)!
-  const layout = useGetLayout()
+  const eipId = getEipId(props.id)
+  const componentDefinition = eipId && lookupEipComponent(eipId)
+  if (!componentDefinition) {
+    return null
+  }
+
   const handles = renderHandles(
     componentDefinition.connectionType,
     layout.orientation
   )
+
+  const { data } = props
 
   return (
     <Tile
       className={getClassNames(props, componentDefinition.role)}
       onClick={hasChildren ? () => clearSelectedChildNode() : undefined}
     >
-      <div>{getNamespacedTitle(data.eipId)}</div>
-      <img className="eip-node-image" src={getIconUrl(data.eipId)} />
+      <div>{getNamespacedTitle(eipId)}</div>
+      <img className="eip-node-image" src={getIconUrl(eipId)} />
       <div
         className="eip-node-label"
         style={hasChildren ? { marginBottom: "0.5rem" } : {}}
       >
         <strong>{data.label || DEFAULT_NODE_LABEL}</strong>
       </div>
-      {hasChildren && (
-        <ChildrenIcons
-          childrenNames={childrenState}
-          parentNodeId={props.id}
-          parentEipId={props.data.eipId}
-        />
-      )}
+      {hasChildren && <ChildrenIcons childIds={childrenState} />}
       {handles}
     </Tile>
   )

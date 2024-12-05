@@ -17,7 +17,7 @@ import {
   useGetContentRouterKey,
   useGetRouterDefaultEdgeMapping,
 } from "../../singletons/store/getterHooks"
-import { getNodesView } from "../../singletons/store/storeViews"
+import { getEipId, getNodesView } from "../../singletons/store/storeViews"
 import debounce from "../../utils/debounce"
 import DescriptionTooltipWrapper from "./DescriptionTooltipWrapper"
 
@@ -177,8 +177,8 @@ const EdgeMatcher = ({ edgeId, mapping }: EdgeMatcherProps) => {
 const DynamicEdgeConfig = ({ edge }: EdgeConfigProps) => {
   const currDefaultEdge = useGetRouterDefaultEdgeMapping(edge.source)
   const sourceNode = getNodesView().find((node) => node.id === edge.source)
-  const routerKeyDef =
-    sourceNode && lookupContentBasedRouterKeys(sourceNode.data.eipId)
+  const sourceEipId = sourceNode && getEipId(sourceNode.id)
+  const routerKeyDef = sourceEipId && lookupContentBasedRouterKeys(sourceEipId)
 
   const isTheDefaultEdge = currDefaultEdge?.id === edge.id
 

@@ -1,33 +1,34 @@
 import isDeepEqual from "fast-deep-equal"
 import { useStoreWithEqualityFn } from "zustand/traditional"
 import {
-    DYNAMIC_EDGE_TYPE,
-    DynamicEdge,
-    EipFlowNode,
-    EipNodeData,
-    RouterKey,
+  DYNAMIC_EDGE_TYPE,
+  DynamicEdge,
+  EipFlowNode,
+  EipNodeData,
+  RouterKey,
 } from "../../api/flow"
 import {
-    Attributes,
-    EipChildNode,
-    EipFlow,
-    EipNode,
-    FlowEdge,
+  Attributes,
+  EipChildNode,
+  EipFlow,
+  EipNode,
+  FlowEdge,
 } from "../../api/generated/eipFlow"
-import { EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import {
-    CHANNEL_ATTR_NAME,
-    DEFAULT_OUTPUT_CHANNEL_NAME,
-    lookupContentBasedRouterKeys,
-    lookupEipComponent,
+  CHANNEL_ATTR_NAME,
+  DEFAULT_OUTPUT_CHANNEL_NAME,
+  lookupContentBasedRouterKeys,
+  lookupEipComponent,
 } from "../eipDefinitions"
-import { AppStore } from "./api"
+import { AppStore, EipConfig } from "./api"
 import { useAppStore } from "./appStore"
+import { getEipId } from "./storeViews"
 
 const EIP_NAMESPACE_TO_XML_PREFIX: Record<string, string> = {
-    xml: "int-xml",
-    "web-services": "ws",
-  }
+  xml: "int-xml",
+  "web-services": "ws",
+}
 
 export const useEipFlow = () =>
   useStoreWithEqualityFn(
@@ -36,7 +37,6 @@ export const useEipFlow = () =>
     isDeepEqual
   )
 
-// TODO: Extract flow conversion to a separate file
 // TODO: Dynamic router logic is over-complicating this method, extract to
 // a separate method and apply modifications after building original flow.
 const diagramToEipFlow = (state: AppStore): EipFlow => {
@@ -63,30 +63,31 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
   })
 
   const nodes: EipNode[] = state.nodes.map((node) => {
-    const eipComponent = lookupEipComponent(node.data.eipId)!
-    const namespace = node.data.eipId.namespace
+    const eipId = getEipId(node.id)!
+    const eipComponent = lookupEipComponent(eipId)!
+    const namespace = eipId.namespace
 
-    const routerKey = state.eipNodeConfigs[node.id].routerKey
+    const routerKey = state.eipConfigs[node.id].routerKey
     const routerKeyAttrs =
       eipComponent.connectionType === "content_based_router" && routerKey
-        ? getRouterKeyAttributes(node.data.eipId, routerKey)
+        ? getRouterKeyAttributes(eipId, routerKey)
         : {}
 
     return {
       id: node.data.label ? node.data.label : node.id,
       eipId: {
-        ...node.data.eipId,
+        ...eipId,
         namespace: EIP_NAMESPACE_TO_XML_PREFIX[namespace] ?? namespace,
       },
-      description: state.eipNodeConfigs[node.id]?.description,
+      description: state.eipConfigs[node.id]?.description,
       role: eipComponent.role,
       connectionType: eipComponent.connectionType,
       attributes: {
-        ...state.eipNodeConfigs[node.id]?.attributes,
+        ...state.eipConfigs[node.id]?.attributes,
         ...routerKeyAttrs.attributes,
         ...routerAttrMap.get(node.id),
       },
-      children: Object.values(state.eipNodeConfigs[node.id]?.children).concat(
+      children: buildChildTree(node.id, state.eipConfigs).concat(
         routerKeyAttrs.child ?? [],
         routerChildMap.get(node.id) ?? []
       ),
@@ -95,6 +96,40 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
 
   return { nodes, edges }
 }
+
+// TODO: Refactor. Ugly.
+const buildChildTree = (
+  rootId: string,
+  eipConfigs: AppStore["eipConfigs"]
+): EipChildNode[] => {
+  const top = eipConfigs[rootId].children.map((childId) =>
+    childConfigToNode(eipConfigs[childId])
+  )
+
+  const queue = [...top]
+
+  while (queue.length > 0) {
+    const curr = queue.shift()!
+    if (curr.childIds && curr.childIds.length > 1) {
+      curr.children = curr.childIds.map((childId) =>
+        childConfigToNode(eipConfigs[childId])
+      )
+      queue.push(...curr.children)
+    }
+    delete curr.childIds
+  }
+
+  return top
+}
+
+const childConfigToNode = (config: EipConfig) =>
+  ({
+    name: config.eipId.name,
+    attributes: config.attributes,
+    childIds: config.children,
+  }) as EipChildNode & {
+    childIds?: string[]
+  }
 
 const createNodeLookupMap = (nodes: EipFlowNode[]) => {
   const map = new Map<string, EipNodeData>()

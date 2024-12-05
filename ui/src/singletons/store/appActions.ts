@@ -10,19 +10,19 @@ import {
   Layout,
 } from "../../api/flow"
 import { AttributeType } from "../../api/generated/eipComponentDef"
-import { ChildNodeId, EipId, ROOT_PARENT } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import { newFlowLayout } from "../../components/layout/layouting"
-import { AppStore, EipNodeConfig } from "./api"
+import { AppStore, EipConfig, SerializedFlow } from "./api"
 import { useAppStore } from "./appStore"
 
 export const createDroppedNode = (eipId: EipId, position: XYPosition) =>
   useAppStore.setState((state) => {
-    const node = newNode(eipId, position, state.layout.orientation)
+    const node = newNode(position, state.layout.orientation)
     return {
       nodes: [...state.nodes, node],
-      eipNodeConfigs: {
-        ...state.eipNodeConfigs,
-        [node.id]: { attributes: {}, children: {} },
+      eipConfigs: {
+        ...state.eipConfigs,
+        [node.id]: { attributes: {}, children: [], eipId },
       },
     }
   })
@@ -48,42 +48,25 @@ export const updateNodeLabel = (id: string, label: string) => {
 export const updateNodeDescription = (id: string, description: string) =>
   useAppStore.setState(
     produce((draft: AppStore) => {
-      draft.eipNodeConfigs[id].description = description
+      draft.eipConfigs[id].description = description
     })
   )
 
 export const updateEipAttribute = (
   id: string,
-  parentId: string,
   attrName: string,
   value: AttributeType
 ) =>
   useAppStore.setState(
     produce((draft: AppStore) => {
-      if (parentId === ROOT_PARENT) {
-        draft.eipNodeConfigs[id].attributes[attrName] = value
-      } else {
-        const child = draft.eipNodeConfigs[parentId].children[id]
-        child.attributes ??= {}
-        child.attributes[attrName] = value
-      }
+      draft.eipConfigs[id].attributes[attrName] = value
     })
   )
 
-export const deleteEipAttribute = (
-  id: string,
-  parentId: string,
-  attrName: string
-) =>
+export const deleteEipAttribute = (id: string, attrName: string) =>
   useAppStore.setState(
     produce((draft: AppStore) => {
-      if (parentId === ROOT_PARENT) {
-        delete draft.eipNodeConfigs[id].attributes[attrName]
-      } else {
-        const attributes =
-          draft.eipNodeConfigs[parentId].children[id].attributes
-        attributes && delete attributes[attrName]
-      }
+      delete draft.eipConfigs[id].attributes[attrName]
     })
   )
 
@@ -116,7 +99,7 @@ export const updateContentRouterKey = (
 ) =>
   useAppStore.setState(
     produce((draft: AppStore) => {
-      const config = draft.eipNodeConfigs[nodeId]
+      const config = draft.eipConfigs[nodeId]
       config.routerKey ??= { name: keyName }
       config.routerKey.name = keyName
 
@@ -126,20 +109,41 @@ export const updateContentRouterKey = (
     })
   )
 
-export const updateEnabledChildren = (nodeId: string, children: string[]) =>
-  useAppStore.setState(
-    produce((draft: AppStore) => {
-      draft.eipNodeConfigs[nodeId].children = children.reduce(
-        (accum, name) => {
-          accum[name] = { name }
-          return accum
-        },
-        {} as EipNodeConfig["children"]
-      )
-    })
-  )
+export const enableChild = (parentId: string, childEipId: EipId) =>
+  useAppStore.setState((state) => {
+    const childConfig: EipConfig = {
+      eipId: childEipId,
+      attributes: {},
+      children: [],
+    }
 
-export const updateSelectedChildNode = (childId: ChildNodeId) =>
+    const childId = nanoid(11)
+
+    return produce(state, (draft: AppStore) => {
+      draft.eipConfigs[parentId].children.push(childId)
+      draft.eipConfigs[childId] = childConfig
+    })
+  })
+
+export const disableChild = (parentId: string, childId: string) =>
+  useAppStore.setState((state) => {
+    const idx = state.eipConfigs[parentId].children.findIndex(
+      (id) => id === childId
+    )
+
+    if (idx === -1) {
+      throw new Error(
+        `Node (id: ${parentId}) did not have child with id: ${childId}`
+      )
+    }
+
+    return produce(state, (draft: AppStore) => {
+      draft.eipConfigs[parentId].children.splice(idx, 1)
+      delete draft.eipConfigs[childId]
+    })
+  })
+
+export const updateSelectedChildNode = (childId: string) =>
   useAppStore.setState(() => ({ selectedChildNode: childId }))
 
 export const clearSelectedChildNode = () =>
@@ -149,7 +153,7 @@ export const clearFlow = () =>
   useAppStore.setState(() => ({
     nodes: [],
     edges: [],
-    eipNodeConfigs: {},
+    eipConfigs: {},
     selectedChildNode: null,
   }))
 
@@ -159,20 +163,31 @@ export const clearDiagramSelections = () =>
     edges: state.edges.map((edge) => ({ ...edge, selected: false })),
   }))
 
-// TODO: Should importing throw an error on failure instead?
-export const importFlowFromJson = (json: string) =>
+export const importFlowFromJson = (json: string) => {
+  const flow = JSON.parse(json) as SerializedFlow
+  importFlowFromObject(flow)
+}
+
+// TODO: Should a failed import throw an error on failure instead (for an error pop-up)?
+export const importFlowFromObject = (flow: SerializedFlow) => {
   useAppStore.setState(() => {
-    const imported = JSON.parse(json) as Partial<AppStore>
-    if (isStoreType(imported)) {
-      return {
-        nodes: imported.nodes,
-        edges: imported.edges,
-        eipNodeConfigs: imported.eipNodeConfigs,
-      }
+    if (!isStoreType(flow)) {
+      console.error("Failed to import an EIP flow JSON. Malformed input")
+      return {}
     }
-    console.error("Failed to import an EIP flow JSON. Malformed input")
-    return {}
+
+    // Maintain backwards compatibility with older exported formats
+    if (!flow.eipConfigs && !flow.version) {
+      return importDeprecatedFlow(flow)
+    }
+
+    return {
+      nodes: flow.nodes,
+      edges: flow.edges,
+      eipConfigs: flow.eipConfigs,
+    }
   })
+}
 
 export const updateLayoutOrientation = (orientation: Layout["orientation"]) =>
   useAppStore.setState((state) => {
@@ -202,11 +217,7 @@ export const toggleLayoutDensity = () =>
     }
   })
 
-const newNode = (
-  eipId: EipId,
-  position: XYPosition,
-  orientation: Layout["orientation"]
-) => {
+const newNode = (position: XYPosition, orientation: Layout["orientation"]) => {
   const id = nanoid(10)
   const isHorizontal = orientation === "horizontal"
   const node: EipFlowNode = {
@@ -215,9 +226,7 @@ const newNode = (
     position: position,
     targetPosition: isHorizontal ? Position.Left : Position.Top,
     sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
-    data: {
-      eipId: eipId,
-    },
+    data: {},
   }
   return node
 }
@@ -232,10 +241,43 @@ const validateDynamicEdgeType = (edge: Edge) => {
 }
 
 const isStoreType = (state: unknown): state is AppStore => {
-  const store = state as AppStore
+  const store = state as SerializedFlow & {
+    eipNodeConfigs: Record<string, object>
+  }
+
+  const hasOldConfigKey = store.eipNodeConfigs !== undefined
+  if (hasOldConfigKey) {
+    console.warn(
+      "Attempting to import a deprecated EIP Flow format. Attribute configurations will not be preserved."
+    )
+  }
+
   return (
     store.nodes !== undefined &&
     store.edges !== undefined &&
-    store.eipNodeConfigs !== undefined
+    (store.eipConfigs !== undefined || hasOldConfigKey)
   )
+}
+
+// Maintains compatibility with older exported formats
+const importDeprecatedFlow = (flow: SerializedFlow) => {
+  const eipConfigs = {} as AppStore["eipConfigs"]
+  const nodes = flow.nodes.map((node) => {
+    const { eipId: oldEipId, ...rest } = node.data as { eipId: EipId }
+    eipConfigs[node.id] = {
+      attributes: {},
+      children: [],
+      eipId: oldEipId,
+    }
+    return {
+      ...node,
+      data: rest,
+    }
+  })
+
+  return {
+    nodes,
+    edges: flow.edges,
+    eipConfigs,
+  }
 }

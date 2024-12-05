@@ -10,7 +10,7 @@ import {
 import { CloseOutline, Send } from "@carbon/react/icons"
 import { interactive } from "@carbon/themes"
 import { forwardRef, useEffect, useRef, useState } from "react"
-import { importFlowFromJson } from "../../../singletons/store/appActions"
+import { importFlowFromObject } from "../../../singletons/store/appActions"
 import { llmClientInstance as llmClient } from "./llmClient"
 
 type ChatEntrySource = "user" | "AI"
@@ -134,18 +134,15 @@ const AssistantChatPanel = () => {
   const [chatEntries, setChatEntries] = useState<ChatEntry[]>([])
   const [streamingResponse, setStreamingResponse] = useState("")
 
-  const handleStreamUpdate = (chunk: string) =>
-    setStreamingResponse((prev) => prev + chunk)
-
   const sendPrompt = async (input: string) => {
-    const response = await llmClient.prompt(input, handleStreamUpdate)
+    const response = await llmClient.prompt(input, setStreamingResponse)
     if (response.success) {
-      importFlowFromJson(response.data)
+      response.processedFlow && importFlowFromObject(response.processedFlow)
     }
     setChatEntries((prev) => [
       ...prev,
       { message: input, source: "user" },
-      { message: response.data, source: "AI" },
+      { message: response.raw, source: "AI" },
     ])
     setStreamingResponse("")
   }

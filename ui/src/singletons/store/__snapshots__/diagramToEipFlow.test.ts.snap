@@ -201,9 +201,12 @@ exports[`standard diagram to EipFlow success 1`] = `
       "role": "router",
     },
     {
-      "attributes": {},
+      "attributes": {
+        "directory": "testdir",
+      },
       "children": [
         {
+          "attributes": {},
           "name": "transactional",
         },
       ],

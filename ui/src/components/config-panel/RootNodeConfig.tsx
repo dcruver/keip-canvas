@@ -2,7 +2,6 @@ import { Stack, TextArea, TextInput } from "@carbon/react"
 import { ChangeEvent, useMemo, useState } from "react"
 import { EipFlowNode } from "../../api/flow"
 import { Attribute, EipChildGroup } from "../../api/generated/eipComponentDef"
-import { ROOT_PARENT } from "../../api/id"
 import {
   updateNodeDescription,
   updateNodeLabel,
@@ -84,13 +83,7 @@ const RootNodeConfig = ({
     <ConfigurationInputTabs
       hasAttributes={attributes.length > 0}
       hasChildren={Boolean(childGroup && childGroup.children.length > 0)}
-      attributesForm={
-        <AttributeConfigForm
-          id={node.id}
-          parentId={ROOT_PARENT}
-          attrs={attributes}
-        />
-      }
+      attributesForm={<AttributeConfigForm id={node.id} attrs={attributes} />}
       childrenForm={<ChildSelector nodeId={node.id} childGroup={childGroup!} />}
     />
   </Stack>
