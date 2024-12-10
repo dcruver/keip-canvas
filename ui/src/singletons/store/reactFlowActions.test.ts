@@ -2,17 +2,16 @@ import { act } from "@testing-library/react"
 import { Connection, NodeRemoveChange } from "reactflow"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { DYNAMIC_EDGE_TYPE, DynamicEdgeData } from "../../api/flow"
-import { ROOT_PARENT } from "../../api/id"
-import { useGetEipAttribute } from "./getterHooks"
+import { useGetEnabledChildren } from "./getterHooks"
 import { onConnect, onNodesChange } from "./reactFlowActions"
 import { renderAndUnwrapHook, resetMockStore } from "./storeTestingUtils"
-import { getEdgesView, getNodesView } from "./storeViews"
+import { getEdgesView, getEipId, getNodesView } from "./storeViews"
 import disconnectedFlow from "./testdata/store-initializers/disconnectedFlow.json"
 import standardFlow from "./testdata/store-initializers/standardFlow.json"
 
 vi.mock("zustand")
 
-const FILTER_ID = "SV43RVeijQ"
+const STANDARD_FILE_ADAPTER_ID = "MrMneIdthg"
 
 beforeEach(() => {
   act(() => {
@@ -20,26 +19,31 @@ beforeEach(() => {
   })
 })
 
+// TODO: test that child node configs are deleted recursively
 describe("onNodesChange", () => {
-  test("config is removed when a node is deleted", () => {
-    const attrName = "expression"
-
-    // assert config exists before removing node
-    const initialValue = renderAndUnwrapHook(() =>
-      useGetEipAttribute(FILTER_ID, ROOT_PARENT, attrName)
+  test("top-level config and all child configs are removed when node is deleted", () => {
+    // assert configs exist before removing node
+    expect(getEipId(STANDARD_FILE_ADAPTER_ID)).not.toBeUndefined()
+    const children = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(STANDARD_FILE_ADAPTER_ID)
     )
-    expect(initialValue).toBeTruthy()
+    expect(children).toHaveLength(1)
+    const childId = children[0]
+    expect(getEipId(childId)).not.toBeUndefined()
 
-    const change: NodeRemoveChange = { id: FILTER_ID, type: "remove" }
+    const change: NodeRemoveChange = {
+      id: STANDARD_FILE_ADAPTER_ID,
+      type: "remove",
+    }
     act(() => onNodesChange([change]))
 
-    const finalValue = renderAndUnwrapHook(() =>
-      useGetEipAttribute(FILTER_ID, ROOT_PARENT, attrName)
+    const checkDeleted = getNodesView().find(
+      (n) => n.id === STANDARD_FILE_ADAPTER_ID
     )
-    expect(finalValue).toBeUndefined()
-
-    const checkDeleted = getNodesView().find((n) => n.id === FILTER_ID)
     expect(checkDeleted).toBeUndefined()
+
+    expect(getEipId(STANDARD_FILE_ADAPTER_ID)).toBeUndefined()
+    expect(getEipId(childId)).toBeUndefined()
   })
 })
 

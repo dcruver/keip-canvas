@@ -9,11 +9,10 @@ import {
   Layout,
   RouterKey,
 } from "../../api/flow"
-import { ChildNodeId, ROOT_PARENT } from "../../api/id"
 import {
-  useGetEnabledChildren,
   useGetContentRouterKey,
   useGetEipAttribute,
+  useGetEnabledChildren,
   useGetNodeDescription,
   useGetSelectedChildNode,
 } from "./getterHooks"
@@ -23,29 +22,38 @@ import standardFlow from "./testdata/store-initializers/standardFlow.json"
 import unspecifiedRouterFlow from "./testdata/store-initializers/unspecifiedRouterFlow.json"
 import verticalFlow from "./testdata/store-initializers/verticalFlow.json"
 
+import { EipId } from "../../api/generated/eipFlow"
 import {
   clearDiagramSelections,
   clearFlow,
   createDroppedNode,
   deleteEipAttribute,
+  enableChild,
   importFlowFromJson,
   toggleLayoutDensity,
   updateContentRouterKey,
   updateDynamicEdgeMapping,
   updateEipAttribute,
-  updateEnabledChildren,
   updateLayoutOrientation,
   updateNodeDescription,
   updateNodeLabel,
   updateSelectedChildNode,
 } from "./appActions"
-import { getEdgesView, getLayoutView, getNodesView } from "./storeViews"
+import {
+  getEdgesView,
+  getEipId,
+  getLayoutView,
+  getNodesView,
+} from "./storeViews"
+import deprecatedExportedFlow from "./testdata/exported-diagrams/deprecatedFlow.json?raw"
 import validExportedFlow from "./testdata/exported-diagrams/validFlow.json?raw"
 
 vi.mock("zustand")
 
-const N1_ID = "9KWCqlIyy7"
-const N2_ID = "LoiC2CFbLP"
+const STANDARD_INBOUND_ADAPTER = "9KWCqlIyy7"
+const STANDARD_ROUTER = "LoiC2CFbLP"
+const STANDARD_POLLER_CHILD_ID = "mcyTryMPewJ"
+const STANDARD_TRANSACTIONAL_CHILD_ID = "V1ls9ri4szs"
 
 beforeEach(() => {
   act(() => {
@@ -105,7 +113,7 @@ describe("create dropped node", () => {
     act(() => createDroppedNode(eipId, position))
 
     const nodes = getNodesView()
-    const node = nodes.find((n) => isDeepEqual(n.data.eipId, eipId))!
+    const node = nodes.find((n) => isDeepEqual(getEipId(n.id), eipId))!
 
     expect(node.position).toEqual(position)
     expect(node.id).toBeTruthy()
@@ -119,22 +127,22 @@ describe("update node label", () => {
   test("update node with unique label success", () => {
     const label = "test-label-123"
 
-    act(() => void updateNodeLabel(N1_ID, label))
+    act(() => void updateNodeLabel(STANDARD_INBOUND_ADAPTER, label))
 
-    const target = getNode(N1_ID)
+    const target = getNode(STANDARD_INBOUND_ADAPTER)
     expect(target.data.label).toEqual(label)
   })
 
   test("update node with duplicated label -> error", () => {
-    let target = getNode(N1_ID)
+    let target = getNode(STANDARD_INBOUND_ADAPTER)
     const originalLabel = target.data.label
 
     const duplicatedLabel = "test-router"
 
-    const result = updateNodeLabel(N1_ID, duplicatedLabel)
+    const result = updateNodeLabel(STANDARD_INBOUND_ADAPTER, duplicatedLabel)
     expect(result instanceof Error).toBeTruthy()
 
-    target = getNode(N1_ID)
+    target = getNode(STANDARD_INBOUND_ADAPTER)
     expect(target.data.label).toEqual(originalLabel)
   })
 
@@ -149,9 +157,11 @@ describe("update node label", () => {
 describe("update node description", () => {
   test("update node description success", () => {
     const description = "testing description update"
-    act(() => updateNodeDescription(N1_ID, description))
+    act(() => updateNodeDescription(STANDARD_INBOUND_ADAPTER, description))
 
-    const actual = renderAndUnwrapHook(() => useGetNodeDescription(N1_ID))
+    const actual = renderAndUnwrapHook(() =>
+      useGetNodeDescription(STANDARD_INBOUND_ADAPTER)
+    )
     expect(actual).toEqual(description)
   })
 
@@ -164,8 +174,7 @@ describe("updating EIP Attributes", () => {
   test.each([
     {
       msg: "add root node attr",
-      nodeId: N2_ID,
-      parentId: ROOT_PARENT,
+      nodeId: STANDARD_ROUTER,
       attribute: {
         name: "foo",
         value: "bar",
@@ -173,8 +182,7 @@ describe("updating EIP Attributes", () => {
     },
     {
       msg: "add the first attr for a root node",
-      nodeId: N1_ID,
-      parentId: ROOT_PARENT,
+      nodeId: STANDARD_INBOUND_ADAPTER,
       attribute: {
         name: "foo",
         value: "bar",
@@ -182,8 +190,7 @@ describe("updating EIP Attributes", () => {
     },
     {
       msg: "add child node attr",
-      nodeId: "poller",
-      parentId: N1_ID,
+      nodeId: STANDARD_POLLER_CHILD_ID,
       attribute: {
         name: "child-foo",
         value: "child-bar",
@@ -191,20 +198,17 @@ describe("updating EIP Attributes", () => {
     },
     {
       msg: "add the first attr for a child node",
-      nodeId: "transactional",
-      parentId: "MrMneIdthg",
+      nodeId: STANDARD_TRANSACTIONAL_CHILD_ID,
       attribute: {
         name: "child-foo",
         value: "child-bar",
       },
     },
-  ])("$msg", ({ nodeId, parentId, attribute }) => {
-    act(() =>
-      updateEipAttribute(nodeId, parentId, attribute.name, attribute.value)
-    )
+  ])("$msg", ({ nodeId, attribute }) => {
+    act(() => updateEipAttribute(nodeId, attribute.name, attribute.value))
 
     const actual = renderAndUnwrapHook(() =>
-      useGetEipAttribute(nodeId, parentId, attribute.name)
+      useGetEipAttribute(nodeId, attribute.name)
     )
     expect(actual).toEqual(attribute.value)
   })
@@ -212,8 +216,7 @@ describe("updating EIP Attributes", () => {
   test.each([
     {
       msg: "overwrite root node attr",
-      nodeId: N2_ID,
-      parentId: ROOT_PARENT,
+      nodeId: STANDARD_ROUTER,
       attribute: {
         name: "phase",
         value: "last",
@@ -221,103 +224,60 @@ describe("updating EIP Attributes", () => {
     },
     {
       msg: "overwrite child node attr",
-      nodeId: "poller",
-      parentId: N1_ID,
+      nodeId: STANDARD_POLLER_CHILD_ID,
       attribute: {
         name: "fixed-rate",
         value: 500,
       },
     },
-  ])("$msg", ({ nodeId, parentId, attribute }) => {
+  ])("$msg", ({ nodeId, attribute }) => {
     // assert attribute actually exists before updating
     let actual = renderAndUnwrapHook(() =>
-      useGetEipAttribute(nodeId, parentId, attribute.name)
+      useGetEipAttribute(nodeId, attribute.name)
     )
     expect(actual).toBeTruthy()
     expect(actual).not.toEqual(attribute.value)
 
-    act(() =>
-      updateEipAttribute(nodeId, parentId, attribute.name, attribute.value)
-    )
+    act(() => updateEipAttribute(nodeId, attribute.name, attribute.value))
 
     actual = renderAndUnwrapHook(() =>
-      useGetEipAttribute(nodeId, parentId, attribute.name)
+      useGetEipAttribute(nodeId, attribute.name)
     )
     expect(actual).toEqual(attribute.value)
   })
 
-  test.each([
-    {
-      msg: "update non-existent root node",
-      nodeId: "fakeid",
-      parentId: ROOT_PARENT,
-    },
-    {
-      msg: "update non-existent parent node",
-      nodeId: "poller",
-      parentId: "fakeid",
-    },
-    {
-      msg: "update non-existent child node",
-      nodeId: "fakeid",
-      parentId: N1_ID,
-    },
-  ])("$msg", ({ nodeId, parentId }) => {
+  test("update non-existent node throws error", () => {
     const attribute = { name: "foo", value: "bar" }
-
     expect(() =>
-      updateEipAttribute(nodeId, parentId, attribute.name, attribute.value)
+      updateEipAttribute("fakeid", attribute.name, attribute.value)
     ).toThrowError()
   })
 })
 
 describe("deleting EIP Attributes", () => {
-  test.each([
-    {
-      msg: "delete existing root node attribute success",
-      nodeId: N2_ID,
-      parentId: ROOT_PARENT,
-      attrName: "phase",
-    },
-    {
-      msg: "delete existing child node attribute success",
-      nodeId: "poller",
-      parentId: N1_ID,
-      attrName: "fixed-rate",
-    },
-  ])("$msg", ({ nodeId, parentId, attrName }) => {
+  test("delete existing node attribute success", () => {
+    const nodeId = STANDARD_ROUTER
+    const attrName = "phase"
+
     // assert attribute exists before deleting
     let attribute = renderAndUnwrapHook(() =>
-      useGetEipAttribute(nodeId, parentId, attrName)
+      useGetEipAttribute(nodeId, attrName)
     )
     expect(attribute).toBeTruthy()
 
-    act(() => deleteEipAttribute(nodeId, parentId, attrName))
+    act(() => deleteEipAttribute(nodeId, attrName))
 
-    attribute = renderAndUnwrapHook(() =>
-      useGetEipAttribute(nodeId, parentId, attrName)
-    )
+    attribute = renderAndUnwrapHook(() => useGetEipAttribute(nodeId, attrName))
     expect(attribute).toBeUndefined()
   })
 
-  test.each([
-    {
-      msg: "delete non-existent root node attribute is a no-op",
-      nodeId: N2_ID,
-      parentId: ROOT_PARENT,
-    },
-    {
-      msg: "delete non-existent child node attribute is a no-op",
-      nodeId: "poller",
-      parentId: N1_ID,
-    },
-  ])("$msg", ({ nodeId, parentId }) => {
+  test("delete non-existent node attribute is a no-op", () => {
     const attrName = "fakeattr"
 
-    act(() => deleteEipAttribute(nodeId, parentId, attrName))
+    act(() => deleteEipAttribute(STANDARD_ROUTER, attrName))
 
     const attribute = renderAndUnwrapHook(() =>
-      useGetEipAttribute(nodeId, parentId, attrName)
+      useGetEipAttribute(STANDARD_ROUTER, attrName)
     )
     expect(attribute).toBeUndefined()
   })
@@ -361,10 +321,17 @@ describe("update content router key", () => {
     }
 
     act(() =>
-      updateContentRouterKey(N2_ID, routerKey.name, attrName, attrValue)
+      updateContentRouterKey(
+        STANDARD_ROUTER,
+        routerKey.name,
+        attrName,
+        attrValue
+      )
     )
 
-    const actual = renderAndUnwrapHook(() => useGetContentRouterKey(N2_ID))
+    const actual = renderAndUnwrapHook(() =>
+      useGetContentRouterKey(STANDARD_ROUTER)
+    )
     expect(actual).toEqual(routerKey)
   })
 
@@ -388,7 +355,9 @@ describe("update content router key", () => {
   })
 
   test("add additional router key attribute success", () => {
-    const initialKey = renderAndUnwrapHook(() => useGetContentRouterKey(N2_ID))
+    const initialKey = renderAndUnwrapHook(() =>
+      useGetContentRouterKey(STANDARD_ROUTER)
+    )
 
     const attrName = "foo"
     const attrValue = "bar"
@@ -398,17 +367,24 @@ describe("update content router key", () => {
     }
 
     act(() =>
-      updateContentRouterKey(N2_ID, routerKey.name, attrName, attrValue)
+      updateContentRouterKey(
+        STANDARD_ROUTER,
+        routerKey.name,
+        attrName,
+        attrValue
+      )
     )
 
-    const actual = renderAndUnwrapHook(() => useGetContentRouterKey(N2_ID))
+    const actual = renderAndUnwrapHook(() =>
+      useGetContentRouterKey(STANDARD_ROUTER)
+    )
     expect(actual).toEqual(routerKey)
   })
 
   // TODO: unskip this test once action is fixed
   test.skip("update non-router node throws error", () => {
     expect(() =>
-      updateContentRouterKey(N1_ID, "test-key", "foo", "bar")
+      updateContentRouterKey(STANDARD_INBOUND_ADAPTER, "test-key", "foo", "bar")
     ).toThrowError()
   })
 
@@ -419,20 +395,24 @@ describe("update content router key", () => {
   })
 })
 
-test("update enabled children success", () => {
-  const children = ["child1", "child2"]
+test("enable child success", () => {
+  const child1: EipId = { namespace: "test", name: "c1" }
+  const child2: EipId = { namespace: "other", name: "c2" }
 
-  act(() => updateEnabledChildren(N2_ID, children))
+  act(() => enableChild(STANDARD_ROUTER, child1))
+  act(() => enableChild(STANDARD_ROUTER, child2))
 
-  const actual = renderAndUnwrapHook(() => useGetEnabledChildren(N2_ID))
-  expect(actual).toEqual(children)
+  const children = renderAndUnwrapHook(() =>
+    useGetEnabledChildren(STANDARD_ROUTER)
+  )
+
+  expect(children).toHaveLength(2)
+  expect(getEipId(children[0])).toEqual(child1)
+  expect(getEipId(children[1])).toEqual(child2)
 })
 
 test("update selected child node success", () => {
-  const childId: ChildNodeId = {
-    name: "poller",
-    parentNodeId: N2_ID,
-  }
+  const childId = "abc"
 
   act(() => updateSelectedChildNode(childId))
 
@@ -452,7 +432,7 @@ test("clear flow success", () => {
   expect(selectedChildNode).toBeNull()
 })
 
-test("clear root node selections from diagram success", () => {
+test("clear top-level node selections from diagram success", () => {
   // Initialize store
   act(() => {
     resetMockStore(selectedNodeFlow)
@@ -469,24 +449,37 @@ test("clear root node selections from diagram success", () => {
 })
 
 describe("import flow from an exported JSON file", () => {
-  test("import a valid flow", () => {
+  test.each([
+    {
+      msg: "import a valid flow success",
+      flow: validExportedFlow,
+    },
+    {
+      msg: "import a deprecated flow partial success",
+      flow: deprecatedExportedFlow,
+    },
+  ])("$msg", ({ flow }) => {
     const initNodes = getNodesView()
 
-    act(() => importFlowFromJson(validExportedFlow))
+    act(() => importFlowFromJson(flow))
+
+    const nodes = getNodesView()
 
     const updatedState = {
-      nodes: getNodesView(),
+      nodes: nodes,
       edges: getEdgesView(),
-      children: getNodesView().map((node) => ({
+      children: nodes.map((node) => ({
         [node.id]: renderAndUnwrapHook(() => useGetEnabledChildren(node.id)),
       })),
+      eipIds: nodes.map((node) => getEipId(node.id)),
+      layout: getLayoutView(),
     }
 
     expect(updatedState.nodes).not.toEqual(initNodes)
     expect(updatedState).toMatchSnapshot()
   })
 
-  test.each([{ key: "nodes" }, { key: "edges" }, { key: "eipNodeConfigs" }])(
+  test.each([{ key: "nodes" }, { key: "edges" }, { key: "eipConfigs" }])(
     "import a malformed flow (missing '$key' field) is a no-op",
     ({ key }) => {
       const initialNodes = getNodesView()

@@ -2,9 +2,9 @@ import { act } from "@testing-library/react"
 import { beforeEach, describe, expect, test, vi } from "vitest"
 import { RouterKey } from "../../api/flow"
 import {
-  useGetEnabledChildren,
   useGetContentRouterKey,
   useGetEipAttribute,
+  useGetEnabledChildren,
   useGetNodeDescription,
   useGetRouterDefaultEdgeMapping,
   useSerializedFlow,
@@ -15,9 +15,9 @@ import standardFlow from "./testdata/store-initializers/standardFlow.json"
 
 vi.mock("zustand")
 
-const N1_ID = "9KWCqlIyy7"
-const N2_ID = "LoiC2CFbLP"
-const N3_ID = "pQv30nNaZI"
+const STANDARD_INBOUND_ADAPTER = "9KWCqlIyy7"
+const STANDARD_ROUTER = "LoiC2CFbLP"
+const STANDARD_POLLER_CHILD_ID = "mcyTryMPewJ"
 
 // TODO: Do we really need to use 'act'?
 beforeEach(() => {
@@ -35,12 +35,12 @@ describe("get node description", () => {
   test.each([
     {
       msg: "node id is present -> value",
-      id: N1_ID,
+      id: STANDARD_INBOUND_ADAPTER,
       result: "message incoming",
     },
     {
       msg: "node id is present but no description -> undefined",
-      id: N3_ID,
+      id: STANDARD_ROUTER,
       result: undefined,
     },
     {
@@ -58,62 +58,46 @@ describe("get EIP attribute", () => {
   test.each([
     {
       msg: "root node id and attribute are present -> value",
-      id: N2_ID,
-      parentId: ROOT_PARENT,
+      id: STANDARD_ROUTER,
       attrName: "phase",
       result: "init",
     },
     {
-      msg: "parent id, child id, and child attribute name are present -> value",
-      id: "poller",
-      parentId: N1_ID,
+      msg: "child id and attribute are present -> value",
+      id: STANDARD_POLLER_CHILD_ID,
       attrName: "fixed-rate",
       result: "2000",
     },
     {
-      msg: "root node id is present but attribute name is unknown -> undefined",
-      id: N2_ID,
-      parentId: ROOT_PARENT,
+      msg: "node id is present but attribute name is unknown -> undefined",
+      id: STANDARD_ROUTER,
       attrName: "fakeattr",
       result: undefined,
     },
     {
       msg: "unknown root node id -> undefined",
       id: "fakeid",
-      parentId: ROOT_PARENT,
       attrName: "ref",
       result: undefined,
     },
-    {
-      msg: "unknown parent id -> undefined",
-      id: "poller",
-      parentId: "fakeid",
-      attrName: "fixed-rate",
-      result: undefined,
-    },
-    {
-      msg: "unknown child id -> undefined",
-      id: "other",
-      parentId: N1_ID,
-      attrName: "fixed-rate",
-      result: undefined,
-    },
-  ])("$msg", ({ id, parentId, attrName, result }) => {
-    const value = renderAndUnwrapHook(() =>
-      useGetEipAttribute(id, parentId, attrName)
-    )
+  ])("$msg", ({ id, attrName, result }) => {
+    const value = renderAndUnwrapHook(() => useGetEipAttribute(id, attrName))
     expect(value).toEqual(result)
   })
 })
 
 describe("get list of children", () => {
   test("node has children -> value", () => {
-    const children = renderAndUnwrapHook(() => useGetEnabledChildren(N1_ID))
-    expect(children).toEqual(["poller"])
+    const children = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(STANDARD_INBOUND_ADAPTER)
+    )
+    expect(children).toEqual([STANDARD_POLLER_CHILD_ID])
   })
 
   test("node does not have children -> empty array", () => {
-    const children = renderAndUnwrapHook(() => useGetEnabledChildren(N3_ID))
+    const children = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(STANDARD_ROUTER)
+    )
     expect(children).toEqual([])
   })
 
@@ -125,7 +109,9 @@ describe("get list of children", () => {
 
 describe("get content router key", () => {
   test("node id is a router -> value", () => {
-    const key = renderAndUnwrapHook(() => useGetContentRouterKey(N2_ID))
+    const key = renderAndUnwrapHook(() =>
+      useGetContentRouterKey(STANDARD_ROUTER)
+    )
     const expected: RouterKey = {
       name: "expression",
       attributes: { expression: "headers.protocol" },
@@ -142,14 +128,14 @@ describe("get content router key", () => {
 describe("get content router default edge mapping", () => {
   test("node is a router and has a default edge -> value", () => {
     const edge = renderAndUnwrapHook(() =>
-      useGetRouterDefaultEdgeMapping(N2_ID)
+      useGetRouterDefaultEdgeMapping(STANDARD_ROUTER)
     )
     expect(edge?.id).toEqual("reactflow__edge-LoiC2CFbLPoutput-H4-ED4F0XTinput")
   })
 
   test("node is not a router -> undefined", () => {
     const edge = renderAndUnwrapHook(() =>
-      useGetRouterDefaultEdgeMapping(N1_ID)
+      useGetRouterDefaultEdgeMapping(STANDARD_INBOUND_ADAPTER)
     )
     expect(edge).toBeUndefined()
   })

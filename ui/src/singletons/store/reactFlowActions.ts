@@ -61,8 +61,20 @@ const removeDeletedNodeConfigs = (state: AppStore, changes: NodeChange[]) => {
   }
 
   const updatedConfigs = { ...state.eipConfigs }
-  deletes.forEach((c) => delete updatedConfigs[c.id])
+  deletes.forEach((c) => removeNestedConfigs(c.id, updatedConfigs))
   return updatedConfigs
+}
+
+const removeNestedConfigs = (root: string, configs: AppStore["eipConfigs"]) => {
+  const stack = []
+  stack.push(root)
+
+  while (stack.length > 0) {
+    const curr = stack.pop()!
+    configs[curr].children.forEach((c) => stack.push(c))
+    delete configs[curr]
+  }
+  return configs
 }
 
 // TODO: Refactor

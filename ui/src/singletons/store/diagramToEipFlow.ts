@@ -111,12 +111,12 @@ const buildChildTree = (
   while (queue.length > 0) {
     const curr = queue.shift()!
     if (curr.childIds && curr.childIds.length > 1) {
-      const childNodes = curr.childIds.map((childId) =>
+      curr.children = curr.childIds.map((childId) =>
         childConfigToNode(eipConfigs[childId])
       )
-      queue.push(...childNodes)
-      delete curr.childIds
+      queue.push(...curr.children)
     }
+    delete curr.childIds
   }
 
   return top
@@ -127,7 +127,6 @@ const childConfigToNode = (config: EipConfig) =>
     name: config.eipId.name,
     attributes: config.attributes,
     childIds: config.children,
-    children: [],
   }) as EipChildNode & {
     childIds?: string[]
   }
