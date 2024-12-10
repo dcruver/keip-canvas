@@ -6,7 +6,7 @@ import debounce from "../../utils/debounce"
 
 import { AppStore } from "./api"
 
-const NO_PERSIST = new Set(["appActions", "reactFlowActions"])
+export const EXPORTED_FLOW_VERSION = "1.0"
 
 // If app becomes too slow, might need to switch to async persistent storage.
 // TODO: Remove devtools
@@ -39,8 +39,8 @@ export const useAppStore = create<AppStore>()(
               return rest
             })
 
-            const { eipConfigs: eipNodeConfigs, edges, layout } = state
-            return { eipNodeConfigs, layout, edges, nodes: newNodes }
+            const { eipConfigs, edges, layout } = state
+            return { eipConfigs, edges, layout, nodes: newNodes }
           },
 
           equality: (pastState, currentState) =>
@@ -52,12 +52,8 @@ export const useAppStore = create<AppStore>()(
       ),
       {
         name: "eipFlow",
-        version: 0,
+        version: Number(EXPORTED_FLOW_VERSION.split(".")[0]),
         storage: createJSONStorage(() => localStorage),
-        partialize: (state) =>
-          Object.fromEntries(
-            Object.entries(state).filter(([key]) => !NO_PERSIST.has(key))
-          ),
       }
     )
   )

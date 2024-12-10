@@ -7,7 +7,7 @@ import {
   useGetEipAttribute,
   useGetNodeDescription,
   useGetRouterDefaultEdgeMapping,
-  useSerializedStore,
+  useSerializedFlow,
 } from "./getterHooks"
 import { renderAndUnwrapHook, resetMockStore } from "./storeTestingUtils"
 import childBasedRouterFlow from "./testdata/store-initializers/childBasedRouterFlow.json"
@@ -27,7 +27,7 @@ beforeEach(() => {
 })
 
 test("serialized store includes nodes, edges, and eipNodeConfigs only", () => {
-  const storeJson = renderAndUnwrapHook(useSerializedStore)
+  const storeJson = renderAndUnwrapHook(useSerializedFlow)
   expect(storeJson).toMatchSnapshot()
 })
 

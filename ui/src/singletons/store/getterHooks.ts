@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow"
 import { DYNAMIC_EDGE_TYPE, DynamicEdge } from "../../api/flow"
-import { AppStore } from "./api"
-import { useAppStore } from "./appStore"
+import { AppStore, SerializedFlow } from "./api"
+import { EXPORTED_FLOW_VERSION, useAppStore } from "./appStore"
 
 export const useNodeCount = () => useAppStore((state) => state.nodes.length)
 
@@ -23,14 +23,16 @@ export const useUndoRedo = () =>
     redo: useAppStore.temporal.getState().redo,
   }))
 
-export const useSerializedStore = () =>
-  useAppStore((state) =>
-    JSON.stringify({
+export const useSerializedFlow = () =>
+  useAppStore((state) => {
+    const flow: SerializedFlow = {
       nodes: state.nodes,
       edges: state.edges,
-      eipNodeConfigs: state.eipConfigs,
-    })
-  )
+      eipConfigs: state.eipConfigs,
+      version: EXPORTED_FLOW_VERSION,
+    }
+    return JSON.stringify(flow)
+  })
 
 export const useGetNodeDescription = (id: string) =>
   useAppStore((state) => state.eipConfigs[id]?.description)

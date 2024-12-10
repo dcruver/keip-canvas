@@ -1,7 +1,8 @@
 import { Ollama } from "@langchain/ollama"
 import { Edge, Node } from "reactflow"
 import { EipId } from "../../../api/id"
-import { EipConfig } from "../../../singletons/store/api"
+import { EipConfig, SerializedFlow } from "../../../singletons/store/api"
+import { EXPORTED_FLOW_VERSION } from "../../../singletons/store/appStore"
 import {
   getEdgesView,
   getEipId,
@@ -24,9 +25,10 @@ interface ModelFlowResponse {
 }
 
 interface PromptResponse {
-  data: string
+  raw: string
   success: boolean
   cause?: Error | "aborted"
+  processedFlow?: SerializedFlow
 }
 
 class LlmClient {
@@ -49,7 +51,7 @@ class LlmClient {
 
   public async prompt(
     userInput: string,
-    streamCallback: (chunk: string) => void
+    streamCallback: (data: string) => void
   ): Promise<PromptResponse> {
     let rawResponse = ""
     try {
@@ -62,18 +64,22 @@ class LlmClient {
       for await (const chunk of responseStream) {
         if (this.abortCtrl.signal.aborted) {
           this.abortCtrl = new AbortController()
-          return { data: rawResponse, success: false, cause: "aborted" }
+          return { raw: rawResponse, success: false, cause: "aborted" }
         }
 
         rawResponse += chunk
-        streamCallback(chunk)
+        streamCallback(rawResponse)
       }
 
-      return { data: this.parseResponse(rawResponse), success: true }
+      return {
+        raw: rawResponse,
+        processedFlow: this.parseResponse(rawResponse),
+        success: true,
+      }
     } catch (err) {
       console.error(err)
       return {
-        data: rawResponse,
+        raw: rawResponse,
         success: false,
         cause: err as Error,
       }
@@ -113,8 +119,7 @@ class LlmClient {
   }
 
   // TODO: Use Langchain custom output parser
-  // TODO: Return an object rather than a JSON string
-  private parseResponse(jsonResponse: string): string {
+  private parseResponse(jsonResponse: string) {
     const response = JSON.parse(jsonResponse) as ModelFlowResponse
     if (!response.nodes) {
       throw new Error("No nodes provided in model response: " + jsonResponse)
@@ -130,19 +135,22 @@ class LlmClient {
 
     response.eipConfigs = {}
     collectEipIds(response)
+    const eipFlow = convertToSerializedFlow(response)
 
     const layout = getLayoutView()
-    const eipFlow = convertToEipFlow(response)
     eipFlow.nodes = newFlowLayout(eipFlow.nodes, eipFlow.edges, layout)
 
-    return JSON.stringify(response)
+    return eipFlow
   }
 }
 
-const convertToEipFlow = (response: ModelFlowResponse) => ({
+const convertToSerializedFlow = (
+  response: ModelFlowResponse
+): SerializedFlow => ({
   nodes: response.nodes.map((node) => ({ ...node, data: {} })),
   edges: response.edges,
   eipConfigs: response.eipConfigs,
+  version: EXPORTED_FLOW_VERSION,
 })
 
 const collectEipIds = (response: ModelFlowResponse) =>

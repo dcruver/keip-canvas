@@ -12,7 +12,7 @@ import {
 import { AttributeType } from "../../api/generated/eipComponentDef"
 import { EipId } from "../../api/id"
 import { newFlowLayout } from "../../components/layout/layouting"
-import { AppStore, EipConfig } from "./api"
+import { AppStore, EipConfig, SerializedFlow } from "./api"
 import { useAppStore } from "./appStore"
 
 export const createDroppedNode = (eipId: EipId, position: XYPosition) =>
@@ -163,20 +163,31 @@ export const clearDiagramSelections = () =>
     edges: state.edges.map((edge) => ({ ...edge, selected: false })),
   }))
 
-// TODO: Should importing throw an error on failure instead?
-export const importFlowFromJson = (json: string) =>
+export const importFlowFromJson = (json: string) => {
+  const flow = JSON.parse(json) as SerializedFlow
+  importFlowFromObject(flow)
+}
+
+// TODO: Should a failed import throw an error on failure instead (for an error pop-up)?
+export const importFlowFromObject = (flow: SerializedFlow) => {
   useAppStore.setState(() => {
-    const imported = JSON.parse(json) as Partial<AppStore>
-    if (isStoreType(imported)) {
-      return {
-        nodes: imported.nodes,
-        edges: imported.edges,
-        eipConfigs: imported.eipConfigs,
-      }
+    if (!isStoreType(flow)) {
+      console.error("Failed to import an EIP flow JSON. Malformed input")
+      return {}
     }
-    console.error("Failed to import an EIP flow JSON. Malformed input")
-    return {}
+
+    // Maintain backwards compatibility with older exported formats
+    if (!flow.eipConfigs && !flow.version) {
+      return importDeprecatedFlow(flow)
+    }
+
+    return {
+      nodes: flow.nodes,
+      edges: flow.edges,
+      eipConfigs: flow.eipConfigs,
+    }
   })
+}
 
 export const updateLayoutOrientation = (orientation: Layout["orientation"]) =>
   useAppStore.setState((state) => {
@@ -230,10 +241,43 @@ const validateDynamicEdgeType = (edge: Edge) => {
 }
 
 const isStoreType = (state: unknown): state is AppStore => {
-  const store = state as AppStore
+  const store = state as SerializedFlow & {
+    eipNodeConfigs: Record<string, object>
+  }
+
+  const hasOldConfigKey = store.eipNodeConfigs !== undefined
+  if (hasOldConfigKey) {
+    console.warn(
+      "Attempting to import a deprecated EIP Flow format. Attribute configurations will not be preserved."
+    )
+  }
+
   return (
     store.nodes !== undefined &&
     store.edges !== undefined &&
-    store.eipConfigs !== undefined
+    (store.eipConfigs !== undefined || hasOldConfigKey)
   )
+}
+
+// Maintains compatibility with older exported formats
+const importDeprecatedFlow = (flow: SerializedFlow) => {
+  const eipConfigs = {} as AppStore["eipConfigs"]
+  const nodes = flow.nodes.map((node) => {
+    const { eipId: oldEipId, ...rest } = node.data as { eipId: EipId }
+    eipConfigs[node.id] = {
+      attributes: {},
+      children: [],
+      eipId: oldEipId,
+    }
+    return {
+      ...node,
+      data: rest,
+    }
+  })
+
+  return {
+    nodes,
+    edges: flow.edges,
+    eipConfigs,
+  }
 }

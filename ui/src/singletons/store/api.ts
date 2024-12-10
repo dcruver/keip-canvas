@@ -18,3 +18,10 @@ export interface AppStore {
   selectedChildNode: string | null
   layout: Layout
 }
+
+export interface SerializedFlow {
+  nodes: AppStore["nodes"]
+  edges: AppStore["edges"]
+  eipConfigs: AppStore["eipConfigs"]
+  version: string
+}
