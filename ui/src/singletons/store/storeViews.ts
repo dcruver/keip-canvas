@@ -13,4 +13,4 @@ export const getLayoutView = (): Readonly<Layout> =>
   useAppStore.getState().layout
 
 export const getEipId = (nodeId: string): Readonly<EipId> | undefined =>
-  useAppStore.getState().eipConfigs[nodeId].eipId
+  useAppStore.getState().eipConfigs[nodeId]?.eipId

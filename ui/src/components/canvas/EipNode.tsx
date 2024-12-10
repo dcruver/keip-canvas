@@ -109,12 +109,12 @@ const ChildIconButton = (props: ChildIconButtonProps) => {
   const currSelection = useGetSelectedChildNode()
   const isSelected = currSelection === props.id
 
-  const eipId = getEipId(props.id)
-
   const clsNames = ["child-icon-button"]
   isSelected && clsNames.push("child-icon-button-focused")
 
-  return (
+  const eipId = getEipId(props.id)
+
+  return eipId ? (
     <Button
       className={clsNames.join(" ")}
       hasIconOnly
@@ -128,7 +128,7 @@ const ChildIconButton = (props: ChildIconButtonProps) => {
         updateSelectedChildNode(props.id)
       }}
     />
-  )
+  ) : null
 }
 
 // TODO: Account for a large number of children to be displayed
@@ -146,18 +146,22 @@ const ChildrenIcons = ({ childIds }: ChildrenIconsProps) => {
 // TODO: Consider separating into Endpoint and Channel custom node types
 export const EipNode = (props: NodeProps<EipNodeData>) => {
   // TODO: clearSelectedChildNode is used in too many different components. See if that can be reduced (or elimnated).
+  const layout = useGetLayout()
   const childrenState = useGetEnabledChildren(props.id)
   const hasChildren = childrenState.length > 0
 
   const eipId = getEipId(props.id)
+  const componentDefinition = eipId && lookupEipComponent(eipId)
+  if (!componentDefinition) {
+    return null
+  }
 
-  const { data } = props
-  const componentDefinition = lookupEipComponent(eipId)!
-  const layout = useGetLayout()
   const handles = renderHandles(
     componentDefinition.connectionType,
     layout.orientation
   )
+
+  const { data } = props
 
   return (
     <Tile

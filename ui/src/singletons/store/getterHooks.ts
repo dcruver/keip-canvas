@@ -38,7 +38,7 @@ export const useGetNodeDescription = (id: string) =>
   useAppStore((state) => state.eipConfigs[id]?.description)
 
 export const useGetEipAttribute = (id: string, attrName: string) =>
-  useAppStore((state) => state.eipConfigs[id].attributes[attrName])
+  useAppStore((state) => state.eipConfigs[id]?.attributes[attrName])
 
 export const useGetEnabledChildren = (id: string) =>
   useAppStore(
