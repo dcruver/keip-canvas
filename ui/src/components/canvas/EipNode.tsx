@@ -3,7 +3,7 @@ import { ServiceId } from "@carbon/react/icons"
 import { Handle, NodeProps, Position } from "reactflow"
 import { EipNodeData, Layout } from "../../api/flow"
 import { ConnectionType, EipRole } from "../../api/generated/eipComponentDef"
-import { EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
 import getIconUrl from "../../singletons/eipIconCatalog"
 import {

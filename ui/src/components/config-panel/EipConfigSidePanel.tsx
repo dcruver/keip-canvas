@@ -3,7 +3,7 @@ import { useState } from "react"
 import { Edge, useOnSelectionChange, useStoreApi } from "reactflow"
 import { DYNAMIC_EDGE_TYPE, DynamicEdge, EipFlowNode } from "../../api/flow"
 import { Attribute } from "../../api/generated/eipComponentDef"
-import { EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import {
   FLOW_CONTROLLED_ATTRIBUTES,
   lookupContentBasedRouterKeys,

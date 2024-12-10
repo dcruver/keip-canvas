@@ -21,7 +21,7 @@ import {
 } from "reactflow"
 import "reactflow/dist/base.css"
 import { DYNAMIC_EDGE_TYPE, EIP_NODE_TYPE } from "../../api/flow"
-import { EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import {
   clearFlow,
   clearSelectedChildNode,

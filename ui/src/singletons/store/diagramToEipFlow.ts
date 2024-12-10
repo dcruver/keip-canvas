@@ -14,7 +14,7 @@ import {
   EipNode,
   FlowEdge,
 } from "../../api/generated/eipFlow"
-import { EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import {
   CHANNEL_ATTR_NAME,
   DEFAULT_OUTPUT_CHANNEL_NAME,

@@ -1,6 +1,6 @@
 import { Ollama } from "@langchain/ollama"
 import { Edge, Node } from "reactflow"
-import { EipId } from "../../../api/id"
+import { EipId } from "../../../api/generated/eipFlow"
 import { EipConfig, SerializedFlow } from "../../../singletons/store/api"
 import { EXPORTED_FLOW_VERSION } from "../../../singletons/store/appStore"
 import {

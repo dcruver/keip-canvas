@@ -10,7 +10,7 @@ import {
   Layout,
 } from "../../api/flow"
 import { AttributeType } from "../../api/generated/eipComponentDef"
-import { EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import { newFlowLayout } from "../../components/layout/layouting"
 import { AppStore, EipConfig, SerializedFlow } from "./api"
 import { useAppStore } from "./appStore"

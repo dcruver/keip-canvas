@@ -1,6 +1,6 @@
 import { Edge } from "reactflow"
 import { EipFlowNode, Layout } from "../../api/flow"
-import { EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import { useAppStore } from "./appStore"
 
 // Warning: the following exports provide non-reactive access to the store's state

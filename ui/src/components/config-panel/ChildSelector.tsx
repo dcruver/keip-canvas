@@ -1,6 +1,6 @@
 import { Checkbox, Form, RadioButton, RadioButtonGroup } from "@carbon/react"
 import { EipChildGroup } from "../../api/generated/eipComponentDef"
-import { EipId } from "../../api/id"
+import { EipId } from "../../api/generated/eipFlow"
 import {
   DYNAMIC_ROUTING_CHILDREN,
   lookupContentBasedRouterKeys,

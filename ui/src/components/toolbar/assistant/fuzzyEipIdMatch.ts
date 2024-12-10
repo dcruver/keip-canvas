@@ -1,5 +1,5 @@
 import { EipComponent } from "../../../api/generated/eipComponentDef"
-import { EipId } from "../../../api/id"
+import { EipId } from "../../../api/generated/eipFlow"
 import {
   EIP_SCHEMA,
   lookupEipComponent,
