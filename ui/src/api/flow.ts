@@ -42,3 +42,5 @@ export interface RouterKey {
   name: string
   attributes?: Attributes
 }
+
+export const DEFAULT_NAMESPACE = "integration"
