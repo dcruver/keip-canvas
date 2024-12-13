@@ -4,33 +4,43 @@ import {
   Button,
   ContainedList,
   ContainedListItem,
+  Dropdown,
+  Layer,
   Modal,
   Popover,
   PopoverContent,
+  Stack,
   Tile,
   TreeNode,
   TreeView,
 } from "@carbon/react"
-import { Add, Close, ServiceId } from "@carbon/react/icons"
-import { useContext, useState } from "react"
+import { Close, ServiceId } from "@carbon/react/icons"
+import { ReactNode, useState } from "react"
 import { createPortal } from "react-dom"
-import { Handle, NodeProps, Position } from "reactflow"
+import { Handle, NodeProps, Position, useNodeId } from "reactflow"
 import { EipNodeData, Layout } from "../../api/flow"
-import { ConnectionType, EipRole } from "../../api/generated/eipComponentDef"
+import {
+  ConnectionType,
+  EipComponent,
+  EipRole,
+} from "../../api/generated/eipComponentDef"
 import { EipId } from "../../api/generated/eipFlow"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
 import getIconUrl from "../../singletons/eipIconCatalog"
-import { clearSelectedChildNode } from "../../singletons/store/appActions"
+import {
+  clearSelectedChildNode,
+  disableChild,
+  enableChild,
+} from "../../singletons/store/appActions"
 import {
   useGetEnabledChildren,
   useGetLayout,
 } from "../../singletons/store/getterHooks"
 import { getEipId } from "../../singletons/store/storeViews"
 import { toTitleCase } from "../../utils/titleTransform"
-import EipComponentContext from "./EipComponentContext"
 import "./nodes.scss"
 
-interface UpdateModalProps {
+interface ChildrenUpdateModalProps {
   open: boolean
   setOpen: (open: boolean) => void
 }
@@ -113,90 +123,111 @@ const getClassNames = (props: NodeProps<EipNodeData>, role: EipRole) => {
   return ["eip-node", roleClsName, selectedClsName].join(" ")
 }
 
-const ChildrenUpdateModal = ({ open, setOpen }: UpdateModalProps) => {
-  const rootEipComponent = useContext(EipComponentContext)
-  const [path, setPath] = useState([rootEipComponent?.name])
+const getEipDefinition = (rootEipDef: EipComponent, path: string[]) => {
+  let children = rootEipDef.childGroup?.children
 
-  const [childConfigs, setChildConfigs] = useState<Record<string, string[]>>(
-    () =>
-      rootEipComponent!.childGroup!.children.reduce(
-        (acc, child) => ({
-          ...acc,
-          [child.name]: [],
-        }),
-        {}
-      )
-  )
+  if (path.length == 1) {
+    return children
+  }
 
+  for (const id of path.slice(1)) {
+    const name = getEipId(id)?.name
+    const child = children?.find((c) => c.name === name)
+    children = child?.childGroup?.children
+  }
+  return children
+}
+
+const ChildrenUpdateModal = ({ open, setOpen }: ChildrenUpdateModalProps) => {
+  const rootId = useNodeId()!
+  const [path, setPath] = useState([rootId])
+  const parentId = path[path.length - 1]
+  const enabledChildren = useGetEnabledChildren(parentId)
+
+  const rootEipId = getEipId(rootId)
+  const rootEipDef = rootEipId && lookupEipComponent(rootEipId)
+
+  const childOptions = rootEipDef && getEipDefinition(rootEipDef, path)
+
+  let modalContent: ReactNode
+  if (childOptions && childOptions.length > 0) {
+    modalContent = (
+      <>
+        <Dropdown
+          id={"dropdown-child-selector"}
+          label="Select child..."
+          items={[null, ...childOptions]}
+          itemToString={(child) => child?.name ?? ""}
+          onChange={({ selectedItem }) => {
+            selectedItem &&
+              enableChild(parentId, {
+                namespace: DEFAULT_NAMESPACE,
+                name: selectedItem.name,
+              })
+          }}
+          selectedItem={null}
+          titleText={"Add a child"}
+        />
+
+        <Layer>
+          <ContainedList
+            className="child-update-modal__list"
+            label="Children"
+            kind="on-page"
+          >
+            {enabledChildren.map((childId) => {
+              const eipId = getEipId(childId)
+              return (
+                <ContainedListItem
+                  key={childId}
+                  action={
+                    <Button
+                      kind="ghost"
+                      iconDescription="Delete"
+                      hasIconOnly
+                      renderIcon={Close}
+                      tooltipPosition="left"
+                      onClick={() => disableChild(parentId, childId)}
+                    />
+                  }
+                  onClick={() => setPath((path) => [...path, childId])}
+                >
+                  <span>{eipId?.name}</span> <span>({childId})</span>
+                </ContainedListItem>
+              )
+            })}
+          </ContainedList>
+        </Layer>
+      </>
+    )
+  } else {
+    modalContent = <p>No children defined</p>
+  }
+
+  // TODO: Look into using a ComposedModal rather than relying on 'passiveModal' prop
   return createPortal(
     <Modal
+      className="child-update-modal"
       open={open}
       onRequestClose={() => setOpen(false)}
-      modalHeading="Add a new child component"
-      modalLabel="Children"
+      modalHeading="Update Children"
+      modalLabel={rootEipDef?.name}
       passiveModal
       size="md"
     >
-      <Breadcrumb>
-        {path.map((name, idx) => (
-          <BreadcrumbItem
-            key={idx}
-            onClick={() => setPath((prev) => prev.slice(0, idx + 1))}
-          >
-            {name}
-          </BreadcrumbItem>
-        ))}
-      </Breadcrumb>
-      {rootEipComponent?.childGroup?.children.map((child) => (
-        <ContainedList
-          key={child.name}
-          label={child.name}
-          kind="on-page"
-          action={
-            <Button
-              hasIconOnly
-              iconDescription="Add"
-              renderIcon={Add}
-              tooltipPosition="left"
-              onClick={() => {
-                const currChildren = childConfigs[child.name]
-                const newName =
-                  currChildren.length > 0
-                    ? `${child.name}${Number(currChildren[currChildren.length - 1].slice(child.name.length)) + 1}`
-                    : `${child.name}1`
-                setChildConfigs((prev) => ({
-                  ...prev,
-                  [child.name]: [...prev[child.name], newName],
-                }))
-              }}
-            />
-          }
-        >
-          {childConfigs[child.name]?.map((name) => (
-            <ContainedListItem
-              key={name}
-              onClick={() => setPath((prev) => [...prev, name])}
-              action={
-                <Button
-                  kind="ghost"
-                  iconDescription="Dismiss"
-                  hasIconOnly
-                  renderIcon={Close}
-                  tooltipPosition="left"
-                  onClick={() =>
-                    setChildConfigs((prev) => ({
-                      ...prev,
-                      [child.name]: prev[child.name].filter((n) => n !== name),
-                    }))
-                  }
-                />
-              }
+      <Stack orientation="vertical" gap={4}>
+        <Breadcrumb>
+          {path.map((id, idx) => (
+            <BreadcrumbItem
+              key={idx}
+              onClick={() => setPath((prev) => prev.slice(0, idx + 1))}
             >
-              {name}
-            </ContainedListItem>
+              {getEipId(id)?.name}
+            </BreadcrumbItem>
           ))}
-        </ContainedList>
-      ))}
+        </Breadcrumb>
+        {modalContent}
+      </Stack>
     </Modal>,
     document.body
   )
@@ -224,6 +255,7 @@ const ChildTree = () => {
   )
 }
 
+// TODO: Move children popover to a separate file
 const ChildrenPopoverMenu = () => {
   const [open, setOpen] = useState(true)
 
@@ -279,23 +311,21 @@ export const EipNode = (props: NodeProps<EipNodeData>) => {
   const { data } = props
 
   return (
-    <EipComponentContext.Provider value={componentDefinition}>
-      <Tile
-        className={getClassNames(props, componentDefinition.role)}
-        onClick={hasChildren ? () => clearSelectedChildNode() : undefined}
+    <Tile
+      className={getClassNames(props, componentDefinition.role)}
+      onClick={hasChildren ? () => clearSelectedChildNode() : undefined}
+    >
+      <div>{getNamespacedTitle(eipId)}</div>
+      <img className="eip-node-image" src={getIconUrl(eipId)} />
+      <div
+        className="eip-node-label"
+        style={hasChildren ? { marginBottom: "0.5rem" } : {}}
       >
-        <div>{getNamespacedTitle(eipId)}</div>
-        <img className="eip-node-image" src={getIconUrl(eipId)} />
-        <div
-          className="eip-node-label"
-          style={hasChildren ? { marginBottom: "0.5rem" } : {}}
-        >
-          <strong>{data.label || DEFAULT_NODE_LABEL}</strong>
-        </div>
-        {/* TODO: Only show children menu if component has a non-empty child group */}
-        <ChildrenPopoverMenu />
-        {handles}
-      </Tile>
-    </EipComponentContext.Provider>
+        <strong>{data.label || DEFAULT_NODE_LABEL}</strong>
+      </div>
+      {/* TODO: Only show children menu if component has a non-empty child group */}
+      <ChildrenPopoverMenu />
+      {handles}
+    </Tile>
   )
 }
