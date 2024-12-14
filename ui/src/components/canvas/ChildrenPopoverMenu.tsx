@@ -77,7 +77,7 @@ const ChildrenUpdateModal = ({ open, setOpen }: ChildrenUpdateModalProps) => {
 
         <Layer>
           <ContainedList
-            className="child-update-modal__list"
+            className="child-modal__list"
             label="Children"
             kind="on-page"
           >
@@ -111,9 +111,10 @@ const ChildrenUpdateModal = ({ open, setOpen }: ChildrenUpdateModalProps) => {
   }
 
   // TODO: Look into using a ComposedModal rather than relying on 'passiveModal' prop
+  // TODO: Capture browser "back" and "forward" clicks and apply to child path navigation
   return createPortal(
     <Modal
-      className="child-update-modal"
+      className="child-modal"
       open={open}
       onRequestClose={() => setOpen(false)}
       modalHeading="Update Children"
@@ -121,7 +122,7 @@ const ChildrenUpdateModal = ({ open, setOpen }: ChildrenUpdateModalProps) => {
       passiveModal
       size="md"
     >
-      <Stack orientation="vertical" gap={4}>
+      <Stack orientation="vertical" gap={7}>
         <Breadcrumb>
           {path.map((id, idx) => (
             <BreadcrumbItem

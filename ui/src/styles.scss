@@ -255,9 +255,9 @@
   }
 }
 
-// .child-update-modal {
-//   .child-update-modal__list {
-//     min-height: 10vh;
-//     max-height: 30vh;
-//   }
-// }
+.child-modal {
+  .child-modal__list > ul {
+    height: 25vh;
+    overflow-y: auto;
+  }
+}
