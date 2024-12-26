@@ -1,0 +1,75 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`traverse children breadth-first search 1`] = `
+[
+  {
+    "id": "FL5Tssm8tV",
+    "parentId": null,
+  },
+  {
+    "id": "43FAdk5SdBR",
+    "parentId": "FL5Tssm8tV",
+  },
+  {
+    "id": "hSZG9DyYy8q",
+    "parentId": "FL5Tssm8tV",
+  },
+  {
+    "id": "DD7ZbYQ3AST",
+    "parentId": "FL5Tssm8tV",
+  },
+  {
+    "id": "9OymVfY4n4p",
+    "parentId": "43FAdk5SdBR",
+  },
+  {
+    "id": "5x4O_wYO-tM",
+    "parentId": "DD7ZbYQ3AST",
+  },
+  {
+    "id": "LYutVnb04dY",
+    "parentId": "DD7ZbYQ3AST",
+  },
+  {
+    "id": "gCL0YkrFGgW",
+    "parentId": "9OymVfY4n4p",
+  },
+]
+`;
+
+exports[`traverse children depth-first search 1`] = `
+[
+  {
+    "id": "FL5Tssm8tV",
+    "parentId": null,
+  },
+  {
+    "id": "DD7ZbYQ3AST",
+    "parentId": "FL5Tssm8tV",
+  },
+  {
+    "id": "LYutVnb04dY",
+    "parentId": "DD7ZbYQ3AST",
+  },
+  {
+    "id": "5x4O_wYO-tM",
+    "parentId": "DD7ZbYQ3AST",
+  },
+  {
+    "id": "hSZG9DyYy8q",
+    "parentId": "FL5Tssm8tV",
+  },
+  {
+    "id": "43FAdk5SdBR",
+    "parentId": "FL5Tssm8tV",
+  },
+  {
+    "id": "9OymVfY4n4p",
+    "parentId": "43FAdk5SdBR",
+  },
+  {
+    "id": "gCL0YkrFGgW",
+    "parentId": "9OymVfY4n4p",
+  },
+]
+`;

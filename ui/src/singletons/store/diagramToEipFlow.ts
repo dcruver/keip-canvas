@@ -11,10 +11,10 @@ import {
   Attributes,
   EipChildNode,
   EipFlow,
+  EipId,
   EipNode,
   FlowEdge,
 } from "../../api/generated/eipFlow"
-import { EipId } from "../../api/generated/eipFlow"
 import {
   CHANNEL_ATTR_NAME,
   DEFAULT_OUTPUT_CHANNEL_NAME,
@@ -23,7 +23,7 @@ import {
 } from "../eipDefinitions"
 import { AppStore, EipConfig } from "./api"
 import { useAppStore } from "./appStore"
-import { getEipId } from "./storeViews"
+import { childrenBreadthTraversal, getEipId } from "./storeViews"
 
 const EIP_NAMESPACE_TO_XML_PREFIX: Record<string, string> = {
   xml: "int-xml",
@@ -97,39 +97,31 @@ const diagramToEipFlow = (state: AppStore): EipFlow => {
   return { nodes, edges }
 }
 
-// TODO: Refactor. Ugly.
 const buildChildTree = (
   rootId: string,
   eipConfigs: AppStore["eipConfigs"]
 ): EipChildNode[] => {
-  const top = eipConfigs[rootId].children.map((childId) =>
-    childConfigToNode(eipConfigs[childId])
-  )
+  const nodes: Record<string, EipChildNode> = {}
 
-  const queue = [...top]
+  for (const child of childrenBreadthTraversal(rootId)) {
+    const currNode = childConfigToNode(eipConfigs[child.id])
+    nodes[child.id] = currNode
 
-  while (queue.length > 0) {
-    const curr = queue.shift()!
-    if (curr.childIds && curr.childIds.length > 1) {
-      curr.children = curr.childIds.map((childId) =>
-        childConfigToNode(eipConfigs[childId])
-      )
-      queue.push(...curr.children)
+    if (child.parentId !== null) {
+      const parentNode = nodes[child.parentId]
+      parentNode.children
+        ? parentNode.children.push(currNode)
+        : (parentNode.children = [currNode])
     }
-    delete curr.childIds
   }
 
-  return top
+  return nodes[rootId].children ?? []
 }
 
-const childConfigToNode = (config: EipConfig) =>
-  ({
-    name: config.eipId.name,
-    attributes: config.attributes,
-    childIds: config.children,
-  }) as EipChildNode & {
-    childIds?: string[]
-  }
+const childConfigToNode = (config: EipConfig): EipChildNode => ({
+  name: config.eipId.name,
+  attributes: config.attributes,
+})
 
 const createNodeLookupMap = (nodes: EipFlowNode[]) => {
   const map = new Map<string, EipNodeData>()

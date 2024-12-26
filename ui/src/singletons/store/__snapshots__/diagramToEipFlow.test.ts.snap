@@ -96,6 +96,61 @@ exports[`diagram includes a router with child based matcher to EipFlow success 1
 }
 `;
 
+exports[`diagram with deep child nesting 1`] = `
+{
+  "edges": [],
+  "nodes": [
+    {
+      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "children": [
+                {
+                  "attributes": {},
+                  "name": "ref",
+                },
+              ],
+              "name": "advice-chain",
+            },
+          ],
+          "name": "poller",
+        },
+        {
+          "attributes": {},
+          "name": "transactional",
+        },
+        {
+          "attributes": {},
+          "children": [
+            {
+              "attributes": {},
+              "name": "retry-advice",
+            },
+            {
+              "attributes": {},
+              "name": "ref",
+            },
+          ],
+          "name": "request-handler-advice-chain",
+        },
+      ],
+      "connectionType": "request_reply",
+      "description": undefined,
+      "eipId": {
+        "name": "outbound-gateway",
+        "namespace": "file",
+      },
+      "id": "FL5Tssm8tV",
+      "role": "endpoint",
+    },
+  ],
+}
+`;
+
 exports[`standard diagram to EipFlow success 1`] = `
 {
   "edges": [

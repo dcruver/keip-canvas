@@ -141,7 +141,7 @@ const ChildrenUpdateModal = ({ open, setOpen }: ChildrenUpdateModalProps) => {
 }
 
 const ChildTree = () => {
-  const [modalOpen, setModalOpen] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
   return (
     <div>
       <TreeView
