@@ -1,20 +1,21 @@
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    Button,
-    ContainedList,
-    ContainedListItem,
-    Dropdown,
-    Layer,
-    Modal,
-    Popover,
-    PopoverContent,
-    Stack,
-    TreeNode,
-    TreeView,
+  Breadcrumb,
+  BreadcrumbItem,
+  Button,
+  ContainedList,
+  ContainedListItem,
+  Dropdown,
+  Layer,
+  Modal,
+  Popover,
+  PopoverContent,
+  Stack,
+  TreeNode,
+  TreeNodeProps,
+  TreeView,
 } from "@carbon/react"
 import { Close, ServiceId } from "@carbon/react/icons"
-import { ReactNode, useState } from "react"
+import { ReactElement, ReactNode, useState } from "react"
 import { createPortal } from "react-dom"
 import { useNodeId } from "reactflow"
 import { DEFAULT_NAMESPACE } from "../../api/flow"
@@ -22,7 +23,10 @@ import { EipComponent } from "../../api/generated/eipComponentDef"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
 import { disableChild, enableChild } from "../../singletons/store/appActions"
 import { useGetEnabledChildren } from "../../singletons/store/getterHooks"
-import { getEipId } from "../../singletons/store/storeViews"
+import {
+  getEipId,
+  getEnabledChildrenView,
+} from "../../singletons/store/storeViews"
 
 interface ChildrenUpdateModalProps {
   open: boolean
@@ -140,8 +144,31 @@ const ChildrenUpdateModal = ({ open, setOpen }: ChildrenUpdateModalProps) => {
   )
 }
 
+const renderTree = (id: string): ReactElement<TreeNodeProps> => {
+  const children = getEnabledChildrenView(id)
+
+  return (
+    <TreeNode
+      className={"child-tree-view__node"}
+      key={id}
+      id={id}
+      label={getEipId(id)?.name}
+    >
+      {children && children.length > 0
+        ? children.map((childId) => renderTree(childId))
+        : null}
+    </TreeNode>
+  )
+}
+
 const ChildTree = () => {
+  const rootId = useNodeId()
   const [modalOpen, setModalOpen] = useState(false)
+
+  if (!rootId) {
+    return null
+  }
+
   return (
     <div>
       <TreeView
@@ -150,12 +177,13 @@ const ChildTree = () => {
         hideLabel
         size="xs"
       >
-        <TreeNode
+        {renderTree(rootId).props.children}
+        {/* <TreeNode
           className={"child-tree-view__node"}
           id={"_add-child-action"}
           label="add child..."
           onSelect={() => modalOpen || setModalOpen(true)}
-        />
+        /> */}
       </TreeView>
       <ChildrenUpdateModal open={modalOpen} setOpen={setModalOpen} />
     </div>
@@ -163,7 +191,7 @@ const ChildTree = () => {
 }
 
 export const ChildrenPopoverMenu = () => {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   return (
     <Popover

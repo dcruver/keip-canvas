@@ -18,6 +18,11 @@ export const getEdgesView = (): readonly Edge[] => useAppStore.getState().edges
 export const getLayoutView = (): Readonly<Layout> =>
   useAppStore.getState().layout
 
+export const getEnabledChildrenView = (
+  nodeId: string
+): readonly string[] | undefined =>
+  useAppStore.getState().eipConfigs[nodeId]?.children
+
 export const getEipId = (nodeId: string): Readonly<EipId> | undefined =>
   useAppStore.getState().eipConfigs[nodeId]?.eipId
 

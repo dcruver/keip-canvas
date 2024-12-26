@@ -126,8 +126,7 @@ export const EipNode = (props: NodeProps<EipNodeData>) => {
       >
         <strong>{data.label || DEFAULT_NODE_LABEL}</strong>
       </div>
-      {/* TODO: Only show children menu if component has a non-empty child group */}
-      <ChildrenPopoverMenu />
+      {hasChildren && <ChildrenPopoverMenu />}
       {handles}
     </Tile>
   )
