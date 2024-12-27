@@ -23,6 +23,11 @@ import { disableChild, enableChild } from "../../singletons/store/appActions"
 import { useGetEnabledChildren } from "../../singletons/store/getterHooks"
 import { getEipId } from "../../singletons/store/storeViews"
 
+interface ChildPathBreadcrumbProps {
+  path: string[]
+  navigatePath: (idx: number) => void
+}
+
 interface ChildSelectorProps {
   parentId: string
   childOptions: EipChildElement[]
@@ -55,6 +60,19 @@ const getEipDefinition = (rootEipDef: EipComponent, path: string[]) => {
   }
   return children
 }
+
+const ChildPathBreadcrumb = ({
+  path,
+  navigatePath,
+}: ChildPathBreadcrumbProps) => (
+  <Breadcrumb>
+    {path.map((id, idx) => (
+      <BreadcrumbItem key={idx} onClick={() => navigatePath(idx)}>
+        {getEipId(id)?.name}
+      </BreadcrumbItem>
+    ))}
+  </Breadcrumb>
+)
 
 const ChildSelector = ({ parentId, childOptions }: ChildSelectorProps) => (
   <Dropdown
@@ -137,32 +155,28 @@ export const ChildManagementModal = ({
       </>
     )
   } else {
-    modalContent = <p className="child-modal__list-placeholder">No available children</p>
+    modalContent = (
+      <p className="child-modal__list-placeholder">No available children</p>
+    )
   }
 
-  // TODO: Look into using a ComposedModal rather than relying on 'passiveModal' prop
   // TODO: Capture browser "back" and "forward" clicks and apply to child path navigation
   return createPortal(
     <Modal
       className="child-modal"
       open={open}
       onRequestClose={() => setOpen(false)}
-      modalHeading="Update Children"
-      modalLabel={rootEipDef?.name}
+      modalHeading="Configure enabled children"
       passiveModal
       size="md"
     >
       <Stack orientation="vertical" gap={7}>
-        <Breadcrumb>
-          {path.map((id, idx) => (
-            <BreadcrumbItem
-              key={idx}
-              onClick={() => setPath((prev) => prev.slice(0, idx + 1))}
-            >
-              {getEipId(id)?.name}
-            </BreadcrumbItem>
-          ))}
-        </Breadcrumb>
+        <ChildPathBreadcrumb
+          path={path}
+          navigatePath={(idx: number) =>
+            setPath((prev) => prev.slice(0, idx + 1))
+          }
+        />
         {modalContent}
       </Stack>
     </Modal>,
