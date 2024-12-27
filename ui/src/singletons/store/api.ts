@@ -15,7 +15,7 @@ export interface AppStore {
   nodes: EipFlowNode[]
   edges: Edge[]
   eipConfigs: Record<string, EipConfig>
-  selectedChildNode: string | null
+  selectedChildNode: string[] | null
   layout: Layout
 }
 

@@ -143,8 +143,8 @@ export const disableChild = (parentId: string, childId: string) =>
     })
   })
 
-export const updateSelectedChildNode = (childId: string) =>
-  useAppStore.setState(() => ({ selectedChildNode: childId }))
+export const updateSelectedChildNode = (childIdPath: string[]) =>
+  useAppStore.setState(() => ({ selectedChildNode: childIdPath }))
 
 export const clearSelectedChildNode = () =>
   useAppStore.setState(() => ({ selectedChildNode: null }))

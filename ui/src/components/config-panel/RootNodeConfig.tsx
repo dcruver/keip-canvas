@@ -1,4 +1,4 @@
-import { Stack, TextArea, TextInput } from "@carbon/react"
+import { Button, Stack, TextArea, TextInput } from "@carbon/react"
 import { ChangeEvent, useMemo, useState } from "react"
 import { EipFlowNode } from "../../api/flow"
 import { Attribute } from "../../api/generated/eipComponentDef"
@@ -9,6 +9,7 @@ import {
 import { useGetNodeDescription } from "../../singletons/store/getterHooks"
 import debounce from "../../utils/debounce"
 import { AttributeConfigForm } from "./AttributeConfigForm"
+import { ChildManagementModal } from "./ChildManagementModal"
 import ConfigurationInputTabs from "./ConfigurationTabs"
 
 interface PanelContentProps {
@@ -71,14 +72,32 @@ const NodeIdentifierInputs = ({ node }: { node: EipFlowNode }) => {
   )
 }
 
-const RootNodeConfig = ({ node, attributes }: PanelContentProps) => (
-  <Stack gap={8}>
-    <NodeIdentifierInputs node={node} />
-    <ConfigurationInputTabs
-      hasAttributes={attributes.length > 0}
-      attributesForm={<AttributeConfigForm id={node.id} attrs={attributes} />}
-    />
-  </Stack>
-)
+const RootNodeConfig = ({ node, attributes }: PanelContentProps) => {
+  const [childModalOpen, setChildModalOpen] = useState(false)
+
+  return (
+    <Stack gap={8}>
+      <NodeIdentifierInputs node={node} />
+
+      {/* Improve styling */}
+      <div className="cfg-panel__container__padding-add">
+        <Button onClick={() => childModalOpen || setChildModalOpen(true)}>
+          Configure Children
+        </Button>
+      </div>
+
+      <ConfigurationInputTabs
+        hasAttributes={attributes.length > 0}
+        attributesForm={<AttributeConfigForm id={node.id} attrs={attributes} />}
+      />
+
+      <ChildManagementModal
+        rootId={node.id}
+        open={childModalOpen}
+        setOpen={setChildModalOpen}
+      />
+    </Stack>
+  )
+}
 
 export default RootNodeConfig
