@@ -6,7 +6,7 @@ import {
   TreeNodeProps,
   TreeView,
 } from "@carbon/react"
-import { ServiceId } from "@carbon/react/icons"
+import { ParentChild } from "@carbon/react/icons"
 import { ReactElement, useState } from "react"
 import { useNodeId } from "reactflow"
 import { updateSelectedChildNode } from "../../singletons/store/appActions"
@@ -34,7 +34,6 @@ const renderTree = (idPath: string[]): ReactElement<TreeNodeProps> => {
   )
 }
 
-// TODO: Use scroll for overflow with a lot of children
 const ChildTree = () => {
   const rootId = useNodeId()
 
@@ -56,6 +55,7 @@ const ChildTree = () => {
   )
 }
 
+// TODO: Change button location depending on layout
 export const ChildrenPopoverMenu = () => {
   const [open, setOpen] = useState(false)
 
@@ -64,20 +64,20 @@ export const ChildrenPopoverMenu = () => {
       className="eip-children-popover"
       highContrast
       open={open}
-      onRequestClose={() => setOpen(true)}
+      onRequestClose={() => setOpen(false)}
       onKeyDown={(ev: React.KeyboardEvent) =>
-        ev.key === "Escape" && setOpen(true)
+        ev.key === "Escape" && setOpen(false)
       }
     >
       {/* TODO: Make button smaller. Also, appear onHover if no children. */}
       <Button
         className="eip-children-popover__button"
         hasIconOnly
-        renderIcon={ServiceId}
         iconDescription="children"
-        size="sm"
-        tooltipPosition="bottom"
         kind="primary"
+        renderIcon={ParentChild}
+        size="sm"
+        tooltipPosition="left"
         onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
           ev.stopPropagation()
           setOpen(!open)

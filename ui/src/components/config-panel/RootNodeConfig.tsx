@@ -1,4 +1,5 @@
 import { Button, Stack, TextArea, TextInput } from "@carbon/react"
+import { Settings } from "@carbon/react/icons"
 import { ChangeEvent, useMemo, useState } from "react"
 import { EipFlowNode } from "../../api/flow"
 import { Attribute } from "../../api/generated/eipComponentDef"
@@ -79,9 +80,13 @@ const RootNodeConfig = ({ node, attributes }: PanelContentProps) => {
     <Stack gap={8}>
       <NodeIdentifierInputs node={node} />
 
-      {/* Improve styling */}
       <div className="cfg-panel__container__padding-add">
-        <Button onClick={() => childModalOpen || setChildModalOpen(true)}>
+        <Button
+          className="cfg-panel__button"
+          kind="tertiary"
+          onClick={() => childModalOpen || setChildModalOpen(true)}
+          renderIcon={Settings}
+        >
           Configure Children
         </Button>
       </div>
@@ -91,11 +96,13 @@ const RootNodeConfig = ({ node, attributes }: PanelContentProps) => {
         attributesForm={<AttributeConfigForm id={node.id} attrs={attributes} />}
       />
 
-      <ChildManagementModal
-        rootId={node.id}
-        open={childModalOpen}
-        setOpen={setChildModalOpen}
-      />
+      {childModalOpen && (
+        <ChildManagementModal
+          rootId={node.id}
+          open={childModalOpen}
+          setOpen={setChildModalOpen}
+        />
+      )}
     </Stack>
   )
 }

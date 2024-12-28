@@ -243,6 +243,10 @@
     padding: 0;
   }
 
+  .cfg-panel__button {
+    width: 100%;
+  }
+
   // the following two blocks are a workaround for the accordion content
   // taking up empty space when the accordion item is collapsed, needlessly
   // causing the scroll bar to appear.

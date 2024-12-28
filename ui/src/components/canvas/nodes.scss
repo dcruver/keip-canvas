@@ -34,12 +34,16 @@ $icon-button-focus-shadow:
   }
 
   .child-tree-view {
-    inline-size: 8rem;
+    inline-size: 10rem;
+    max-block-size: 15rem;
+    overflow-y: auto;
   }
 
-  // .child-tree-view__node {
-  //   padding-left: layout.$spacing-02;
-  // }
+
+  .child-tree-view__node {
+    background-color: themes.$background;
+  }
+
 }
 
 .eip-node-selected {
