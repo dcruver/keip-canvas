@@ -10,7 +10,7 @@ import {
   Stack,
 } from "@carbon/react"
 
-import { Close } from "@carbon/react/icons"
+import { Close, SettingsEdit } from "@carbon/react/icons"
 import { ReactNode, useState } from "react"
 import { createPortal } from "react-dom"
 import { DEFAULT_NAMESPACE } from "../../api/flow"
@@ -19,7 +19,11 @@ import {
   EipComponent,
 } from "../../api/generated/eipComponentDef"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
-import { disableChild, enableChild } from "../../singletons/store/appActions"
+import {
+  disableChild,
+  enableChild,
+  updateSelectedChildNode
+} from "../../singletons/store/appActions"
 import { useGetEnabledChildren } from "../../singletons/store/getterHooks"
 import { getEipId } from "../../singletons/store/storeViews"
 
@@ -37,6 +41,7 @@ interface ChildrenDisplayProps {
   parentId: string
   enabledChildren: string[]
   updatePath: (childId: string) => void
+  openChildConfigPanel: (childId: string) => void
 }
 
 interface ChildModalProps {
@@ -97,6 +102,7 @@ const ChildrenDisplay = ({
   parentId,
   enabledChildren,
   updatePath,
+  openChildConfigPanel,
 }: ChildrenDisplayProps) => (
   <Layer>
     <ContainedList
@@ -110,14 +116,24 @@ const ChildrenDisplay = ({
           <ContainedListItem
             key={childId}
             action={
-              <Button
-                kind="ghost"
-                iconDescription="Delete"
-                hasIconOnly
-                renderIcon={Close}
-                tooltipPosition="left"
-                onClick={() => disableChild(parentId, childId)}
-              />
+              <>
+                <Button
+                  kind="ghost"
+                  iconDescription="Configure"
+                  hasIconOnly
+                  renderIcon={SettingsEdit}
+                  tooltipPosition="left"
+                  onClick={() => openChildConfigPanel(childId)}
+                />
+                <Button
+                  kind="ghost"
+                  iconDescription="Delete"
+                  hasIconOnly
+                  renderIcon={Close}
+                  tooltipPosition="left"
+                  onClick={() => disableChild(parentId, childId)}
+                />
+              </>
             }
             onClick={() => updatePath(childId)}
           >
@@ -133,7 +149,7 @@ export const ChildManagementModal = ({
   rootId,
   open,
   setOpen,
-  initPath
+  initPath,
 }: ChildModalProps) => {
   const [path, setPath] = useState(initPath ?? [rootId])
   const parentId = path[path.length - 1]
@@ -153,6 +169,10 @@ export const ChildManagementModal = ({
           parentId={parentId}
           enabledChildren={enabledChildren}
           updatePath={(childId) => setPath((path) => [...path, childId])}
+          openChildConfigPanel={(childId) => {
+            updateSelectedChildNode([...path, childId])
+            setOpen(false)
+          }}
         />
       </>
     )
