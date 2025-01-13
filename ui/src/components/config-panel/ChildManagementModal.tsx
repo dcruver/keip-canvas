@@ -43,6 +43,7 @@ interface ChildModalProps {
   rootId: string
   open: boolean
   setOpen: (open: boolean) => void
+  initPath?: string[]
 }
 
 // TODO: Should this be a utility method in the EipComponentDef module?
@@ -132,8 +133,9 @@ export const ChildManagementModal = ({
   rootId,
   open,
   setOpen,
+  initPath
 }: ChildModalProps) => {
-  const [path, setPath] = useState([rootId])
+  const [path, setPath] = useState(initPath ?? [rootId])
   const parentId = path[path.length - 1]
   const enabledChildren = useGetEnabledChildren(parentId)
 

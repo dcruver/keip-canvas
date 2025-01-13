@@ -56,7 +56,7 @@ const ChildTree = () => {
 }
 
 // TODO: Change button location depending on layout
-export const ChildrenPopoverMenu = () => {
+export const ChildrenNavigationPopover = () => {
   const [open, setOpen] = useState(false)
 
   return (

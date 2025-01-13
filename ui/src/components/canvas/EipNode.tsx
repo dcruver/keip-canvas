@@ -1,9 +1,8 @@
 import { Tile } from "@carbon/react"
 
 import { Handle, NodeProps, Position } from "reactflow"
-import { DEFAULT_NAMESPACE, EipNodeData, Layout } from "../../api/flow"
+import { EipNodeData, Layout } from "../../api/flow"
 import { ConnectionType, EipRole } from "../../api/generated/eipComponentDef"
-import { EipId } from "../../api/generated/eipFlow"
 import { lookupEipComponent } from "../../singletons/eipDefinitions"
 import getIconUrl from "../../singletons/eipIconCatalog"
 import { clearSelectedChildNode } from "../../singletons/store/appActions"
@@ -12,8 +11,8 @@ import {
   useGetLayout,
 } from "../../singletons/store/getterHooks"
 import { getEipId } from "../../singletons/store/storeViews"
-import { toTitleCase } from "../../utils/titleTransform"
-import { ChildrenPopoverMenu } from "./ChildrenPopoverMenu"
+import { getNamespacedTitle } from "../../utils/titleTransform"
+import { ChildrenNavigationPopover } from "./ChildrenNavigationPopover"
 import "./nodes.scss"
 
 const DEFAULT_NODE_LABEL = "New Node"
@@ -79,13 +78,6 @@ const renderHandles = (
     ? renderHorizontalHandles(connectionType)
     : renderVerticalHandles(connectionType)
 
-const getNamespacedTitle = (eipId: EipId) => {
-  if (eipId.namespace === DEFAULT_NAMESPACE) {
-    return toTitleCase(eipId.name)
-  }
-  return toTitleCase(eipId.namespace) + " " + toTitleCase(eipId.name)
-}
-
 const getClassNames = (props: NodeProps<EipNodeData>, role: EipRole) => {
   const roleClsName =
     role === "channel" ? "eip-channel-node" : "eip-endpoint-node"
@@ -126,7 +118,7 @@ export const EipNode = (props: NodeProps<EipNodeData>) => {
       >
         <strong>{data.label || DEFAULT_NODE_LABEL}</strong>
       </div>
-      {hasChildren && <ChildrenPopoverMenu />}
+      {hasChildren && <ChildrenNavigationPopover />}
       {handles}
     </Tile>
   )

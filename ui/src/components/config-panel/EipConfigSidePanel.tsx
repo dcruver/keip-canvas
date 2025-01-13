@@ -16,9 +16,8 @@ import {
 import { clearSelectedChildNode } from "../../singletons/store/appActions"
 import { useGetSelectedChildNode } from "../../singletons/store/getterHooks"
 import { getEipId } from "../../singletons/store/storeViews"
-import ChildNodeConfig from "./ChildNodeConfig"
 import DynamicEdgeConfig from "./DynamicEdgeConfig"
-import RootNodeConfig from "./RootNodeConfig"
+import { ChildNodeConfig, RootNodeConfig } from "./NodeConfigPanel"
 
 const isDynamicRouterAttribute = (attribute: Attribute, eipId?: EipId) => {
   if (!eipId) {
@@ -99,8 +98,7 @@ const EipConfigSidePanel = () => {
     sidePanelContent = (
       <ChildNodeConfig
         key={childId}
-        childId={childId}
-        parentName={eipComponent.name}
+        childPath={selectedChildPath}
         attributes={configurableAttrs}
       />
     )
