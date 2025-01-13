@@ -109,10 +109,10 @@ const BaseNodePanel = ({
   const [childModalOpen, setChildModalOpen] = useState(false)
 
   return (
-    <Stack gap={8}>
+    <Stack gap={8} className="cfg-panel__container__top-padding-add">
       {metadataInputs}
 
-      <div className="cfg-panel__container__padding-add">
+      <div className="cfg-panel__container__side-padding-add">
         <Button
           className="cfg-panel__button"
           kind="tertiary"
@@ -144,7 +144,7 @@ export const RootNodeConfig = ({ node, attributes }: RootPanelProps) => {
   const eipId = getEipId(node.id)
 
   const metadataInputs = (
-    <Stack gap={6} className="cfg-panel__container__padding-add">
+    <Stack gap={6} className="cfg-panel__container__side-padding-add">
       {eipId && <h4>{getNamespacedTitle(eipId)}</h4>}
       <IdDisplay id={node.id} />
       <LabelInput node={node} />
@@ -166,7 +166,7 @@ export const ChildNodeConfig = ({ childPath, attributes }: ChildPanelProps) => {
   const eipId = getEipId(childId)
 
   const metadataInputs = (
-    <Stack gap={6} className="cfg-panel__container__padding-add">
+    <Stack gap={6} className="cfg-panel__container__side-padding-add">
       {eipId && <h4>{getNamespacedTitle(eipId)}</h4>}
       <IdDisplay id={childId} />
       <DescriptionInput id={childId} />

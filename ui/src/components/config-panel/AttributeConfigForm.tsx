@@ -18,7 +18,7 @@ import { useGetEipAttribute } from "../../singletons/store/getterHooks"
 import debounce from "../../utils/debounce"
 import DescriptionTooltipWrapper from "./DescriptionTooltipWrapper"
 
-const addPaddingClass = "cfg-panel__container__padding-add"
+const addPaddingClass = "cfg-panel__container__side-padding-add"
 
 interface AttributeInputFactoryProps {
   attr: Attribute
