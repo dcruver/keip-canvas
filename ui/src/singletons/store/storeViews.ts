@@ -26,6 +26,9 @@ export const getEnabledChildrenView = (
 export const getEipId = (nodeId: string): Readonly<EipId> | undefined =>
   useAppStore.getState().eipConfigs[nodeId]?.eipId
 
+export const getSelectedChildNode = (): readonly string[] | null =>
+  useAppStore.getState().selectedChildNode
+
 export const childrenBreadthTraversal = function* (
   rootId: string
 ): Generator<ChildTraversalItem> {

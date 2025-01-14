@@ -13,6 +13,7 @@ import { updateSelectedChildNode } from "../../singletons/store/appActions"
 import {
   getEipId,
   getEnabledChildrenView,
+  getSelectedChildNode,
 } from "../../singletons/store/storeViews"
 
 const renderTree = (idPath: string[]): ReactElement<TreeNodeProps> => {
@@ -55,7 +56,6 @@ const ChildTree = () => {
   )
 }
 
-// TODO: Change button location depending on layout
 export const ChildrenNavigationPopover = () => {
   const [open, setOpen] = useState(false)
 
@@ -64,24 +64,21 @@ export const ChildrenNavigationPopover = () => {
       className="eip-children-popover"
       highContrast
       open={open}
-      onRequestClose={() => setOpen(false)}
+      // Keep popover open when interacting with node config side panel
+      onRequestClose={() => !getSelectedChildNode() && setOpen(false)}
       onKeyDown={(ev: React.KeyboardEvent) =>
         ev.key === "Escape" && setOpen(false)
       }
     >
-      {/* TODO: Make button smaller. Also, appear onHover if no children. */}
       <Button
-        className="eip-children-popover__button"
+        className="eip-children-popover__button nodrag"
         hasIconOnly
         iconDescription="children"
         kind="primary"
         renderIcon={ParentChild}
         size="sm"
         tooltipPosition="left"
-        onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-          ev.stopPropagation()
-          setOpen(!open)
-        }}
+        onClick={() => setOpen(!open)}
       />
       <PopoverContent>
         <ChildTree />
