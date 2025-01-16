@@ -143,6 +143,25 @@ export const disableChild = (parentId: string, childId: string) =>
     })
   })
 
+export const reorderEnabledChildren = (parentId: string, children: string[]) =>
+  useAppStore.setState((state) => {
+    if (
+      [...children].sort().toString() !==
+      [...state.eipConfigs[parentId].children].sort().toString()
+    ) {
+      throw new Error(
+        `Cannot use this method to add/remove child ids, only reordering is allowed
+        current list: ${JSON.stringify(state.eipConfigs[parentId].children)}
+        requested list: ${JSON.stringify(children)}
+        `
+      )
+    }
+
+    return produce(state, (draft: AppStore) => {
+      draft.eipConfigs[parentId].children = children
+    })
+  })
+
 export const updateSelectedChildNode = (childIdPath: string[]) =>
   useAppStore.setState(() => ({ selectedChildNode: childIdPath }))
 

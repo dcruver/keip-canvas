@@ -43,7 +43,7 @@ const ChildTree = () => {
   }
 
   return (
-    <div>
+    <div className="nodrag">
       <TreeView
         className={"child-tree-view"}
         label={"children-menu"}
@@ -61,7 +61,7 @@ export const ChildrenNavigationPopover = () => {
 
   return (
     <Popover
-      className="eip-children-popover"
+      className="eip-children-popover nowheel"
       highContrast
       open={open}
       // Keep popover open when interacting with node config side panel
@@ -71,7 +71,7 @@ export const ChildrenNavigationPopover = () => {
       }
     >
       <Button
-        className="eip-children-popover__button nodrag"
+        className="eip-children-popover__button"
         hasIconOnly
         iconDescription="children"
         kind="primary"

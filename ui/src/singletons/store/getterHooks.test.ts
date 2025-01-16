@@ -17,7 +17,7 @@ vi.mock("zustand")
 
 const STANDARD_INBOUND_ADAPTER = "9KWCqlIyy7"
 const STANDARD_ROUTER = "LoiC2CFbLP"
-const STANDARD_POLLER_CHILD_ID = "mcyTryMPewJ"
+const STANDARD_POLLER_CHILD = "mcyTryMPewJ"
 
 // TODO: Do we really need to use 'act'?
 beforeEach(() => {
@@ -64,7 +64,7 @@ describe("get EIP attribute", () => {
     },
     {
       msg: "child id and attribute are present -> value",
-      id: STANDARD_POLLER_CHILD_ID,
+      id: STANDARD_POLLER_CHILD,
       attrName: "fixed-rate",
       result: "2000",
     },
@@ -91,7 +91,7 @@ describe("get list of children", () => {
     const children = renderAndUnwrapHook(() =>
       useGetEnabledChildren(STANDARD_INBOUND_ADAPTER)
     )
-    expect(children).toEqual([STANDARD_POLLER_CHILD_ID])
+    expect(children).toEqual([STANDARD_POLLER_CHILD])
   })
 
   test("node does not have children -> empty array", () => {
