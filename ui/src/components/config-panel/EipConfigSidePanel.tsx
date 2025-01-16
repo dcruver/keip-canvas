@@ -80,18 +80,13 @@ const EipConfigSidePanel = () => {
     },
   })
 
-  const selectedNodeEipId = selectedNode && getEipId(selectedNode.id)
-  const eipComponent = selectedNodeEipId
-    ? lookupEipComponent(selectedNodeEipId)
-    : null
-
   let sidePanelContent
   // TODO: Simplify conditionals
-  if (selectedChildPath && selectedNode && eipComponent) {
+  if (selectedChildPath) {
+    // TODO: Handle error case if childElement or rootComponent is undefined
     const childId = selectedChildPath[selectedChildPath.length - 1]
-
-    // TODO: Handle error case if childElement is undefined
-    const childElement = findChildDefinition(eipComponent, selectedChildPath)
+    const rootComponent = lookupEipComponent(getEipId(selectedChildPath[0])!)!
+    const childElement = findChildDefinition(rootComponent, selectedChildPath)
     const configurableAttrs = filterConfigurableAttributes(
       childElement?.attributes
     )
@@ -102,9 +97,13 @@ const EipConfigSidePanel = () => {
         attributes={configurableAttrs}
       />
     )
-  } else if (selectedNodeEipId && eipComponent) {
+  } else if (selectedNode) {
+    // TODO: Handle error case if eipComponent is undefined
+    const selectedNodeEipId = selectedNode && getEipId(selectedNode.id)
+    const eipComponent =
+      selectedNodeEipId && lookupEipComponent(selectedNodeEipId)
     const configurableAttrs = filterConfigurableAttributes(
-      eipComponent.attributes,
+      eipComponent?.attributes,
       selectedNodeEipId
     )
     sidePanelContent = (

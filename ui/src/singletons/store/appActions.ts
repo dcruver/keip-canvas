@@ -143,6 +143,13 @@ export const disableChild = (parentId: string, childId: string) =>
     })
   })
 
+export const updateEnabledChildren = (parentId: string, children: string[]) =>
+  useAppStore.setState(
+    produce((draft: AppStore) => {
+      draft.eipConfigs[parentId].children = children
+    })
+  )
+
 export const updateSelectedChildNode = (childIdPath: string[]) =>
   useAppStore.setState(() => ({ selectedChildNode: childIdPath }))
 

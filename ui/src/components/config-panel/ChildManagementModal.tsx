@@ -2,8 +2,6 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Button,
-  ContainedList,
-  ContainedListItem,
   Dropdown,
   Layer,
   Modal,
@@ -22,10 +20,12 @@ import { lookupEipComponent } from "../../singletons/eipDefinitions"
 import {
   disableChild,
   enableChild,
-  updateSelectedChildNode
+  updateEnabledChildren,
+  updateSelectedChildNode,
 } from "../../singletons/store/appActions"
 import { useGetEnabledChildren } from "../../singletons/store/getterHooks"
 import { getEipId } from "../../singletons/store/storeViews"
+import { DraggableList, DraggableListItem } from "./DraggableList"
 
 interface ChildPathBreadcrumbProps {
   path: string[]
@@ -105,16 +105,18 @@ const ChildrenDisplay = ({
   openChildConfigPanel,
 }: ChildrenDisplayProps) => (
   <Layer>
-    <ContainedList
+    <DraggableList
       className="child-modal__list"
       label="Children"
       kind="on-page"
+      handleDrop={(items) => updateEnabledChildren(parentId, items)}
     >
       {enabledChildren.map((childId) => {
         const eipId = getEipId(childId)
         return (
-          <ContainedListItem
+          <DraggableListItem
             key={childId}
+            id={childId}
             action={
               <>
                 <Button
@@ -138,10 +140,10 @@ const ChildrenDisplay = ({
             onClick={() => updatePath(childId)}
           >
             <span>{eipId?.name}</span> <span>({childId})</span>
-          </ContainedListItem>
+          </DraggableListItem>
         )
       })}
-    </ContainedList>
+    </DraggableList>
   </Layer>
 )
 
