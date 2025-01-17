@@ -17,6 +17,7 @@ import {
   useGetSelectedChildNode,
 } from "./getterHooks"
 import { renderAndUnwrapHook, resetMockStore } from "./storeTestingUtils"
+import nestedChildFlow from "./testdata/store-initializers/nestedChildFlow.json"
 import selectedNodeFlow from "./testdata/store-initializers/singleSelectedNodeFlow.json"
 import standardFlow from "./testdata/store-initializers/standardFlow.json"
 import unspecifiedRouterFlow from "./testdata/store-initializers/unspecifiedRouterFlow.json"
@@ -28,8 +29,10 @@ import {
   clearFlow,
   createDroppedNode,
   deleteEipAttribute,
+  disableChild,
   enableChild,
   importFlowFromJson,
+  reorderEnabledChildren,
   toggleLayoutDensity,
   updateContentRouterKey,
   updateDynamicEdgeMapping,
@@ -52,8 +55,8 @@ vi.mock("zustand")
 
 const STANDARD_INBOUND_ADAPTER = "9KWCqlIyy7"
 const STANDARD_ROUTER = "LoiC2CFbLP"
-const STANDARD_POLLER_CHILD_ID = "mcyTryMPewJ"
-const STANDARD_TRANSACTIONAL_CHILD_ID = "V1ls9ri4szs"
+const STANDARD_POLLER_CHILD = "mcyTryMPewJ"
+const STANDARD_TRANSACTIONAL_CHILD = "V1ls9ri4szs"
 
 beforeEach(() => {
   act(() => {
@@ -190,7 +193,7 @@ describe("updating EIP Attributes", () => {
     },
     {
       msg: "add child node attr",
-      nodeId: STANDARD_POLLER_CHILD_ID,
+      nodeId: STANDARD_POLLER_CHILD,
       attribute: {
         name: "child-foo",
         value: "child-bar",
@@ -198,7 +201,7 @@ describe("updating EIP Attributes", () => {
     },
     {
       msg: "add the first attr for a child node",
-      nodeId: STANDARD_TRANSACTIONAL_CHILD_ID,
+      nodeId: STANDARD_TRANSACTIONAL_CHILD,
       attribute: {
         name: "child-foo",
         value: "child-bar",
@@ -224,7 +227,7 @@ describe("updating EIP Attributes", () => {
     },
     {
       msg: "overwrite child node attr",
-      nodeId: STANDARD_POLLER_CHILD_ID,
+      nodeId: STANDARD_POLLER_CHILD,
       attribute: {
         name: "fixed-rate",
         value: 500,
@@ -411,13 +414,89 @@ test("enable child success", () => {
   expect(getEipId(children[1])).toEqual(child2)
 })
 
-test("update selected child node success", () => {
-  const childId = "abc"
+describe("disable child", () => {
+  test("disable child success", () => {
+    act(() => disableChild(STANDARD_INBOUND_ADAPTER, STANDARD_POLLER_CHILD))
 
-  act(() => updateSelectedChildNode(childId))
+    const children = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(STANDARD_INBOUND_ADAPTER)
+    )
+
+    expect(children).toHaveLength(0)
+  })
+
+  test("disable child unknown child id -> error", () => {
+    expect(() =>
+      disableChild(STANDARD_INBOUND_ADAPTER, "fakeid")
+    ).toThrowError()
+
+    const children = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(STANDARD_INBOUND_ADAPTER)
+    )
+
+    expect(children).toHaveLength(1)
+  })
+
+  test("disable child unknown parent id -> error", () => {
+    expect(() => disableChild("fakeid", STANDARD_POLLER_CHILD)).toThrowError()
+
+    const children = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(STANDARD_INBOUND_ADAPTER)
+    )
+
+    expect(children).toHaveLength(1)
+  })
+})
+
+describe("reorder enabled child list", () => {
+  beforeEach(() => {
+    act(() => {
+      resetMockStore(nestedChildFlow)
+    })
+  })
+
+  const PARENT_ID = "FL5Tssm8tV"
+
+  test("reorder enabled children success", () => {
+    const initial = renderAndUnwrapHook(() => useGetEnabledChildren(PARENT_ID))
+
+    const updated = [...initial]
+
+    // swap first and third elements
+    const temp = updated[2]
+    updated[2] = updated[0]
+    updated[0] = temp
+
+    act(() => reorderEnabledChildren(PARENT_ID, updated))
+
+    const children = renderAndUnwrapHook(() => useGetEnabledChildren(PARENT_ID))
+    expect(children).toEqual(updated)
+  })
+
+  test("adding child -> error ", () => {
+    const initial = renderAndUnwrapHook(() => useGetEnabledChildren(PARENT_ID))
+    const updated = [...initial, "extra"]
+    expect(() => reorderEnabledChildren(PARENT_ID, updated)).toThrowError()
+  })
+
+  test("removing child -> error ", () => {
+    const initial = renderAndUnwrapHook(() => useGetEnabledChildren(PARENT_ID))
+    const updated = initial.slice(1)
+    expect(() => reorderEnabledChildren(PARENT_ID, updated)).toThrowError()
+  })
+
+  test("changing child list -> error ", () => {
+    expect(() => reorderEnabledChildren(PARENT_ID, ["c1", "c2"])).toThrowError()
+  })
+})
+
+test("update selected child node success", () => {
+  const childPath = ["root", "c1"]
+
+  act(() => updateSelectedChildNode(childPath))
 
   const actual = renderAndUnwrapHook(useGetSelectedChildNode)
-  expect(actual).toEqual(childId)
+  expect(actual).toEqual(childPath)
 })
 
 test("clear flow success", () => {

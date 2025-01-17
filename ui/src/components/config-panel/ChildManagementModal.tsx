@@ -20,7 +20,7 @@ import { lookupEipComponent } from "../../singletons/eipDefinitions"
 import {
   disableChild,
   enableChild,
-  updateEnabledChildren,
+  reorderEnabledChildren,
   updateSelectedChildNode,
 } from "../../singletons/store/appActions"
 import { useGetEnabledChildren } from "../../singletons/store/getterHooks"
@@ -109,7 +109,7 @@ const ChildrenDisplay = ({
       className="child-modal__list"
       label="Children"
       kind="on-page"
-      handleDrop={(items) => updateEnabledChildren(parentId, items)}
+      handleDrop={(items) => reorderEnabledChildren(parentId, items)}
     >
       {enabledChildren.map((childId) => {
         const eipId = getEipId(childId)
