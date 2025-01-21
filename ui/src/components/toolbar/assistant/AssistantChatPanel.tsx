@@ -128,7 +128,6 @@ const ChatHistory = forwardRef<HTMLParagraphElement, ChatHistoryProps>(
 
 ChatHistory.displayName = "ChatHistory"
 
-// TODO: Create a new store action to set nodes/edges directly from object instead of JSON string.
 const AssistantChatPanel = () => {
   const chatHistoryEndRef = useRef<HTMLParagraphElement | null>(null)
   const [chatEntries, setChatEntries] = useState<ChatEntry[]>([])

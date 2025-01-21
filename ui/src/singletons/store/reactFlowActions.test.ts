@@ -19,7 +19,6 @@ beforeEach(() => {
   })
 })
 
-// TODO: test that child node configs are deleted recursively
 describe("onNodesChange", () => {
   test("top-level config and all child configs are removed when node is deleted", () => {
     // assert configs exist before removing node

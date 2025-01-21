@@ -87,7 +87,6 @@ const getClassNames = (props: NodeProps<EipNodeData>, role: EipRole) => {
 
 // TODO: Consider separating into Endpoint and Channel custom node types
 export const EipNode = (props: NodeProps<EipNodeData>) => {
-  // TODO: clearSelectedChildNode is used in too many different components. See if that can be reduced (or elimnated).
   const layout = useGetLayout()
   const children = useGetEnabledChildren(props.id)
   const hasChildren = children.length > 0

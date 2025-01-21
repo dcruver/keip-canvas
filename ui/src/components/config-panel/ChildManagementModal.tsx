@@ -26,6 +26,7 @@ import {
 import { useGetEnabledChildren } from "../../singletons/store/getterHooks"
 import { getEipId } from "../../singletons/store/storeViews"
 import { DraggableList, DraggableListItem } from "./DraggableList"
+import { findChildDefinition } from "./childDefinitions"
 
 interface ChildPathBreadcrumbProps {
   path: string[]
@@ -51,20 +52,13 @@ interface ChildModalProps {
   initPath?: string[]
 }
 
-// TODO: Should this be a utility method in the EipComponentDef module?
-const getEipDefinition = (rootEipDef: EipComponent, path: string[]) => {
-  let children = rootEipDef.childGroup?.children
-
+const getChildEipDefinition = (rootEipDef: EipComponent, path: string[]) => {
   if (path.length == 1) {
-    return children
+    return rootEipDef.childGroup?.children
   }
 
-  for (const id of path.slice(1)) {
-    const name = getEipId(id)?.name
-    const child = children?.find((c) => c.name === name)
-    children = child?.childGroup?.children
-  }
-  return children
+  const child = findChildDefinition(rootEipDef, path)
+  return child?.childGroup?.children
 }
 
 const ChildPathBreadcrumb = ({
@@ -164,7 +158,7 @@ export const ChildManagementModal = ({
   const rootEipId = getEipId(rootId)
   const rootEipDef = rootEipId && lookupEipComponent(rootEipId)
 
-  const childOptions = rootEipDef && getEipDefinition(rootEipDef, path)
+  const childOptions = rootEipDef && getChildEipDefinition(rootEipDef, path)
 
   let modalContent: ReactNode
   if (childOptions && childOptions.length > 0) {
