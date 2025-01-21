@@ -7,7 +7,6 @@ const OptionsMenu = () => {
   return (
     <OverflowMenu
       className="options-menu"
-      iconClass="options-menu-icon"
       aria-label="options-menu"
       iconDescription="options"
       align="bottom-end"
