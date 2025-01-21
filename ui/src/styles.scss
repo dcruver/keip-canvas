@@ -273,6 +273,11 @@
   }
 
   .child-modal__list-placeholder {
-    height: 37vh;
+    // Keep the child modal the same size even when selected a child with no available children
+    height: calc(25vh + 147px);
+  }
+
+  .breadcrumb__item:hover {
+    cursor: pointer;
   }
 }

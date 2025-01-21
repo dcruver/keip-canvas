@@ -73,7 +73,11 @@ const ChildPathBreadcrumb = ({
 }: ChildPathBreadcrumbProps) => (
   <Breadcrumb>
     {path.map((id, idx) => (
-      <BreadcrumbItem key={idx} onClick={() => navigatePath(idx)}>
+      <BreadcrumbItem
+        className="breadcrumb__item"
+        key={idx}
+        onClick={() => navigatePath(idx)}
+      >
         {getEipId(id)?.name}
       </BreadcrumbItem>
     ))}
