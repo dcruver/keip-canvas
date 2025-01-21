@@ -24,11 +24,7 @@
   "eipConfigs": {
     "FL5Tssm8tV": {
       "attributes": {},
-      "children": [
-        "43FAdk5SdBR",
-        "hSZG9DyYy8q",
-        "DD7ZbYQ3AST"
-      ],
+      "children": ["43FAdk5SdBR", "hSZG9DyYy8q", "DD7ZbYQ3AST"],
       "eipId": {
         "namespace": "file",
         "name": "outbound-gateway"
@@ -40,9 +36,7 @@
         "name": "poller"
       },
       "attributes": {},
-      "children": [
-        "9OymVfY4n4p"
-      ]
+      "children": ["9OymVfY4n4p"]
     },
     "hSZG9DyYy8q": {
       "eipId": {
@@ -58,10 +52,7 @@
         "name": "request-handler-advice-chain"
       },
       "attributes": {},
-      "children": [
-        "5x4O_wYO-tM",
-        "LYutVnb04dY"
-      ]
+      "children": ["5x4O_wYO-tM", "LYutVnb04dY"]
     },
     "9OymVfY4n4p": {
       "eipId": {
@@ -69,9 +60,7 @@
         "name": "advice-chain"
       },
       "attributes": {},
-      "children": [
-        "gCL0YkrFGgW"
-      ]
+      "children": ["gCL0YkrFGgW"]
     },
     "gCL0YkrFGgW": {
       "eipId": {
