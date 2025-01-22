@@ -2,11 +2,7 @@ import { HeaderPanel } from "@carbon/react"
 import { useState } from "react"
 import { Edge, useOnSelectionChange, useStoreApi } from "reactflow"
 import { DYNAMIC_EDGE_TYPE, DynamicEdge, EipFlowNode } from "../../api/flow"
-import {
-  Attribute,
-  EipChildElement,
-  EipComponent,
-} from "../../api/generated/eipComponentDef"
+import { Attribute } from "../../api/generated/eipComponentDef"
 import { EipId } from "../../api/generated/eipFlow"
 import {
   FLOW_CONTROLLED_ATTRIBUTES,
@@ -18,6 +14,7 @@ import { useGetSelectedChildNode } from "../../singletons/store/getterHooks"
 import { getEipId } from "../../singletons/store/storeViews"
 import DynamicEdgeConfig from "./DynamicEdgeConfig"
 import { ChildNodeConfig, RootNodeConfig } from "./NodeConfigPanel"
+import { findChildDefinition } from "./childDefinitions"
 
 const isDynamicRouterAttribute = (attribute: Attribute, eipId?: EipId) => {
   if (!eipId) {
@@ -44,25 +41,6 @@ const filterConfigurableAttributes = (attrs?: Attribute[], eipId?: EipId) => {
 
 const isDynamicEdge = (edge: Edge) => edge?.type === DYNAMIC_EDGE_TYPE
 
-// TODO: Should this be a utility method in the EipComponentDef module?
-// TODO: Handle invalid path error case
-const findChildDefinition = (
-  rootComponent: EipComponent,
-  childPath: string[]
-) => {
-  let children = rootComponent.childGroup?.children
-  let child: EipChildElement | null = null
-
-  for (const id of childPath.slice(1)) {
-    const name = getEipId(id)?.name
-    child = children?.find((c) => c.name === name) ?? null
-    children = child?.childGroup?.children
-  }
-
-  return child
-}
-
-// TODO: Add breadcrumb menu at the top, showing the path to child.
 const EipConfigSidePanel = () => {
   const reactFlowStore = useStoreApi()
   const [selectedNode, setSelectedNode] = useState<EipFlowNode | null>(null)
