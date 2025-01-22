@@ -59,7 +59,6 @@ const EipConfigSidePanel = () => {
   })
 
   let sidePanelContent
-  // TODO: Simplify conditionals
   if (selectedChildPath) {
     // TODO: Handle error case if childElement or rootComponent is undefined
     const childId = selectedChildPath[selectedChildPath.length - 1]
