@@ -1,6 +1,6 @@
 import {
-    EipChildElement,
-    EipComponent,
+  EipChildElement,
+  EipComponent,
 } from "../../api/generated/eipComponentDef"
 import { getEipId } from "../../singletons/store/storeViews"
 
