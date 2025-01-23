@@ -14,6 +14,7 @@ import { EipId } from "../../api/generated/eipFlow"
 import { newFlowLayout } from "../../components/layout/layouting"
 import { AppStore, EipConfig, SerializedFlow } from "./api"
 import { useAppStore } from "./appStore"
+import { childrenDepthTraversal } from "./storeViews"
 
 export const createDroppedNode = (eipId: EipId, position: XYPosition) =>
   useAppStore.setState((state) => {
@@ -127,9 +128,8 @@ export const enableChild = (parentId: string, childEipId: EipId) =>
 
 export const disableChild = (parentId: string, childId: string) =>
   useAppStore.setState((state) => {
-    const idx = state.eipConfigs[parentId].children.findIndex(
-      (id) => id === childId
-    )
+    const parentConfig = state.eipConfigs[parentId]
+    const idx = parentConfig.children.findIndex((id) => id === childId)
 
     if (idx === -1) {
       throw new Error(
@@ -137,10 +137,21 @@ export const disableChild = (parentId: string, childId: string) =>
       )
     }
 
-    return produce(state, (draft: AppStore) => {
-      draft.eipConfigs[parentId].children.splice(idx, 1)
-      delete draft.eipConfigs[childId]
-    })
+    // remove target child from parent's children list
+    const updatedConfigs = {
+      ...state.eipConfigs,
+      [parentId]: {
+        ...parentConfig,
+        children: parentConfig.children.filter((c) => c !== childId),
+      },
+    }
+
+    // delete target child and its nested children
+    for (const child of childrenDepthTraversal(childId)) {
+      delete updatedConfigs[child.id]
+    }
+
+    return { eipConfigs: updatedConfigs }
   })
 
 export const reorderEnabledChildren = (parentId: string, children: string[]) =>

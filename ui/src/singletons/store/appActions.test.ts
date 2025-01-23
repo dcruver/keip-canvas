@@ -57,6 +57,7 @@ const STANDARD_INBOUND_ADAPTER = "9KWCqlIyy7"
 const STANDARD_ROUTER = "LoiC2CFbLP"
 const STANDARD_POLLER_CHILD = "mcyTryMPewJ"
 const STANDARD_TRANSACTIONAL_CHILD = "V1ls9ri4szs"
+const NESTED_CHILD_PARENT_ID = "FL5Tssm8tV"
 
 beforeEach(() => {
   act(() => {
@@ -423,6 +424,28 @@ describe("disable child", () => {
     )
 
     expect(children).toHaveLength(0)
+    expect(getEipId(STANDARD_POLLER_CHILD)).toBeUndefined()
+  })
+
+  test("disable child deletes all nested children", () => {
+    act(() => resetMockStore(nestedChildFlow))
+
+    const initChildren = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(NESTED_CHILD_PARENT_ID)
+    )
+    expect(initChildren).toHaveLength(3)
+
+    const topChildId = "43FAdk5SdBR"
+    act(() => disableChild(NESTED_CHILD_PARENT_ID, topChildId))
+
+    const updatedChildren = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(NESTED_CHILD_PARENT_ID)
+    )
+    expect(updatedChildren).toHaveLength(initChildren.length - 1)
+
+    expect(getEipId(topChildId)).toBeUndefined()
+    expect(getEipId("9OymVfY4n4p")).toBeUndefined()
+    expect(getEipId("gCL0YkrFGgW")).toBeUndefined()
   })
 
   test("disable child unknown child id -> error", () => {
@@ -455,10 +478,10 @@ describe("reorder enabled child list", () => {
     })
   })
 
-  const PARENT_ID = "FL5Tssm8tV"
-
   test("reorder enabled children success", () => {
-    const initial = renderAndUnwrapHook(() => useGetEnabledChildren(PARENT_ID))
+    const initial = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(NESTED_CHILD_PARENT_ID)
+    )
 
     const updated = [...initial]
 
@@ -467,26 +490,38 @@ describe("reorder enabled child list", () => {
     updated[2] = updated[0]
     updated[0] = temp
 
-    act(() => reorderEnabledChildren(PARENT_ID, updated))
+    act(() => reorderEnabledChildren(NESTED_CHILD_PARENT_ID, updated))
 
-    const children = renderAndUnwrapHook(() => useGetEnabledChildren(PARENT_ID))
+    const children = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(NESTED_CHILD_PARENT_ID)
+    )
     expect(children).toEqual(updated)
   })
 
   test("adding child -> error ", () => {
-    const initial = renderAndUnwrapHook(() => useGetEnabledChildren(PARENT_ID))
+    const initial = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(NESTED_CHILD_PARENT_ID)
+    )
     const updated = [...initial, "extra"]
-    expect(() => reorderEnabledChildren(PARENT_ID, updated)).toThrowError()
+    expect(() =>
+      reorderEnabledChildren(NESTED_CHILD_PARENT_ID, updated)
+    ).toThrowError()
   })
 
   test("removing child -> error ", () => {
-    const initial = renderAndUnwrapHook(() => useGetEnabledChildren(PARENT_ID))
+    const initial = renderAndUnwrapHook(() =>
+      useGetEnabledChildren(NESTED_CHILD_PARENT_ID)
+    )
     const updated = initial.slice(1)
-    expect(() => reorderEnabledChildren(PARENT_ID, updated)).toThrowError()
+    expect(() =>
+      reorderEnabledChildren(NESTED_CHILD_PARENT_ID, updated)
+    ).toThrowError()
   })
 
   test("changing child list -> error ", () => {
-    expect(() => reorderEnabledChildren(PARENT_ID, ["c1", "c2"])).toThrowError()
+    expect(() =>
+      reorderEnabledChildren(NESTED_CHILD_PARENT_ID, ["c1", "c2"])
+    ).toThrowError()
   })
 })
 
