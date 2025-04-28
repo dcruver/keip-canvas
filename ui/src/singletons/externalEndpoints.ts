@@ -3,3 +3,6 @@ export const FLOW_TRANSLATOR_BASE_URL = import.meta.env
 
 export const KEIP_ASSISTANT_DOCS_URL = import.meta.env
   .VITE_KEIP_ASSISTANT_DOCS_URL
+
+export const KEIP_ASSISTANT_OLLAMA_URL = import.meta.env
+  .VITE_KEIP_ASSISTANT_OLLAMA_URL

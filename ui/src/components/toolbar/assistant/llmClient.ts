@@ -3,6 +3,8 @@ import { Edge, Node } from "reactflow"
 import { EipId } from "../../../api/generated/eipFlow"
 import { EipConfig, SerializedFlow } from "../../../singletons/store/api"
 import { EXPORTED_FLOW_VERSION } from "../../../singletons/store/appStore"
+import { KEIP_ASSISTANT_OLLAMA_URL } from "../../../singletons/externalEndpoints"
+
 import {
   getEdgesView,
   getEipId,
@@ -16,6 +18,7 @@ import { flowCreatePrompt, flowUpdatePrompt } from "./prompt"
 
 interface GenNodeData {
   eipId: EipId
+  label?: string
 }
 
 interface ModelFlowResponse {
@@ -34,13 +37,13 @@ interface PromptResponse {
 class LlmClient {
   private llm
   private abortCtrl
-  public serverBaseUrl = "http://localhost:11434"
+  public serverBaseUrl = KEIP_ASSISTANT_OLLAMA_URL
 
   constructor() {
     this.llm = new Ollama({
       baseUrl: this.serverBaseUrl,
       maxRetries: 3,
-      model: "mistral",
+      model: "keip-assistant",
       format: "json",
       numCtx: 4096,
       temperature: 0,
@@ -56,6 +59,7 @@ class LlmClient {
     let rawResponse = ""
     try {
       const prompt = await this.generatePrompt()
+      console.log("user input: ", userInput)
       const chain = prompt.pipe(this.llm)
       const responseStream = await chain.stream({
         userInput: userInput,
@@ -147,7 +151,7 @@ class LlmClient {
 const convertToSerializedFlow = (
   response: ModelFlowResponse
 ): SerializedFlow => ({
-  nodes: response.nodes.map((node) => ({ ...node, data: {} })),
+  nodes: response.nodes.map((node) => ({ ...node, data: { label: node?.data?.label } })),
   edges: response.edges,
   eipConfigs: response.eipConfigs,
   version: EXPORTED_FLOW_VERSION,
