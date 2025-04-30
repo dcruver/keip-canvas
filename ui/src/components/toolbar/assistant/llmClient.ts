@@ -151,7 +151,10 @@ class LlmClient {
 const convertToSerializedFlow = (
   response: ModelFlowResponse
 ): SerializedFlow => ({
-  nodes: response.nodes.map((node) => ({ ...node, data: { label: node?.data?.label } })),
+  nodes: response.nodes.map((node) => ({
+    ...node,
+    data: { label: node?.data?.label },
+  })),
   edges: response.edges,
   eipConfigs: response.eipConfigs,
   version: EXPORTED_FLOW_VERSION,

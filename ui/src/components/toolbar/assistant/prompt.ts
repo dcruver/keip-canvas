@@ -7,13 +7,9 @@ const existingFlowPrompt = PromptTemplate.fromTemplate(
 \`\`\``
 )
 
-const inputPrompt = PromptTemplate.fromTemplate(
-  `{userInput}`
-)
+const inputPrompt = PromptTemplate.fromTemplate(`{userInput}`)
 
-const createPipeline = [
-  { name: "input", prompt: inputPrompt },
-]
+const createPipeline = [{ name: "input", prompt: inputPrompt }]
 
 const updatePipeline = [
   ...createPipeline.slice(0, createPipeline.length - 1),
@@ -21,9 +17,7 @@ const updatePipeline = [
   createPipeline[createPipeline.length - 1],
 ]
 
-const fullCreatePrompt = PromptTemplate.fromTemplate(
-  `{input}`
-)
+const fullCreatePrompt = PromptTemplate.fromTemplate(`{input}`)
 
 const fullUpdatePrompt = PromptTemplate.fromTemplate(
   `{existingFlow}
