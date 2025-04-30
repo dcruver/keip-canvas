@@ -8,23 +8,24 @@ The Keip Canvas UI provides experimental support for generative AI models to aid
 
 The `keip-assistant:32b` model is designed to help users create and modify flow diagrams through natural language interactions.
 
-## Setup Options
-
-You have two main options for using the Keip Canvas Assistant:
-
-1. **Local Setup**: Build and run the model on your local machine
-2. **Team Environment**: Connect to an existing team Ollama instance where the model is already deployed
-
-## Option 1: Local Setup
-
 ### Prerequisites
 - [Ollama](https://github.com/ollama/ollama) installed on your system
 - The Modelfile and Makefile from this repository
 
-### Step 1: Install Ollama
+### Install Ollama
 Install [Ollama](https://github.com/ollama/ollama?tab=readme-ov-file#ollama) following the instructions for your platform.
+- To allow the Canvas UI to access the local Ollama server, add the following web origin:
+  ```shell
+  OLLAMA_ORIGINS="https://octoconsulting.github.io"
+  ```
+  [See here](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-do-i-configure-ollama-server) for
+  details on configuring the Ollama server.
 
-### Step 2: Build the Assistant Model
+If you run into issues, check out
+Ollama's [troubleshooting suggestions](https://github.com/ollama/ollama/blob/main/docs/troubleshooting.md).
+
+
+### Build the Assistant Model
 Navigate to the directory containing the Modelfile and Makefile, then run:
 
 ```bash
@@ -33,67 +34,18 @@ make build
 
 This command creates a model named `keip-assistant:32b` using the specifications in the Modelfile.
 
-### Step 3: Configure Ollama URL
-Configure the Keip Canvas UI to use your Ollama instance (local or remote):
-
-```bash
-make config-ollama
-```
-
-When prompted, enter the Ollama URL:
-- For local development, use the default (`http://localhost:11434`) by pressing Enter
-- For a remote instance, enter the complete URL (e.g., `http://team-server:11434`)
-
-This will update the `../ui/.env` file with the appropriate URL.
-
-### Step 4: Verify the Model
+### Verify the Model
 To check that the model was built successfully:
 
 ```bash
 make status
 ```
 
-### Step 5: Start Your Local Keip Canvas UI
-Start your local instance of the Keip Canvas UI. The `KeipAssistant` button should be enabled in the bottom toolbar.
+### Navigate to Keip Canvas
+In a web browser, navigate to the [Canvas](https://octoconsulting.github.io/keip-canvas/).
+The `KeipAssistant` button should be enabled in the bottom toolbar. Click it to open a chat panel.
 
-## Option 2: Team Environment
-
-If your team already has a shared Ollama instance with the `keip-assistant:32b` model installed:
-
-### Step 1: Configure Your Keip Canvas
-Update your Keip Canvas configuration to point to the team's Ollama instance:
-
-```bash
-make config-ollama
-```
-
-When prompted, enter the URL of your team's Ollama instance (e.g., `http://team-server:11434`).
-
-### Step 2: Start Your Keip Canvas UI
-Start your Keip Canvas UI with the configuration pointing to the team's Ollama instance. The `KeipAssistant` button should be enabled in the bottom toolbar.
-
-## Using the Assistant
-
-### Through the Keip Canvas UI
-1. Start the Keip Canvas UI
-2. Click the `KeipAssistant` button in the bottom toolbar to open the chat panel
-3. Interact with the assistant using natural language
-
-### Direct Interaction with Ollama
-For testing or debugging, you can interact directly with the model:
-
-```bash
-make run
-```
-
-Or with the Ollama CLI:
-
-```bash
-ollama run keip-assistant:32b
-```
-
-## Example Prompts
-
+### Example Prompts
 Try these example prompts with the assistant:
 
 ```

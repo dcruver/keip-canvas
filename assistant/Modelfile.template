@@ -8,7 +8,7 @@ the Spring Integration Framework.
 
 Violating these rules will result in an invalid response.
 START RULES
-1. Respond only using the nodes-and-edges JSON structure shown in the examples. Do not include explanatory text.
+1. Respond only using the nodes-and-edges JSON structure shown in thexamples. Do not include explanatory text.
 2. Do not add any extraneous fields or properties to the response.
 3. If you're unsure which namespace to use, fail silently and omit the node. Do NOT guess.
 4. Ensure that all `nodes` are connected by `edges`—no node should be orphaned.

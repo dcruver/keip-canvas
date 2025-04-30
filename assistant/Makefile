@@ -38,18 +38,14 @@ clean:
 	@rm -f $(TEMP_FILE)
 	ollama rm $(MODEL_NAME)
 
-# Configure for remote Ollama instance
-# Configure for remote Ollama instance
+
+clean-config:
+    @rm ../ui/.env.development.local
+
 config-ollama:
 	@echo "Configuring for remote Ollama instance..."
 	@read -p "Enter the Ollama server URL (e.g., http://localhost:11434): " remote_url; \
-	if [ -f "../ui/.env" ]; then \
-		sed -i.bak "s|^VITE_KEIP_ASSISTANT_OLLAMA_URL=.*|VITE_KEIP_ASSISTANT_OLLAMA_URL=$$remote_url|" ../ui/.env && rm -f ../ui/.env.bak; \
-		echo "Updated VITE_KEIP_ASSISTANT_OLLAMA_URL to $$remote_url in ../ui/.env"; \
-	else \
-		echo "VITE_KEIP_ASSISTANT_OLLAMA_URL=$$remote_url" > ../ui/.env; \
-		echo "Created ../ui/.env with VITE_KEIP_ASSISTANT_OLLAMA_URL=$$remote_url"; \
-	fi
+    echo "VITE_KEIP_ASSISTANT_OLLAMA_URL=$$remote_url" > ../ui/.env.development.local
 
 # Help target
 help:
