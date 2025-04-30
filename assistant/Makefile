@@ -3,7 +3,7 @@
 # Uses Modelfile in the current directory
 
 # Default base model if none is provided
-MODEL ?= qwen2.5-coder:8b
+MODEL ?= qwen2.5-coder:7b
 
 # Paths
 TEMPLATE_FILE := Modelfile.template
