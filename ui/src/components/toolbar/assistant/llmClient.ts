@@ -113,12 +113,12 @@ class LlmClient {
         })),
         edges: getEdgesView(),
       })
-      const prompt = await flowUpdatePrompt
+      const prompt = flowUpdatePrompt
       return await prompt.partial({
         existingFlowJson: currFlow,
       })
     } else {
-      return await flowCreatePrompt
+      return flowCreatePrompt
     }
   }
 
