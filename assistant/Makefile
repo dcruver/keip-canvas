@@ -38,6 +38,7 @@ clean:
 	@rm -f $(TEMP_FILE)
 	ollama rm $(MODEL_NAME)
 
+
 clean-config:
     @rm ../ui/.env.development.local
 
