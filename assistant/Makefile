@@ -3,7 +3,7 @@
 # Uses Modelfile in the current directory
 
 # Default base model if none is provided
-MODEL ?= qwen2.5-coder:8b
+MODEL ?= qwen2.5-coder:7b
 
 # Paths
 TEMPLATE_FILE := Modelfile.template
@@ -18,7 +18,7 @@ all: build
 build:
 	@echo "Building keip-assistant:latest with base model: $(MODEL)"
 	@sed "s|{{BASE_MODEL}}|$(MODEL)|g" $(TEMPLATE_FILE) > $(TEMP_FILE)
-	ollama build -f $(TEMP_FILE) -t keip-assistant:latest
+	ollama create keip-assistant -f $(TEMP_FILE)
 	@rm -f $(TEMP_FILE)
 	@echo "Build complete. Tagged as keip-assistant:latest"
 
