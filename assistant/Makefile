@@ -17,7 +17,14 @@ all: build
 # Build the Modelfile.template
 build:
 	@echo "Building keip-assistant:latest with base model: $(MODEL)"
-	@sed "s|{{BASE_MODEL}}|$(MODEL)|g" $(TEMPLATE_FILE) > $(TEMP_FILE)
+	@awk -v model="$(MODEL)" '\
+		{ \
+			if ($$0 ~ /{{COMPONENT_LIST}}/) { \
+				while ((getline cl < "component_list.json") > 0) print cl; \
+			} else { \
+				gsub("{{BASE_MODEL}}", model); print; \
+			} \
+		}' $(TEMPLATE_FILE) > $(TEMP_FILE)
 	ollama create keip-assistant -f $(TEMP_FILE)
 	@rm -f $(TEMP_FILE)
 	@echo "Build complete. Tagged as keip-assistant:latest"
@@ -40,7 +47,7 @@ clean:
 
 
 clean-config:
-    @rm ../ui/.env.development.local
+	@rm -f ../ui/.env.development.local
 
 config-ollama:
 	@echo "Configuring for remote Ollama instance..."
