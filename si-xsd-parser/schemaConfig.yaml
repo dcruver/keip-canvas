@@ -6,6 +6,10 @@ schemas:
       - "locker"
       - "nio-locker"
 
+  - alias: "mqtt"
+    namespace: "http://www.springframework.org/schema/integration/mqtt"
+    location: "https://www.springframework.org/schema/integration/mqtt/spring-integration-mqtt-5.2.xsd"
+
   - alias: "ftp"
     namespace: "http://www.springframework.org/schema/integration/ftp"
     location: "https://www.springframework.org/schema/integration/ftp/spring-integration-ftp-5.2.xsd"
