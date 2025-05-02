@@ -1,0 +1,663 @@
+prompt,response
+"Start with an XML message on a JMS topic called ""com.acme.input"". Filter out invalid XML messages. Send the message to both the ""com.acme.input.validated"" JMS queue and to an XSLT transformer. Send the transformed message to the ""com.acme.db.input"" JMS queue and await a response.","{
+  ""nodes"": [
+    {
+      ""id"": ""n2"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""XML Validating Filter 1"",
+        ""eipId"": {
+          ""namespace"": ""xml"",
+          ""name"": ""validating-filter""
+        }
+      }
+    },
+    {
+      ""id"": ""n3"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""JMS Outbound Channel Adapter 1"",
+        ""eipId"": {
+          ""namespace"": ""jms"",
+          ""name"": ""outbound-channel-adapter""
+        }
+      }
+    },
+    {
+      ""id"": ""n4"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""XSLT Transformer 1"",
+        ""eipId"": {
+          ""namespace"": ""xml"",
+          ""name"": ""xslt-transformer""
+        }
+      }
+    },
+    {
+      ""id"": ""Cf5tnxMAeD"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""Recipient List Router 1"",
+        ""eipId"": {
+          ""namespace"": ""integration"",
+          ""name"": ""recipient-list-router""
+        }
+      }
+    },
+    {
+      ""id"": ""qpjcYzxlmS"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""JMS Outbound Gateway 1"",
+        ""eipId"": {
+          ""namespace"": ""jms"",
+          ""name"": ""outbound-gateway""
+        }
+      }
+    },
+    {
+      ""id"": ""xwDiB0EKgP"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": """",
+        ""eipId"": {
+          ""namespace"": ""jms"",
+          ""name"": ""inbound-gateway""
+        }
+      }
+    }
+  ],
+  ""edges"": [
+    {
+      ""source"": ""n2"",
+      ""target"": ""Cf5tnxMAeD"",
+      ""id"": ""80c41164-e53a-4026-83a2-19be73db9426""
+    },
+    {
+      ""source"": ""Cf5tnxMAeD"",
+      ""target"": ""n3"",
+      ""id"": ""0c04b276-ab33-448e-82e6-39fe4713c657""
+    },
+    {
+      ""source"": ""Cf5tnxMAeD"",
+      ""target"": ""n4"",
+      ""id"": ""19e523f9-477e-4591-a49c-a223787d5b3d""
+    },
+    {
+      ""source"": ""n4"",
+      ""target"": ""qpjcYzxlmS"",
+      ""id"": ""c9c27949-e5dd-4d07-a71b-45d4f5bfbc0f""
+    },
+    {
+      ""source"": ""xwDiB0EKgP"",
+      ""target"": ""n2"",
+      ""id"": ""defeec19-d9a6-4e0b-b05a-18a1bb77dda9""
+    }
+  ]
+}"
+"Copy a message from a JMS queue to a Kafka topic.","  ""nodes"": [
+    {
+      ""id"": ""n1"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""JMS Inbound Channel Adapter 1"",
+        ""eipId"": {
+          ""namespace"": ""jms"",
+          ""name"": ""inbound-channel-adapter""
+        }
+      }
+    },
+    {
+      ""id"": ""n2"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""Kafka Outbound Channel Adapter 1"",
+        ""eipId"": {
+          ""namespace"": ""kafka"",
+          ""name"": ""outbound-channel-adapter""
+        }
+      }
+    }
+  ],
+  ""edges"": [
+    {
+      ""source"": ""n1"",
+      ""target"": ""n2"",
+      ""id"": ""edge_n1_n2""
+    }
+  ]
+}"
+"Begin with an XML message on a JMS topic.
+Filter out any XML messages that aren't valid for the given schema.
+The message will be sent to a publish-subscribe channel where 3 XSLT transformers are subscribed.
+The first XSLT transformer will create a ""A-document"" XML document.
+The second XSLT transformer will create a ""B-document"" XML document.
+The third XSLT transformer will create a ""C-document"" XML document.
+Branch 2 and 3 will both send their messages to an Xpath splitter, then an enricher.
+The output from the branch 1 transformer and the output of the enricher will both be sent to a JMS topic called, ""internal.database.create"". A response is expected.
+If the response is either a target-metacard or a mission-metacard, then it is sent to a service over HTTP. A response is expected.
+The result of the HTTP request is transformed into JSON.
+The message is sent to a JMS topic called, ""acme.database.product""
+","{
+  ""nodes"": [
+    {
+      ""id"": ""n2"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""XML Validating Filter 1"",
+        ""eipId"": {
+          ""namespace"": ""xml"",
+          ""name"": ""validating-filter""
+        }
+      }
+    },
+    {
+      ""id"": ""n3"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""Publish-Subscribe Channel 1"",
+        ""eipId"": {
+          ""namespace"": ""integration"",
+          ""name"": ""channel""
+        }
+      }
+    },
+    {
+      ""id"": ""n4"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""XSLT Transformer 1"",
+        ""eipId"": {
+          ""namespace"": ""xml"",
+          ""name"": ""xslt-transformer""
+        }
+      }
+    },
+    {
+      ""id"": ""n5"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""XSLT Transformer 2"",
+        ""eipId"": {
+          ""namespace"": ""xml"",
+          ""name"": ""xslt-transformer""
+        }
+      }
+    },
+    {
+      ""id"": ""n6"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""XSLT Transformer 3"",
+        ""eipId"": {
+          ""namespace"": ""xml"",
+          ""name"": ""xslt-transformer""
+        }
+      }
+    },
+    {
+      ""id"": ""n7"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""Xpath Splitter 1"",
+        ""eipId"": {
+          ""namespace"": ""xml"",
+          ""name"": ""xpath-splitter""
+        }
+      }
+    },
+    {
+      ""id"": ""n9"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""Enricher 1"",
+        ""eipId"": {
+          ""namespace"": ""integration"",
+          ""name"": ""enricher""
+        }
+      }
+    },
+    {
+      ""id"": ""n12"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""HTTP Outbound Gateway 1"",
+        ""eipId"": {
+          ""namespace"": ""http"",
+          ""name"": ""outbound-gateway""
+        }
+      }
+    },
+    {
+      ""id"": ""n13"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""Object to JSON Transformer 1"",
+        ""eipId"": {
+          ""namespace"": ""integration"",
+          ""name"": ""object-to-json-transformer""
+        }
+      }
+    },
+    {
+      ""id"": ""n14"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""JMS Outbound Channel Adapter 2"",
+        ""eipId"": {
+          ""namespace"": ""jms"",
+          ""name"": ""outbound-channel-adapter""
+        }
+      }
+    },
+    {
+      ""id"": ""GlxHQiwik_"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": """",
+        ""eipId"": {
+          ""namespace"": ""jms"",
+          ""name"": ""outbound-gateway""
+        }
+      }
+    },
+    {
+      ""id"": ""xauq0T4e3Z"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": """",
+        ""eipId"": {
+          ""namespace"": ""integration"",
+          ""name"": ""filter""
+        }
+      }
+    },
+    {
+      ""id"": ""raovFTr1nw"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": """",
+        ""eipId"": {
+          ""namespace"": ""jms"",
+          ""name"": ""message-driven-channel-adapter""
+        }
+      }
+    }
+  ],
+  ""edges"": [
+    {
+      ""source"": ""n2"",
+      ""target"": ""n3"",
+      ""id"": ""8e639224-1e9c-484c-9af9-eb210a1bcb5e""
+    },
+    {
+      ""source"": ""n3"",
+      ""target"": ""n4"",
+      ""id"": ""f8b31715-0f57-433c-8cc7-fcaee33a6f8e""
+    },
+    {
+      ""source"": ""n3"",
+      ""target"": ""n5"",
+      ""id"": ""7494107c-8832-4a9f-87af-f76ec622180c""
+    },
+    {
+      ""source"": ""n3"",
+      ""target"": ""n6"",
+      ""id"": ""6a0ece74-82fd-4cb9-a8a8-a8c368c303eb""
+    },
+    {
+      ""source"": ""n5"",
+      ""target"": ""n7"",
+      ""id"": ""66623e84-c88a-45e3-aa2b-9c39372cf16c""
+    },
+    {
+      ""source"": ""n7"",
+      ""target"": ""n9"",
+      ""id"": ""19547016-cd09-410a-9f67-d7222fcf98b5""
+    },
+    {
+      ""source"": ""n12"",
+      ""target"": ""n13"",
+      ""id"": ""a34e6810-552f-42b9-ad83-ead4c89342df""
+    },
+    {
+      ""source"": ""n13"",
+      ""target"": ""n14"",
+      ""id"": ""c49a2896-6c77-4b53-8421-bab1e475a96c""
+    },
+    {
+      ""source"": ""n6"",
+      ""target"": ""n7"",
+      ""id"": ""9658f03a-dd49-45ef-90a5-3b5dd46de6ac""
+    },
+    {
+      ""source"": ""n4"",
+      ""target"": ""GlxHQiwik_"",
+      ""id"": ""5a3efc6b-2888-4718-8b65-65a9bdd65592""
+    },
+    {
+      ""source"": ""n9"",
+      ""target"": ""GlxHQiwik_"",
+      ""id"": ""7e217937-642a-4953-a0fe-5526636f8850""
+    },
+    {
+      ""source"": ""GlxHQiwik_"",
+      ""target"": ""xauq0T4e3Z"",
+      ""id"": ""f1e5b440-c027-4546-a0f8-33f56c313b11""
+    },
+    {
+      ""source"": ""xauq0T4e3Z"",
+      ""target"": ""n12"",
+      ""id"": ""2e329418-7dec-4032-a730-c81cb99ea316""
+    },
+    {
+      ""source"": ""raovFTr1nw"",
+      ""target"": ""n2"",
+      ""id"": ""5abb45d2-0630-42f9-9ed6-2283b95b5d71""
+    }
+  ]
+}"
+"This route begins with a message arriving on a JMS topic called ""acme.db.metadata"". That message is transformed from a CSW message to an XML message. The CSW query is sent over HTTP to a metadata catalog. The message is duplicated and sent to both a log file and a JMS queue called ""acme.db.converted"".","{
+  ""nodes"": [
+    {
+      ""id"": ""n3"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""metadata catalog"",
+        ""eipId"": {
+          ""namespace"": ""http"",
+          ""name"": ""outbound-gateway""
+        }
+      }
+    },
+    {
+      ""id"": ""n5"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""acme.db.converted"",
+        ""eipId"": {
+          ""namespace"": ""jms"",
+          ""name"": ""outbound-channel-adapter""
+        }
+      }
+    },
+    {
+      ""id"": ""7-yK2KhaIX"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""acme.db.metadata"",
+        ""eipId"": {
+          ""namespace"": ""jms"",
+          ""name"": ""message-driven-channel-adapter""
+        }
+      }
+    },
+    {
+      ""id"": ""6xmH18Il0E"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""xml xslt transformer 1"",
+        ""eipId"": {
+          ""namespace"": ""xml"",
+          ""name"": ""xslt-transformer""
+        }
+      }
+    },
+    {
+      ""id"": ""BdHGdaVY-u"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""Recipient List Router 1"",
+        ""eipId"": {
+          ""namespace"": ""integration"",
+          ""name"": ""recipient-list-router""
+        }
+      }
+    },
+    {
+      ""id"": ""tW8SFhhQD_"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""logging channel adapter 1"",
+        ""eipId"": {
+          ""namespace"": ""integration"",
+          ""name"": ""logging-channel-adapter""
+        }
+      }
+    }
+  ],
+  ""edges"": [
+    {
+      ""source"": ""7-yK2KhaIX"",
+      ""target"": ""6xmH18Il0E"",
+      ""id"": ""41a98a12-7965-4e00-88f4-836bd200cc1f""
+    },
+    {
+      ""source"": ""6xmH18Il0E"",
+      ""target"": ""n3"",
+      ""id"": ""7225cc55-4c63-4b56-a173-b987c7d5afb4""
+    },
+    {
+      ""source"": ""n3"",
+      ""target"": ""BdHGdaVY-u"",
+      ""id"": ""357da0d6-0d18-4162-8b54-d178a388bb69""
+    },
+    {
+      ""source"": ""BdHGdaVY-u"",
+      ""target"": ""n5"",
+      ""id"": ""9ea5ba54-60b8-46e1-aa37-155ce908ce74""
+    },
+    {
+      ""source"": ""BdHGdaVY-u"",
+      ""target"": ""tW8SFhhQD_"",
+      ""id"": ""96066bd2-e0b8-4a9a-ac8f-e8786bec9f9e""
+    }
+  ]
+}"
+"In this route, ACME and FOOBAR are external service names.
+ACME initiates the message flow by sending a ""acme_test_message.json"" to the route's REST endpoint, and waits for a response while the remainder of the route completes.
+The route transforms the ""acme_test_message.json"" to the ""sample_track_message"".
+The route sends the sample_track_message to FOOBAR over the ""kraft.pro.form"" JMS topic. The route waits for a response while the call to FOOBAR completes.
+FOOBAR processes the sample_track_message and returns a confirmation message
+The route converts the confirmation message to a ""sample_acme_response"" 
+","{
+  ""nodes"": [
+    {
+      ""id"": ""n1"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""REST Inbound Gateway 1"",
+        ""eipId"": {
+          ""namespace"": ""integration"",
+          ""name"": ""inbound-channel-adapter""
+        }
+      }
+    },
+    {
+      ""id"": ""n2"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""JSON to Track Message Transformer 1"",
+        ""eipId"": {
+          ""namespace"": ""integration"",
+          ""name"": ""object-to-json-transformer""
+        }
+      }
+    },
+    {
+      ""id"": ""n3"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""JMS Outbound Gateway 1"",
+        ""eipId"": {
+          ""namespace"": ""jms"",
+          ""name"": ""outbound-gateway""
+        }
+      }
+    },
+    {
+      ""id"": ""n5"",
+      ""type"": ""eipNode"",
+      ""data"": {
+        ""label"": ""Track to ACME Response Transformer 1"",
+        ""eipId"": {
+          ""namespace"": ""integration"",
+          ""name"": ""object-to-json-transformer""
+        }
+      }
+    }
+  ],
+  ""edges"": [
+    {
+      ""source"": ""n1"",
+      ""target"": ""n2"",
+      ""id"": ""5d305005-6c73-4570-9d0d-2524210f5fac""
+    },
+    {
+      ""source"": ""n2"",
+      ""target"": ""n3"",
+      ""id"": ""7b2a3ca3-1c51-4e7a-a5b1-f02d0076bb61""
+    },
+    {
+      ""source"": ""n3"",
+      ""target"": ""n5"",
+      ""id"": ""f72f1cd9-a9d5-4b15-b9bc-ac6a8a502dfa""
+    }
+  ]
+}"
+"This route starts with a message posted to a REST endpoint. The message will contain a Youtube video ID. 
+The video ID will be transformed into JSON and sent to an MQTT topic called, ""yt/download/request"".
+The route will wait for the response to arrive on ""yt/download/response"". This response will contain the path to an audio file. 
+The route will send that message back to an MQTT topic called, ""yt/audio/request"". 
+The response will arrive on MQTT topic ""yt/audio/response"". This response will contain the transcript of the video. 
+The video transcript will be sent over HTTP to an Ollama model that will convert it to a summary. 
+The summary is then sent over HTTP to a notification service.","{
+   ""nodes"":[
+      {
+         ""id"":""n1"",
+         ""type"":""eipNode"",
+         ""data"":{
+            ""label"":""REST Endpoint"",
+            ""eipId"":{
+               ""namespace"":""web-services"",
+               ""name"":""inbound-gateway""
+            }
+         }
+      },
+      {
+         ""id"":""n2"",
+         ""type"":""eipNode"",
+         ""data"":{
+            ""label"":""JSON Transformer"",
+            ""eipId"":{
+               ""namespace"":""integration"",
+               ""name"":""object-to-json-transformer""
+            }
+         }
+      },
+      {
+         ""id"":""n3"",
+         ""type"":""eipNode"",
+         ""data"":{
+            ""label"":""MQTT Publish"",
+            ""eipId"":{
+               ""namespace"":""mqtt"",
+               ""name"":""outbound-channel-adapter""
+            }
+         }
+      },
+      {
+         ""id"":""n4"",
+         ""type"":""eipNode"",
+         ""data"":{
+            ""label"":""MQTT Subscribe"",
+            ""eipId"":{
+               ""namespace"":""mqtt"",
+               ""name"":""message-driven-channel-adapter""
+            }
+         }
+      },
+      {
+         ""id"":""n5"",
+         ""type"":""eipNode"",
+         ""data"":{
+            ""label"":""MQTT Publish Audio Request"",
+            ""eipId"":{
+               ""namespace"":""mqtt"",
+               ""name"":""outbound-channel-adapter""
+            }
+         }
+      },
+      {
+         ""id"":""n6"",
+         ""type"":""eipNode"",
+         ""data"":{
+            ""label"":""MQTT Subscribe Audio Response"",
+            ""eipId"":{
+               ""namespace"":""mqtt"",
+               ""name"":""message-driven-channel-adapter""
+            }
+         }
+      },
+      {
+         ""id"":""n7"",
+         ""type"":""eipNode"",
+         ""data"":{
+            ""label"":""HTTP Request to Ollama"",
+            ""eipId"":{
+               ""namespace"":""web-services"",
+               ""name"":""outbound-gateway""
+            }
+         }
+      },
+      {
+         ""id"":""n8"",
+         ""type"":""eipNode"",
+         ""data"":{
+            ""label"":""HTTP Request to Notification Service"",
+            ""eipId"":{
+               ""namespace"":""web-services"",
+               ""name"":""outbound-gateway""
+            }
+         }
+      }
+   ],
+   ""edges"":[
+      {
+         ""source"":""n1"",
+         ""target"":""n2"",
+         ""id"":""edge_n1_n2""
+      },
+      {
+         ""source"":""n2"",
+         ""target"":""n3"",
+         ""id"":""edge_n2_n3""
+      },
+      {
+         ""source"":""n3"",
+         ""target"":""n4"",
+         ""id"":""edge_n3_n4""
+      },
+      {
+         ""source"":""n4"",
+         ""target"":""n5"",
+         ""id"":""edge_n4_n5""
+      },
+      {
+         ""source"":""n5"",
+         ""target"":""n6"",
+         ""id"":""edge_n5_n6""
+      },
+      {
+         ""source"":""n6"",
+         ""target"":""n7"",
+         ""id"":""edge_n6_n7""
+      },
+      {
+         ""source"":""n7"",
+         ""target"":""n8"",
+         ""id"":""edge_n7_n8""
+      }
+   ]
+}"

@@ -16,6 +16,7 @@ dist-ssr
 tmp
 build/
 target/
+**/package-lock.json
 
 # Test artifacts
 coverage
@@ -33,3 +34,7 @@ coverage
 
 # Secrets
 *.local
+
+# Python Virtual Environment
+**/venv
+**/.python-version
