@@ -46,6 +46,9 @@ keip:
     - eipNamespace: kafka
       xmlNamespace: http://www.springframework.org/schema/integration/kafka
       schemaLocation: https://www.springframework.org/schema/integration/kafka/spring-integration-kafka.xsd
+    - eipNamespace: mqtt
+      xmlNamespace: http://www.springframework.org/schema/integration/mqtt
+      schemaLocation: https://www.springframework.org/schema/integration/mqtt/spring-integration-mqtt.xsd
     - eipNamespace: sftp
       xmlNamespace: http://www.springframework.org/schema/integration/sftp
       schemaLocation: https://www.springframework.org/schema/integration/sftp/spring-integration-sftp.xsd
