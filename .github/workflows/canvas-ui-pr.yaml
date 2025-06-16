@@ -1,0 +1,48 @@
+name: Canvas UI PR Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "ui/**"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  # Disable sending data to IBM telemetry
+  IBM_TELEMETRY_DISABLED: true
+  CARBON_TELEMETRY_DISABLED: 1
+
+jobs:
+  ui_code_check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: "./ui/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Check Linting
+        run: npm run lint
+
+      - name: Check Formatting
+        run: npm run check-format
+
+      - name: Test Build
+        run: npm run build -- --base /keip-canvas/

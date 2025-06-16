@@ -1,11 +1,11 @@
 #!/bin/sh
 #
 # An example hook script to verify what is about to be committed.
-# Called by "git commit" with no arguments.  The hook should
+# Called by "git commit" with no arguments. The hook should
 # exit with non-zero status after issuing an appropriate message if
 # it wants to stop the commit.
 #
-# To enable this hook, rename this file to "pre-commit".
+# To enable this hook, create this file at ".git/hooks/pre-commit" with execute permissions.
 
 UI_DIR_PATTERN='^ui/src/'
 
@@ -13,15 +13,15 @@ git diff --cached --name-only | grep ${UI_DIR_PATTERN} --quiet
 IS_UI_CHANGED=$?
 
 if [ ${IS_UI_CHANGED} -ne 0 ]; then
-	echo "[pre-commit hook] No UI code changes detected. Skip linting."
+	echo "[pre-commit hook] No UI code changes detected. Skip precommit check."
 	exit 0
 fi
 
-LINT_CMD='npm --prefix ./ui run lint -- --color'
+PRECOMMIT_CMD='npm --prefix ./ui run precommit'
 
-echo "[pre-commit hook] Linting...\n"
+echo "[pre-commit hook] Lint and check formatting...\n"
 
-if output=$(${LINT_CMD}); then
+if output=$(${PRECOMMIT_CMD}); then
 	exit 0
 else
 	echo "$output" >&2
