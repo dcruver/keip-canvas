@@ -17,4 +17,4 @@ Include any relevant information about the test environment (e.g. Browser or Pla
 ## Checklist
 
 - [ ] The PR follows the branch and commit styles outlined in the [CONTRIBUTING](/OctoConsulting/keip-canvas/blob/main/docs/CONTRIBUTING.md) doc
-- [ ] Linting and formattng checks pass locally with the new changes
+- [ ] (UI changes only) Linting and formatting checks pass locally with the new changes (`npm run precommit` from the `ui` directory)
