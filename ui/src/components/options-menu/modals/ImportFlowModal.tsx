@@ -1,5 +1,5 @@
 import { Modal } from "@carbon/react"
-import { InlineLoadingStatus } from "carbon-components-react"
+import { InlineLoadingStatus } from "@carbon/react/lib/components/InlineLoading/InlineLoading"
 import hljs from "highlight.js/lib/core"
 import json from "highlight.js/lib/languages/json"
 import { useState } from "react"
