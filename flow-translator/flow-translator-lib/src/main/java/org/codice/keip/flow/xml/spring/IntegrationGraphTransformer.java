@@ -1,11 +1,11 @@
 package org.codice.keip.flow.xml.spring;
 
-import org.codice.keip.flow.xml.GraphTransformer;
-import org.codice.keip.flow.xml.NamespaceSpec;
-import org.codice.keip.flow.xml.NodeTransformerFactory;
 import java.util.Collection;
 import java.util.Set;
 import javax.xml.namespace.QName;
+import org.codice.keip.flow.xml.GraphTransformer;
+import org.codice.keip.flow.xml.NamespaceSpec;
+import org.codice.keip.flow.xml.NodeTransformerFactory;
 
 public final class IntegrationGraphTransformer extends GraphTransformer {
 

@@ -1,8 +1,8 @@
 package org.codice.keip.flow.xml;
 
+import java.util.List;
 import org.codice.keip.flow.model.EipGraph;
 import org.codice.keip.flow.model.EipNode;
-import java.util.List;
 
 /**
  * Implementations of this interface transform an {@link EipNode} into one or more {@link

@@ -1,13 +1,13 @@
 package org.codice.keip.schema;
 
+import java.util.List;
+import org.apache.ws.commons.schema.XmlSchemaCollection;
 import org.codice.keip.schema.client.XmlSchemaClient;
 import org.codice.keip.schema.config.XsdSourceConfiguration;
 import org.codice.keip.schema.config.XsdSourceConfiguration.SchemaIdentifier;
 import org.codice.keip.schema.model.eip.EipComponent;
 import org.codice.keip.schema.model.eip.EipSchema;
 import org.codice.keip.schema.xml.SchemaTranslator;
-import java.util.List;
-import org.apache.ws.commons.schema.XmlSchemaCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

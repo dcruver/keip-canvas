@@ -1,5 +1,8 @@
 package org.codice.keip.flow;
 
+import java.io.Writer;
+import java.util.List;
+import javax.xml.transform.TransformerException;
 import org.codice.keip.flow.error.TransformationError;
 import org.codice.keip.flow.graph.GuavaGraph;
 import org.codice.keip.flow.model.EipGraph;
@@ -7,9 +10,6 @@ import org.codice.keip.flow.model.EipId;
 import org.codice.keip.flow.model.Flow;
 import org.codice.keip.flow.xml.GraphTransformer;
 import org.codice.keip.flow.xml.NodeTransformer;
-import java.io.Writer;
-import java.util.List;
-import javax.xml.transform.TransformerException;
 
 /** Transforms an EIP {@link Flow} to an XML document. */
 public final class FlowTranslator {

@@ -1,8 +1,5 @@
 package org.codice.keip.schema.xml.attribute;
 
-import org.codice.keip.schema.model.eip.Attribute;
-import org.codice.keip.schema.model.eip.AttributeType;
-import org.codice.keip.schema.model.eip.Restriction;
 import java.util.Collections;
 import java.util.List;
 import org.apache.ws.commons.schema.XmlSchemaAttribute;
@@ -11,6 +8,9 @@ import org.apache.ws.commons.schema.walker.XmlSchemaAttrInfo;
 import org.apache.ws.commons.schema.walker.XmlSchemaBaseSimpleType;
 import org.apache.ws.commons.schema.walker.XmlSchemaRestriction;
 import org.apache.ws.commons.schema.walker.XmlSchemaTypeInfo;
+import org.codice.keip.schema.model.eip.Attribute;
+import org.codice.keip.schema.model.eip.AttributeType;
+import org.codice.keip.schema.model.eip.Restriction;
 
 public class AttributeTranslator {
 

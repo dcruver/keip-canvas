@@ -1,16 +1,5 @@
 package org.codice.keip.schema.xml;
 
-import org.codice.keip.schema.model.eip.Attribute;
-import org.codice.keip.schema.model.eip.ChildComposite;
-import org.codice.keip.schema.model.eip.ChildGroup;
-import org.codice.keip.schema.model.eip.ConnectionType;
-import org.codice.keip.schema.model.eip.EipChildElement;
-import org.codice.keip.schema.model.eip.EipComponent;
-import org.codice.keip.schema.model.eip.Indicator;
-import org.codice.keip.schema.model.eip.Occurrence;
-import org.codice.keip.schema.model.eip.Role;
-import org.codice.keip.schema.xml.attribute.AnnotationTranslator;
-import org.codice.keip.schema.xml.attribute.AttributeTranslator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -32,6 +21,17 @@ import org.apache.ws.commons.schema.walker.XmlSchemaAttrInfo;
 import org.apache.ws.commons.schema.walker.XmlSchemaTypeInfo;
 import org.apache.ws.commons.schema.walker.XmlSchemaTypeInfo.Type;
 import org.apache.ws.commons.schema.walker.XmlSchemaVisitor;
+import org.codice.keip.schema.model.eip.Attribute;
+import org.codice.keip.schema.model.eip.ChildComposite;
+import org.codice.keip.schema.model.eip.ChildGroup;
+import org.codice.keip.schema.model.eip.ConnectionType;
+import org.codice.keip.schema.model.eip.EipChildElement;
+import org.codice.keip.schema.model.eip.EipComponent;
+import org.codice.keip.schema.model.eip.Indicator;
+import org.codice.keip.schema.model.eip.Occurrence;
+import org.codice.keip.schema.model.eip.Role;
+import org.codice.keip.schema.xml.attribute.AnnotationTranslator;
+import org.codice.keip.schema.xml.attribute.AttributeTranslator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

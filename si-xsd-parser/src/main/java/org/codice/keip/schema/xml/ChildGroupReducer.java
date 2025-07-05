@@ -1,10 +1,5 @@
 package org.codice.keip.schema.xml;
 
-import org.codice.keip.schema.model.eip.ChildComposite;
-import org.codice.keip.schema.model.eip.ChildGroup;
-import org.codice.keip.schema.model.eip.EipChildElement;
-import org.codice.keip.schema.model.eip.Indicator;
-import org.codice.keip.schema.model.eip.Occurrence;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -14,6 +9,11 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.codice.keip.schema.model.eip.ChildComposite;
+import org.codice.keip.schema.model.eip.ChildGroup;
+import org.codice.keip.schema.model.eip.EipChildElement;
+import org.codice.keip.schema.model.eip.Indicator;
+import org.codice.keip.schema.model.eip.Occurrence;
 
 /**
  * Attempts to reduce the levels of child nesting by collapsing redundant child groups and limiting

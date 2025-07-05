@@ -4,10 +4,10 @@ import com.google.gson.JsonParser
 import org.codice.keip.schema.model.eip.Attribute
 import org.codice.keip.schema.model.eip.AttributeType
 import org.codice.keip.schema.model.eip.ChildGroup
+import org.codice.keip.schema.model.eip.ConnectionType
 import org.codice.keip.schema.model.eip.EipChildElement
 import org.codice.keip.schema.model.eip.EipComponent
 import org.codice.keip.schema.model.eip.EipSchema
-import org.codice.keip.schema.model.eip.ConnectionType
 import org.codice.keip.schema.model.eip.Indicator
 import org.codice.keip.schema.model.eip.Occurrence
 import org.codice.keip.schema.model.eip.Restriction

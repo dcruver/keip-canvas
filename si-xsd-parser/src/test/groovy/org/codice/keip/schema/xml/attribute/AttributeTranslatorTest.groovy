@@ -1,7 +1,5 @@
 package org.codice.keip.schema.xml.attribute
 
-import org.codice.keip.schema.model.eip.AttributeType
-import org.codice.keip.schema.model.eip.Restriction
 import org.apache.ws.commons.schema.XmlSchema
 import org.apache.ws.commons.schema.XmlSchemaAttribute
 import org.apache.ws.commons.schema.XmlSchemaUse
@@ -9,6 +7,8 @@ import org.apache.ws.commons.schema.walker.XmlSchemaAttrInfo
 import org.apache.ws.commons.schema.walker.XmlSchemaBaseSimpleType
 import org.apache.ws.commons.schema.walker.XmlSchemaRestriction
 import org.apache.ws.commons.schema.walker.XmlSchemaTypeInfo
+import org.codice.keip.schema.model.eip.AttributeType
+import org.codice.keip.schema.model.eip.Restriction
 import spock.lang.Specification
 
 class AttributeTranslatorTest extends Specification {

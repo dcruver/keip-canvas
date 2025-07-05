@@ -1,11 +1,11 @@
 package org.codice.keip.flow.graph
 
-import org.codice.keip.flow.model.Flow
-import org.codice.keip.flow.model.FlowEdge
 import org.codice.keip.flow.model.ConnectionType
 import org.codice.keip.flow.model.EdgeProps
 import org.codice.keip.flow.model.EipId
 import org.codice.keip.flow.model.EipNode
+import org.codice.keip.flow.model.Flow
+import org.codice.keip.flow.model.FlowEdge
 import org.codice.keip.flow.model.Role
 import spock.lang.Specification
 

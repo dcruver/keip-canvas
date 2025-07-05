@@ -1,9 +1,9 @@
 package org.codice.keip.flow.xml.spring;
 
+import java.util.List;
 import org.codice.keip.flow.model.EipChild;
 import org.codice.keip.flow.model.EipNode;
 import org.codice.keip.flow.xml.XmlElement;
-import java.util.List;
 
 /**
  * Handles simple conversion from an {@link EipNode} to an {@link XmlElement}. No additions or

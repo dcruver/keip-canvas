@@ -5,9 +5,9 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import org.codice.keip.schema.model.eip.Restriction;
 import java.lang.reflect.Type;
 import java.util.List;
+import org.codice.keip.schema.model.eip.Restriction;
 
 public class RestrictionDeserializer implements JsonDeserializer<Restriction> {
   @Override

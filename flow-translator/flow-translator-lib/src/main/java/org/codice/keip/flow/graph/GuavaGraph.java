@@ -6,17 +6,17 @@ import com.google.common.graph.ImmutableValueGraph;
 import com.google.common.graph.ImmutableValueGraph.Builder;
 import com.google.common.graph.Traverser;
 import com.google.common.graph.ValueGraphBuilder;
-import org.codice.keip.flow.model.Flow;
-import org.codice.keip.flow.model.FlowEdge;
-import org.codice.keip.flow.model.EdgeProps;
-import org.codice.keip.flow.model.EipGraph;
-import org.codice.keip.flow.model.EipNode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.codice.keip.flow.model.EdgeProps;
+import org.codice.keip.flow.model.EipGraph;
+import org.codice.keip.flow.model.EipNode;
+import org.codice.keip.flow.model.Flow;
+import org.codice.keip.flow.model.FlowEdge;
 
 // Guava Graph API is still marked as beta
 @SuppressWarnings("UnstableApiUsage")

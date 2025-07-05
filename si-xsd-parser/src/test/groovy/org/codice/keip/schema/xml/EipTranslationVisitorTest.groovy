@@ -1,5 +1,8 @@
 package org.codice.keip.schema.xml
 
+import org.apache.ws.commons.schema.XmlSchemaCollection
+import org.apache.ws.commons.schema.XmlSchemaElement
+import org.apache.ws.commons.schema.walker.XmlSchemaWalker
 import org.codice.keip.schema.model.eip.Attribute
 import org.codice.keip.schema.model.eip.AttributeType
 import org.codice.keip.schema.model.eip.ChildGroup
@@ -9,9 +12,6 @@ import org.codice.keip.schema.model.eip.Indicator
 import org.codice.keip.schema.model.eip.Occurrence
 import org.codice.keip.schema.model.eip.Role
 import org.codice.keip.schema.test.TestIOUtils
-import org.apache.ws.commons.schema.XmlSchemaCollection
-import org.apache.ws.commons.schema.XmlSchemaElement
-import org.apache.ws.commons.schema.walker.XmlSchemaWalker
 import spock.lang.Specification
 
 import java.nio.file.Path

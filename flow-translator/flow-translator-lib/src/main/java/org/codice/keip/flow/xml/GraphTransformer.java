@@ -4,10 +4,6 @@ import static javax.xml.XMLConstants.XML_NS_PREFIX;
 
 import com.ctc.wstx.stax.WstxEventFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
-import org.codice.keip.flow.error.TransformationError;
-import org.codice.keip.flow.model.EipGraph;
-import org.codice.keip.flow.model.EipId;
-import org.codice.keip.flow.model.EipNode;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +25,10 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 import javax.xml.transform.TransformerException;
+import org.codice.keip.flow.error.TransformationError;
+import org.codice.keip.flow.model.EipGraph;
+import org.codice.keip.flow.model.EipId;
+import org.codice.keip.flow.model.EipNode;
 
 /**
  * Transforms an intermediate {@link EipGraph} representation to an XML document. This base class

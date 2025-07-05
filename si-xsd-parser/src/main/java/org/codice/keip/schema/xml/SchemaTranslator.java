@@ -1,8 +1,5 @@
 package org.codice.keip.schema.xml;
 
-import org.codice.keip.schema.model.eip.ChildGroup;
-import org.codice.keip.schema.model.eip.EipChildElement;
-import org.codice.keip.schema.model.eip.EipComponent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +7,9 @@ import org.apache.ws.commons.schema.XmlSchema;
 import org.apache.ws.commons.schema.XmlSchemaCollection;
 import org.apache.ws.commons.schema.XmlSchemaElement;
 import org.apache.ws.commons.schema.walker.XmlSchemaWalker;
+import org.codice.keip.schema.model.eip.ChildGroup;
+import org.codice.keip.schema.model.eip.EipChildElement;
+import org.codice.keip.schema.model.eip.EipComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

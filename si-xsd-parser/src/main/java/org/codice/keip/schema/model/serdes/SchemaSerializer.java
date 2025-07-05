@@ -2,12 +2,12 @@ package org.codice.keip.schema.model.serdes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.codice.keip.schema.model.eip.EipSchema;
-import org.codice.keip.schema.model.eip.Occurrence;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import org.codice.keip.schema.model.eip.EipSchema;
+import org.codice.keip.schema.model.eip.Occurrence;
 
 public class SchemaSerializer {
   static final Gson GSON =

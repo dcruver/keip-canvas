@@ -4,8 +4,8 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
-import org.codice.keip.schema.model.eip.Occurrence;
 import java.lang.reflect.Type;
+import org.codice.keip.schema.model.eip.Occurrence;
 
 public class OccurrenceDeserializer implements JsonDeserializer<Occurrence> {
 

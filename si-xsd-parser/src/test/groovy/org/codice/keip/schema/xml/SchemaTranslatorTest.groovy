@@ -2,6 +2,7 @@ package org.codice.keip.schema.xml
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import org.apache.ws.commons.schema.XmlSchemaCollection
 import org.codice.keip.schema.model.eip.ChildGroup
 import org.codice.keip.schema.model.eip.EipComponent
 import org.codice.keip.schema.model.eip.EipElement
@@ -9,7 +10,6 @@ import org.codice.keip.schema.model.eip.Indicator
 import org.codice.keip.schema.model.eip.Occurrence
 import org.codice.keip.schema.test.EipComparisonUtils
 import org.codice.keip.schema.test.TestIOUtils
-import org.apache.ws.commons.schema.XmlSchemaCollection
 import spock.lang.Specification
 
 import java.nio.file.Path

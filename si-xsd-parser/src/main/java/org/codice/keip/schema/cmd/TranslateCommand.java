@@ -1,13 +1,13 @@
 package org.codice.keip.schema.cmd;
 
-import org.codice.keip.schema.EipSchemaTranslation;
-import org.codice.keip.schema.client.XmlSchemaClient;
-import org.codice.keip.schema.config.XsdSourceConfiguration;
-import org.codice.keip.schema.model.serdes.SchemaSerializer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import org.codice.keip.schema.EipSchemaTranslation;
+import org.codice.keip.schema.client.XmlSchemaClient;
+import org.codice.keip.schema.config.XsdSourceConfiguration;
+import org.codice.keip.schema.model.serdes.SchemaSerializer;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 

@@ -8,6 +8,12 @@ import static org.codice.keip.flow.xml.spring.AttributeNames.OUTPUT_CHANNEL;
 import static org.codice.keip.flow.xml.spring.AttributeNames.REPLY_CHANNEL;
 import static org.codice.keip.flow.xml.spring.AttributeNames.REQUEST_CHANNEL;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.codice.keip.flow.model.EdgeProps;
 import org.codice.keip.flow.model.EdgeProps.EdgeType;
 import org.codice.keip.flow.model.EipGraph;
@@ -16,12 +22,6 @@ import org.codice.keip.flow.model.EipNode;
 import org.codice.keip.flow.model.Role;
 import org.codice.keip.flow.xml.NodeTransformer;
 import org.codice.keip.flow.xml.XmlElement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A default implementation for generating {@link XmlElement}s from an {@link EipNode}. The

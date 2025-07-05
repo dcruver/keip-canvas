@@ -4,10 +4,10 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import java.lang.reflect.Type;
 import org.codice.keip.schema.model.eip.ChildComposite;
 import org.codice.keip.schema.model.eip.ChildGroup;
 import org.codice.keip.schema.model.eip.EipChildElement;
-import java.lang.reflect.Type;
 
 public class ChildCompositeDeserializer implements JsonDeserializer<ChildComposite> {
   @Override

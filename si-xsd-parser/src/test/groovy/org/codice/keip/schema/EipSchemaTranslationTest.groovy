@@ -2,6 +2,7 @@ package org.codice.keip.schema
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import org.apache.ws.commons.schema.XmlSchemaCollection
 import org.codice.keip.schema.client.XmlSchemaClient
 import org.codice.keip.schema.config.XsdSourceConfiguration
 import org.codice.keip.schema.model.eip.EipComponent
@@ -9,7 +10,6 @@ import org.codice.keip.schema.model.eip.EipElement
 import org.codice.keip.schema.model.eip.EipSchema
 import org.codice.keip.schema.test.EipComparisonUtils
 import org.codice.keip.schema.test.TestIOUtils
-import org.apache.ws.commons.schema.XmlSchemaCollection
 import spock.lang.Shared
 import spock.lang.Specification
 
